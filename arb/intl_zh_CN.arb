@@ -696,5 +696,22 @@
   "onlineNodes": "在线节点",
   "offlineNodes": "离线节点",
   "online": "在线",
-  "offline": "离线"
+  "offline": "离线",
+  "noNodesAvailable": "暂无可用节点",
+  "noNodesFoundTitle": "未找到节点",
+  "refreshSubscriptionHint": "请刷新您的订阅。",
+  "unknown": "未知",
+  "unknownNodes": "未知节点",
+  "lastUpdated": "最近更新",
+  "lastChecked": "最近检测",
+  "never": "从未",
+  "refreshing": "正在刷新…",
+  "completed": "已完成",
+  "checkingProgress": "检测中…（{done}/{total}）",
+  "@checkingProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }
