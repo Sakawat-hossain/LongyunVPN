@@ -1,11 +1,11 @@
 script_template: inno_setup.iss
-app_id: 728B3532-C74B-4870-9068-BE70FE12A3E6
-app_name: FlClash
-publisher: chen08209
-publisher_url: https://github.com/chen08209/FlClash
-display_name: FlClash
-executable_name: FlClash.exe
-output_base_file_name: FlClash.exe
+app_id: 9399FBAE-4986-4943-BBAA-E16D46DE2BEE
+app_name: LongyunVPN
+publisher: LongyunVPN
+publisher_url: https://github.com/Sakawat-hossain/LongyunVPN
+display_name: LongyunVPN
+executable_name: LongyunVPN.exe
+output_base_file_name: LongyunVPN-Setup.exe
 setup_icon_file: ..\windows\runner\resources\app_icon.ico
 locales:
   - lang: zh

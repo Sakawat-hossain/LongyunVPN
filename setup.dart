@@ -185,6 +185,8 @@ Future<int> _package(
       platform,
       '--targets',
       targets,
+      '--artifact-name',
+      '{{name}}-Setup.{{ext}}',
       if (androidArch != null)
         '--build-target-platform=${_androidFlutterTarget[androidArch]!}',
       if (flutterBuildArgs.isNotEmpty)
