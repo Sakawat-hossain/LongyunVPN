@@ -273,6 +273,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Режим черного списка",
     ),
     "buy": MessageLookupByLibrary.simpleMessage("Купить"),
+    "buyPremium": MessageLookupByLibrary.simpleMessage("Купить Premium"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Обход домена"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Действует только при включенном системном прокси",
@@ -764,6 +765,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noActiveProfileImport": MessageLookupByLibrary.simpleMessage(
       "Нет активного профиля. Сначала импортируйте подписку.",
     ),
+    "noActiveSubscription": MessageLookupByLibrary.simpleMessage(
+      "Нет активной подписки",
+    ),
     "noActiveSubscriptionYet": MessageLookupByLibrary.simpleMessage(
       "Активная подписка ещё не найдена. Повторите позже.",
     ),
@@ -791,6 +795,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не разрешать имя хоста",
     ),
     "noSubscription": MessageLookupByLibrary.simpleMessage("Нет подписки"),
+    "noSubscriptionServersMessage": MessageLookupByLibrary.simpleMessage(
+      "У вас нет активного VPN-пакета.\nКупите план для доступа к VPN-серверам.",
+    ),
+    "nodeStatus": MessageLookupByLibrary.simpleMessage("Состояние узлов"),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущая группа прокси не может быть выбрана.",
@@ -800,10 +808,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nullTip": m28,
     "numberTip": m29,
+    "offline": MessageLookupByLibrary.simpleMessage("Офлайн"),
+    "offlineNodes": MessageLookupByLibrary.simpleMessage("Узлы офлайн"),
     "onDemand": MessageLookupByLibrary.simpleMessage("On Demand"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "Configure the program running state for specific scenarios",
     ),
+    "online": MessageLookupByLibrary.simpleMessage("Онлайн"),
+    "onlineNodes": MessageLookupByLibrary.simpleMessage("Узлы онлайн"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Только иконка"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Только статистика прокси",
@@ -963,6 +975,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir-порт"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "refresh": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "refreshStatus": MessageLookupByLibrary.simpleMessage("Обновить состояние"),
     "remote": MessageLookupByLibrary.simpleMessage("Удаленный"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование локальных данных на WebDAV",
@@ -1291,6 +1304,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональный акцент"),
     "tools": MessageLookupByLibrary.simpleMessage("Инструменты"),
+    "totalNodes": MessageLookupByLibrary.simpleMessage("Всего узлов"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage(
       "Использование трафика",
