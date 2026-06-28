@@ -89,6 +89,21 @@ class Preferences {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
     await sharedPreferencesIns?.clear();
   }
+
+  Future<String?> getXboardToken() async {
+    final preferences = await sharedPreferencesCompleter.future;
+    return preferences?.getString('xboardToken');
+  }
+
+  Future<void> setXboardToken(String token) async {
+    final preferences = await sharedPreferencesCompleter.future;
+    await preferences?.setString('xboardToken', token);
+  }
+
+  Future<void> clearXboardToken() async {
+    final preferences = await sharedPreferencesCompleter.future;
+    await preferences?.remove('xboardToken');
+  }
 }
 
 final preferences = Preferences();

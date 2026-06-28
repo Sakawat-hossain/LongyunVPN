@@ -75,27 +75,52 @@ class CommonAction extends _$CommonAction {
     bool isUser = false,
   }) async {
     if (data != null) {
-      final tagName = data['tag_name'];
+      final l = currentAppLocalizations;
+      final tagName = data['tag_name']?.toString() ?? '';
       final body = data['body'];
       final submits = utils.parseReleaseBody(body);
+      final currentVersion = globalState.packageInfo.version;
+
+      // Locate the Windows installer asset (.exe) and its size.
+      Map<String, dynamic>? exeAsset;
+      final assets = data['assets'];
+      if (assets is List) {
+        for (final a in assets.whereType<Map<String, dynamic>>()) {
+          if ((a['name'] ?? '').toString().toLowerCase().endsWith('.exe')) {
+            exeAsset = a;
+            break;
+          }
+        }
+      }
+      final sizeText = exeAsset != null && exeAsset['size'] is num
+          ? ' (${_formatSize((exeAsset['size'] as num).toInt())})'
+          : '';
+
       final context = globalState.navigatorKey.currentContext!;
       final textTheme = context.textTheme;
+      final canInstall = exeAsset != null && Platform.isWindows;
       final res = await globalState.showMessage(
-        title: currentAppLocalizations.discoverNewVersion,
+        title: l.discoverNewVersion,
         message: TextSpan(
-          text: '$tagName \n',
-          style: textTheme.headlineSmall,
+          style: textTheme.bodyMedium,
           children: [
-            TextSpan(text: '\n', style: textTheme.bodyMedium),
-            for (final submit in submits)
-              TextSpan(text: '- $submit \n', style: textTheme.bodyMedium),
+            TextSpan(text: '${l.currentVersion}: v$currentVersion\n'),
+            TextSpan(
+              text: '${l.latestVersion}: $tagName$sizeText\n\n',
+              style: textTheme.titleSmall,
+            ),
+            for (final submit in submits) TextSpan(text: '• $submit \n'),
           ],
         ),
-        confirmText: currentAppLocalizations.goDownload,
-        cancelText: isUser ? null : currentAppLocalizations.noLongerRemind,
+        confirmText: canInstall ? l.updateNow : l.goDownload,
+        cancelText: isUser ? null : l.noLongerRemind,
       );
       if (res == true) {
-        launchUrl(Uri.parse('https://github.com/$repository/releases/latest'));
+        if (canInstall) {
+          await _downloadAndLaunchInstaller(exeAsset);
+        } else {
+          _openReleasesPage();
+        }
       } else if (!isUser && res == false) {
         ref
             .read(appSettingProvider.notifier)
@@ -106,6 +131,47 @@ class CommonAction extends _$CommonAction {
         title: currentAppLocalizations.checkUpdate,
         message: TextSpan(text: currentAppLocalizations.checkUpdateError),
       );
+    }
+  }
+
+  void _openReleasesPage() {
+    launchUrl(Uri.parse('https://github.com/$repository/releases/latest'));
+  }
+
+  String _formatSize(int bytes) {
+    final mb = bytes / (1024 * 1024);
+    if (mb >= 1) return '${mb.toStringAsFixed(1)} MB';
+    return '${(bytes / 1024).toStringAsFixed(0)} KB';
+  }
+
+  /// Downloads the release installer and launches it. User settings, session
+  /// and profiles survive because they live in the app's data directory, which
+  /// the installer doesn't touch. Falls back to the releases page on failure.
+  Future<void> _downloadAndLaunchInstaller(Map<String, dynamic> asset) async {
+    final l = currentAppLocalizations;
+    final url = asset['browser_download_url']?.toString();
+    final name = asset['name']?.toString();
+    if (url == null || name == null) {
+      _openReleasesPage();
+      return;
+    }
+    final savePath =
+        '${Directory.systemTemp.path}${Platform.pathSeparator}$name';
+    try {
+      final ok = await globalState.loadingRun<bool>(
+        () async {
+          await request.downloadFile(url, savePath);
+          return true;
+        },
+        title: l.downloadingUpdate,
+        tag: null,
+      );
+      if (ok != true) return;
+      await Process.start(savePath, const [], mode: ProcessStartMode.detached);
+      globalState.showNotifier(l.installerLaunched);
+    } catch (_) {
+      globalState.showNotifier(l.updateDownloadFailed);
+      _openReleasesPage();
     }
   }
 }
@@ -926,11 +992,43 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
+  void dedupeProfiles() {
+    final profiles = ref.read(profilesProvider);
+    final seenUrls = <String>{};
+    for (final profile in profiles) {
+      if (profile.url.isEmpty) continue;
+      if (!seenUrls.add(profile.url)) {
+        ref.read(profilesProvider.notifier).del(profile.id);
+      }
+    }
+  }
+
   Future<void> addProfileFormURL(String url) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
     ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
+    final existingProfiles = ref
+        .read(profilesProvider)
+        .where((p) => p.url == url)
+        .toList();
+    if (existingProfiles.isNotEmpty) {
+      final keep = existingProfiles.first;
+      for (final dup in existingProfiles.skip(1)) {
+        ref.read(profilesProvider.notifier).del(dup.id);
+      }
+      final updated = await globalState.loadingRun(
+        tag: LoadingTag.profiles,
+        () async {
+          return keep.update();
+        },
+        title: currentAppLocalizations.addProfile,
+      );
+      if (updated != null) {
+        putProfile(updated);
+      }
+      return;
+    }
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
       () async {
