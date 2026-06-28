@@ -91,7 +91,7 @@ class PremiumNotifier extends Notifier<PremiumState> {
   }
 
   /// Re-checks subscription status after the user reports paying. When the
-  /// account is now active, imports the subscribe URL as a FlClash profile
+  /// account is now active, imports the subscribe URL as a LongyunVPN profile
   /// (reusing the existing add/update-from-URL logic) and routes Home. Returns
   /// true if the subscription is active.
   Future<bool> refreshStatus() async {
