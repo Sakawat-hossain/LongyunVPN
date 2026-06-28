@@ -696,5 +696,22 @@
   "onlineNodes": "Узлы онлайн",
   "offlineNodes": "Узлы офлайн",
   "online": "Онлайн",
-  "offline": "Офлайн"
+  "offline": "Офлайн",
+  "noNodesAvailable": "Нет доступных узлов",
+  "noNodesFoundTitle": "Узлы не найдены",
+  "refreshSubscriptionHint": "Пожалуйста, обновите подписку.",
+  "unknown": "Неизвестно",
+  "unknownNodes": "Неизвестные узлы",
+  "lastUpdated": "Обновлено",
+  "lastChecked": "Проверено",
+  "never": "Никогда",
+  "refreshing": "Обновление…",
+  "completed": "Готово",
+  "checkingProgress": "Проверка… ({done}/{total})",
+  "@checkingProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }

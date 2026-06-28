@@ -175,11 +175,14 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     ref.watch(themeSettingProvider.select((state) => state.textScale));
     final state = ref.watch(proxiesTabStateProvider.select((state) => state));
     final groups = state.groups;
-    if (groups.isEmpty || _tabController == null) {
-      return NullStatus(
-        illustration: const ProxyEmptyIllustration(),
-        label: appLocalizations.nullTip(appLocalizations.proxies),
-      );
+    if (groups.isEmpty) {
+      // Subscription loaded but produced no nodes — guide the user to refresh
+      // instead of showing an empty tab strip.
+      return const NoNodesHint();
+    }
+    if (_tabController == null) {
+      // Transient state while the tab controller is (re)built.
+      return const SizedBox.shrink();
     }
     _keyMap = {};
     return Column(
@@ -336,6 +339,11 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
     final proxies = group.all;
     testUrl = group.testUrl;
     currentProxies = proxies;
+    if (proxies.isEmpty) {
+      // A group with no proxies (e.g. an empty Auto Select) — show the same
+      // "No nodes found / please refresh" hint instead of a blank grid.
+      return const NoNodesHint();
+    }
     return CommonScrollBar(
       controller: _controller,
       child: GridView.builder(

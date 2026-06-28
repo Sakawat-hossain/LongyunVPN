@@ -696,5 +696,22 @@
   "onlineNodes": "オンラインノード",
   "offlineNodes": "オフラインノード",
   "online": "オンライン",
-  "offline": "オフライン"
+  "offline": "オフライン",
+  "noNodesAvailable": "利用可能なノードがありません",
+  "noNodesFoundTitle": "ノードが見つかりません",
+  "refreshSubscriptionHint": "サブスクリプションを更新してください。",
+  "unknown": "不明",
+  "unknownNodes": "不明なノード",
+  "lastUpdated": "最終更新",
+  "lastChecked": "最終チェック",
+  "never": "なし",
+  "refreshing": "更新中…",
+  "completed": "完了",
+  "checkingProgress": "チェック中…（{done}/{total}）",
+  "@checkingProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }

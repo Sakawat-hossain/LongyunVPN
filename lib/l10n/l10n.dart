@@ -5578,6 +5578,91 @@ class AppLocalizations {
   String get offline {
     return Intl.message('Offline', name: 'offline', desc: '', args: []);
   }
+
+  /// `No Nodes Available`
+  String get noNodesAvailable {
+    return Intl.message(
+      'No Nodes Available',
+      name: 'noNodesAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No nodes found`
+  String get noNodesFoundTitle {
+    return Intl.message(
+      'No nodes found',
+      name: 'noNodesFoundTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please refresh your subscription.`
+  String get refreshSubscriptionHint {
+    return Intl.message(
+      'Please refresh your subscription.',
+      name: 'refreshSubscriptionHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown Nodes`
+  String get unknownNodes {
+    return Intl.message(
+      'Unknown Nodes',
+      name: 'unknownNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Updated`
+  String get lastUpdated {
+    return Intl.message(
+      'Last Updated',
+      name: 'lastUpdated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last checked`
+  String get lastChecked {
+    return Intl.message(
+      'Last checked',
+      name: 'lastChecked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never`
+  String get never {
+    return Intl.message('Never', name: 'never', desc: '', args: []);
+  }
+
+  /// `Refreshing…`
+  String get refreshing {
+    return Intl.message('Refreshing…', name: 'refreshing', desc: '', args: []);
+  }
+
+  /// `Completed`
+  String get completed {
+    return Intl.message('Completed', name: 'completed', desc: '', args: []);
+  }
+
+  /// `Checking… ({done}/{total})`
+  String checkingProgress(int done, int total) {
+    return Intl.message(
+      'Checking… ($done/$total)',
+      name: 'checkingProgress',
+      desc: '',
+      args: [done, total],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
