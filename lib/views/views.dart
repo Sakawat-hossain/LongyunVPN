@@ -1,13 +1,16 @@
 export 'about.dart';
 export 'access.dart';
+export 'account.dart';
 export 'application_setting.dart';
 export 'backup_and_restore.dart';
 export 'config/config.dart';
 export 'connection/connections.dart';
 export 'connection/requests.dart';
 export 'dashboard/dashboard.dart';
+export 'diagnostics.dart';
 export 'developer.dart';
 export 'logs.dart';
+export 'premium.dart';
 export 'profiles/profiles.dart';
 export 'proxies/proxies.dart';
 export 'resources.dart';

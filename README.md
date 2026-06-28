@@ -1,132 +1,57 @@
-<div>
+# LongyunVPN
 
-[**简体中文**](README_zh_CN.md)
+A fast, secure, multi-platform VPN client built on the Clash.Meta (mihomo) core.
+LongyunVPN connects to the Longyun subscription service and gives you a clean,
+localized interface for managing servers, subscriptions, and traffic.
 
-</div>
-
-## FlClash
-
-[![Downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases/)[![Last Version](https://img.shields.io/github/release/chen08209/FlClash/all.svg?style=flat-square)](https://github.com/chen08209/FlClash/releases/)[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
-
-[![Channel](https://img.shields.io/badge/Telegram-Channel-blue?style=flat-square&logo=telegram)](https://t.me/FlClash)
-
-A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.
-
-on Desktop:
-<p style="text-align: center;">
-    <img alt="desktop" src="snapshots/desktop.gif">
-</p>
-
-on Mobile:
-<p style="text-align: center;">
-    <img alt="mobile" src="snapshots/mobile.gif">
-</p>
+> LongyunVPN is a derivative of [FlClash](https://github.com/chen08209/FlClash)
+> and the [mihomo / Clash.Meta](https://github.com/MetaCubeX/mihomo) core, and is
+> distributed under the **GNU GPL-3.0** license (see [LICENSE](LICENSE)).
 
 ## Features
 
-✈️ Multi-platform: Android, Windows, macOS and Linux
+- High-performance proxying powered by the embedded mihomo core
+- One-tap subscription purchase and renewal (plans, coupons, traffic reset)
+- Account dashboard: plan, expiry, devices, balance, and usage
+- Per-node diagnostics (DNS / TCP / TLS / HTTP) with plain-language fixes
+- Fast TCP ping and URL latency testing
+- Full localization (English, 简体中文, 日本語, Русский)
+- In-app automatic updates from GitHub Releases
 
-💻 Adaptive multiple screen sizes, Multiple color themes available
+## Releasing a new version
 
-💡 Based on Material You Design, [Surfboard](https://github.com/getsurfboard/surfboard)-like UI
+The release pipeline is fully automated. To publish an update:
 
-☁️ Supports data sync via WebDAV
-
-✨ Support subscription link, Dark mode
-
-## Use
-
-### Linux
-
-⚠️ Make sure to install the following dependencies before using them
-
-   ```bash
-    sudo apt-get install libayatana-appindicator3-dev
-    sudo apt-get install libkeybinder-3.0-dev
-   ```
-
-### Android
-
-Support the following actions
+1. Bump the version in [`pubspec.yaml`](pubspec.yaml), e.g. `version: 1.0.1+2`.
+2. Commit the change.
+3. Create and push a matching tag:
 
    ```bash
-    com.follow.clash.action.START
-    
-    com.follow.clash.action.STOP
-    
-    com.follow.clash.action.TOGGLE
+   git tag v1.0.1
+   git push origin v1.0.1
    ```
 
-## Download
+Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml),
+which builds the Windows installer and publishes a GitHub Release with the
+`.exe` attached. Installed apps detect the new release and offer a one-click
+update. Use semantic versioning: `v1.0.1` for fixes, `v1.1.0` for features.
 
-<a href="https://chen08209.github.io/FlClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="200px"/></a> <a href="https://github.com/chen08209/FlClash/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="200px"/></a>
+## Building locally
 
-## Build
+Requirements: Flutter 3.41.9 (stable), Go 1.24.0, and the Windows build tools
+(Visual Studio with the Desktop C++ workload, plus Inno Setup for the installer).
 
-1. Update submodules
-   ```bash
-   git submodule update --init --recursive
-   ```
+```bash
+git clone --recurse-submodules https://github.com/Sakawat-hossain/LongyunVPN.git
+cd LongyunVPN
+flutter pub get
+dart setup.dart windows --env stable -v
+```
 
-2. Install `Flutter` and `Golang` environment
+The installer is written to the `dist/` directory.
 
-3. Build Application
+## License
 
-    - android
-
-        1. Install `Android SDK`, `Android NDK`
-
-        2. Set `ANDROID_NDK` environment variable
-
-        3. Run build script
-
-           ```bash
-           dart setup.dart android
-           ```
-
-    - windows
-
-        1. Requires a Windows client
-
-        2. Install `GCC`, `Inno Setup`
-
-        3. Run build script
-
-           ```bash
-           dart setup.dart windows
-           ```
-
-    - linux
-
-        1. Requires a Linux client
-
-        2. Dependencies are auto-installed by setup script, or manually:
-           ```bash
-           sudo apt-get install -y libayatana-appindicator3-dev libkeybinder-3.0-dev
-           ```
-
-        3. Run build script
-
-           ```bash
-           dart setup.dart linux
-           ```
-
-    - macOS
-
-        1. Requires a macOS client
-
-        2. Run build script
-
-           ```bash
-           dart setup.dart macos
-           ```
-
-## Star
-
-The easiest way to support developers is to click on the star (⭐) at the top of the page.
-
-<p style="text-align: center;">
-    <a href="https://api.star-history.com/svg?repos=chen08209/FlClash&Date">
-        <img alt="start" width=50% src="https://api.star-history.com/svg?repos=chen08209/FlClash&Date"/>
-    </a>
-</p>
+This project is licensed under the GNU General Public License v3.0. Because it is
+a derivative of GPL-3.0 software (FlClash and mihomo), it must remain GPL-3.0.
+See [LICENSE](LICENSE) for the full text.

@@ -3,6 +3,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/views/account.dart';
 import 'package:fl_clash/views/profiles/overwrite/overwrite.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -82,28 +83,44 @@ class _ProfilesViewState extends State<ProfilesView> {
   }
 
   List<Widget> _buildActions(List<Profile> profiles) {
-    return profiles.isNotEmpty
-        ? [
-            IconButton(
-              onPressed: () {
-                _updateProfiles(profiles);
-              },
-              icon: const Icon(Icons.sync),
+    return [
+      // Account lives with the profile options now.
+      Consumer(
+        builder: (_, ref, _) {
+          final loggedIn = ref.watch(
+            authProvider.select((s) => s.status == AuthStatus.loggedIn),
+          );
+          if (!loggedIn) return const SizedBox.shrink();
+          return IconButton(
+            tooltip: context.appLocalizations.account,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AccountView()),
             ),
-            IconButton(
-              onPressed: () {
-                showSheet(
-                  context: context,
-                  builder: (_) {
-                    return ReorderableProfilesSheet(profiles: profiles);
-                  },
-                );
+            icon: const Icon(Icons.account_circle),
+          );
+        },
+      ),
+      if (profiles.isNotEmpty) ...[
+        IconButton(
+          onPressed: () {
+            _updateProfiles(profiles);
+          },
+          icon: const Icon(Icons.sync),
+        ),
+        IconButton(
+          onPressed: () {
+            showSheet(
+              context: context,
+              builder: (_) {
+                return ReorderableProfilesSheet(profiles: profiles);
               },
-              icon: const Icon(Icons.sort),
-              iconSize: 26,
-            ),
-          ]
-        : [];
+            );
+          },
+          icon: const Icon(Icons.sort),
+          iconSize: 26,
+        ),
+      ],
+    ];
   }
 
   Widget _buildFAB() {
@@ -142,24 +159,36 @@ class _ProfilesViewState extends State<ProfilesView> {
                       top: 16,
                       bottom: 88,
                     ),
-                    child: Grid(
-                      mainAxisSpacing: spacing,
-                      crossAxisSpacing: spacing,
-                      crossAxisCount: state.columns,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        for (int i = 0; i < state.profiles.length; i++)
-                          GridItem(
-                            child: ProfileItem(
-                              profile: state.profiles[i],
-                              groupValue: state.currentProfileId,
-                              onChanged: (profileId) {
-                                ref
-                                        .read(currentProfileIdProvider.notifier)
-                                        .value =
-                                    profileId;
-                              },
-                            ),
-                          ),
+                        Grid(
+                          mainAxisSpacing: spacing,
+                          crossAxisSpacing: spacing,
+                          crossAxisCount: state.columns,
+                          children: [
+                            for (int i = 0; i < state.profiles.length; i++)
+                              GridItem(
+                                child: ProfileItem(
+                                  profile: state.profiles[i],
+                                  groupValue: state.currentProfileId,
+                                  onChanged: (profileId) {
+                                    ref
+                                            .read(
+                                              currentProfileIdProvider.notifier,
+                                            )
+                                            .value =
+                                        profileId;
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
+                        // Full account overview lives on the Profiles page now.
+                        const Padding(
+                          padding: EdgeInsets.only(top: 20),
+                          child: AccountSummary(),
+                        ),
                       ],
                     ),
                   ),
@@ -209,6 +238,10 @@ class ProfileItem extends StatelessWidget {
           .read(profilesActionProvider.notifier)
           .updateProfile(profile, showLoading: true);
     }, tag: LoadingTag.profiles);
+    // Updating the subscription can change account usage/expiry — refresh the
+    // Xboard account info so the dashboard Subscription card reflects it without
+    // an app restart. No-op when not logged in.
+    await globalState.container.read(authProvider.notifier).refresh();
   }
 
   void _handleShowEditExtendPage(BuildContext context) {

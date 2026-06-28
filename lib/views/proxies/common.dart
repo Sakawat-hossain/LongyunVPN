@@ -78,7 +78,7 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
     await proxyDelayTest(proxy, testUrl);
   }).toList();
 
-  final batchesDelayProxies = delayProxies.batch(100);
+  final batchesDelayProxies = delayProxies.batch(8);
   for (final batchDelayProxies in batchesDelayProxies) {
     await Future.wait(batchDelayProxies);
   }

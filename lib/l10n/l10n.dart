@@ -74,9 +74,14 @@ class AppLocalizations {
     return Intl.message('Dashboard', name: 'dashboard', desc: '', args: []);
   }
 
-  /// `Proxies`
+  /// `Servers`
   String get proxies {
-    return Intl.message('Proxies', name: 'proxies', desc: '', args: []);
+    return Intl.message('Servers', name: 'proxies', desc: '', args: []);
+  }
+
+  /// `Premium`
+  String get premium {
+    return Intl.message('Premium', name: 'premium', desc: '', args: []);
   }
 
   /// `Profile`
@@ -737,6 +742,11 @@ class AppLocalizations {
   /// `Show`
   String get show {
     return Intl.message('Show', name: 'show', desc: '', args: []);
+  }
+
+  /// `Hide`
+  String get hide {
+    return Intl.message('Hide', name: 'hide', desc: '', args: []);
   }
 
   /// `Exit`
@@ -4377,6 +4387,1121 @@ class AppLocalizations {
   /// `Suspended...`
   String get suspended {
     return Intl.message('Suspended...', name: 'suspended', desc: '', args: []);
+  }
+
+  /// `Sign In`
+  String get signIn {
+    return Intl.message('Sign In', name: 'signIn', desc: '', args: []);
+  }
+
+  /// `Email`
+  String get email {
+    return Intl.message('Email', name: 'email', desc: '', args: []);
+  }
+
+  /// `Log in`
+  String get logIn {
+    return Intl.message('Log in', name: 'logIn', desc: '', args: []);
+  }
+
+  /// `Don't have an account? Sign Up`
+  String get noAccountSignUp {
+    return Intl.message(
+      'Don\'t have an account? Sign Up',
+      name: 'noAccountSignUp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign Up`
+  String get signUp {
+    return Intl.message('Sign Up', name: 'signUp', desc: '', args: []);
+  }
+
+  /// `Email is required.`
+  String get emailRequired {
+    return Intl.message(
+      'Email is required.',
+      name: 'emailRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid email address.`
+  String get emailInvalid {
+    return Intl.message(
+      'Enter a valid email address.',
+      name: 'emailInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email domain not allowed. Allowed: {domains}`
+  String emailDomainNotAllowed(Object domains) {
+    return Intl.message(
+      'Email domain not allowed. Allowed: $domains',
+      name: 'emailDomainNotAllowed',
+      desc: '',
+      args: [domains],
+    );
+  }
+
+  /// `Password is required.`
+  String get passwordRequired {
+    return Intl.message(
+      'Password is required.',
+      name: 'passwordRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password must be at least 8 characters.`
+  String get passwordTooShort {
+    return Intl.message(
+      'Password must be at least 8 characters.',
+      name: 'passwordTooShort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Passwords do not match.`
+  String get passwordsDoNotMatch {
+    return Intl.message(
+      'Passwords do not match.',
+      name: 'passwordsDoNotMatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verification code is required.`
+  String get verificationCodeRequired {
+    return Intl.message(
+      'Verification code is required.',
+      name: 'verificationCodeRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not load signup requirements: {error}`
+  String signupConfigError(Object error) {
+    return Intl.message(
+      'Could not load signup requirements: $error',
+      name: 'signupConfigError',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `Verification Code`
+  String get verificationCode {
+    return Intl.message(
+      'Verification Code',
+      name: 'verificationCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send Code`
+  String get sendCode {
+    return Intl.message('Send Code', name: 'sendCode', desc: '', args: []);
+  }
+
+  /// `Confirm Password`
+  String get confirmPassword {
+    return Intl.message(
+      'Confirm Password',
+      name: 'confirmPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invitation code is required.`
+  String get invitationCodeRequired {
+    return Intl.message(
+      'Invitation code is required.',
+      name: 'invitationCodeRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invitation Code`
+  String get invitationCode {
+    return Intl.message(
+      'Invitation Code',
+      name: 'invitationCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invitation Code (optional)`
+  String get invitationCodeOptional {
+    return Intl.message(
+      'Invitation Code (optional)',
+      name: 'invitationCodeOptional',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Already have an account? Sign In`
+  String get alreadyHaveAccountSignIn {
+    return Intl.message(
+      'Already have an account? Sign In',
+      name: 'alreadyHaveAccountSignIn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh`
+  String get refresh {
+    return Intl.message('Refresh', name: 'refresh', desc: '', args: []);
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message('Retry', name: 'retry', desc: '', args: []);
+  }
+
+  /// `Buy`
+  String get buy {
+    return Intl.message('Buy', name: 'buy', desc: '', args: []);
+  }
+
+  /// `Renew`
+  String get renew {
+    return Intl.message('Renew', name: 'renew', desc: '', args: []);
+  }
+
+  /// `Current plan`
+  String get currentPlan {
+    return Intl.message(
+      'Current plan',
+      name: 'currentPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset traffic`
+  String get resetTraffic {
+    return Intl.message(
+      'Reset traffic',
+      name: 'resetTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No plans available.`
+  String get noPlansAvailable {
+    return Intl.message(
+      'No plans available.',
+      name: 'noPlansAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No payment methods are available.`
+  String get noPaymentMethods {
+    return Intl.message(
+      'No payment methods are available.',
+      name: 'noPaymentMethods',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Complete the payment in your browser, then tap "I've paid".`
+  String get completePaymentInBrowser {
+    return Intl.message(
+      'Complete the payment in your browser, then tap "I\'ve paid".',
+      name: 'completePaymentInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No active subscription yet. Try again shortly.`
+  String get noActiveSubscriptionYet {
+    return Intl.message(
+      'No active subscription yet. Try again shortly.',
+      name: 'noActiveSubscriptionYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription active. Profile imported.`
+  String get subscriptionActiveImported {
+    return Intl.message(
+      'Subscription active. Profile imported.',
+      name: 'subscriptionActiveImported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription active`
+  String get subscriptionActive {
+    return Intl.message(
+      'Subscription active',
+      name: 'subscriptionActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No subscription`
+  String get noSubscription {
+    return Intl.message(
+      'No subscription',
+      name: 'noSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lifetime plan`
+  String get lifetimePlan {
+    return Intl.message(
+      'Lifetime plan',
+      name: 'lifetimePlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expires {date}`
+  String expiresDate(Object date) {
+    return Intl.message(
+      'Expires $date',
+      name: 'expiresDate',
+      desc: '',
+      args: [date],
+    );
+  }
+
+  /// `No active plan — choose one below to get connected.`
+  String get noActivePlanChoose {
+    return Intl.message(
+      'No active plan — choose one below to get connected.',
+      name: 'noActivePlanChoose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Waiting for payment. After you pay, tap below to activate.`
+  String get waitingForPayment {
+    return Intl.message(
+      'Waiting for payment. After you pay, tap below to activate.',
+      name: 'waitingForPayment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I've paid`
+  String get ivePaid {
+    return Intl.message('I\'ve paid', name: 'ivePaid', desc: '', args: []);
+  }
+
+  /// `Checkout`
+  String get checkout {
+    return Intl.message('Checkout', name: 'checkout', desc: '', args: []);
+  }
+
+  /// `Payment method`
+  String get paymentMethod {
+    return Intl.message(
+      'Payment method',
+      name: 'paymentMethod',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coupon code (optional)`
+  String get couponCodeOptional {
+    return Intl.message(
+      'Coupon code (optional)',
+      name: 'couponCodeOptional',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue to payment`
+  String get continueToPayment {
+    return Intl.message(
+      'Continue to payment',
+      name: 'continueToPayment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly`
+  String get periodMonthly {
+    return Intl.message('Monthly', name: 'periodMonthly', desc: '', args: []);
+  }
+
+  /// `Quarterly`
+  String get periodQuarterly {
+    return Intl.message(
+      'Quarterly',
+      name: 'periodQuarterly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Half-yearly`
+  String get periodHalfYearly {
+    return Intl.message(
+      'Half-yearly',
+      name: 'periodHalfYearly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yearly`
+  String get periodYearly {
+    return Intl.message('Yearly', name: 'periodYearly', desc: '', args: []);
+  }
+
+  /// `2 Years`
+  String get periodTwoYears {
+    return Intl.message('2 Years', name: 'periodTwoYears', desc: '', args: []);
+  }
+
+  /// `3 Years`
+  String get periodThreeYears {
+    return Intl.message(
+      '3 Years',
+      name: 'periodThreeYears',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `One-time`
+  String get periodOneTime {
+    return Intl.message('One-time', name: 'periodOneTime', desc: '', args: []);
+  }
+
+  /// `Diagnostics`
+  String get diagnostics {
+    return Intl.message('Diagnostics', name: 'diagnostics', desc: '', args: []);
+  }
+
+  /// `Per-node TCP, DNS and proxy delay tests`
+  String get diagnosticsDesc {
+    return Intl.message(
+      'Per-node TCP, DNS and proxy delay tests',
+      name: 'diagnosticsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy report`
+  String get copyReport {
+    return Intl.message('Copy report', name: 'copyReport', desc: '', args: []);
+  }
+
+  /// `Fast TCP Ping (host → node)`
+  String get fastTcpPing {
+    return Intl.message(
+      'Fast TCP Ping (host → node)',
+      name: 'fastTcpPing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run full tests`
+  String get runFullTests {
+    return Intl.message(
+      'Run full tests',
+      name: 'runFullTests',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run`
+  String get runTest {
+    return Intl.message('Run', name: 'runTest', desc: '', args: []);
+  }
+
+  /// `Re-check exit IP`
+  String get recheckExitIp {
+    return Intl.message(
+      'Re-check exit IP',
+      name: 'recheckExitIp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS lookup`
+  String get stepDnsLookup {
+    return Intl.message(
+      'DNS lookup',
+      name: 'stepDnsLookup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TCP connectivity`
+  String get stepTcpConnectivity {
+    return Intl.message(
+      'TCP connectivity',
+      name: 'stepTcpConnectivity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TLS / HTTPS handshake`
+  String get stepTlsHandshake {
+    return Intl.message(
+      'TLS / HTTPS handshake',
+      name: 'stepTlsHandshake',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HTTP delay (via proxy)`
+  String get stepHttpDelay {
+    return Intl.message(
+      'HTTP delay (via proxy)',
+      name: 'stepHttpDelay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Testing…`
+  String get verdictTesting {
+    return Intl.message('Testing…', name: 'verdictTesting', desc: '', args: []);
+  }
+
+  /// `Not tested yet`
+  String get verdictNotTested {
+    return Intl.message(
+      'Not tested yet',
+      name: 'verdictNotTested',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name lookup failed`
+  String get verdictDnsFailed {
+    return Intl.message(
+      'Name lookup failed',
+      name: 'verdictDnsFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server not responding`
+  String get verdictServerNotResponding {
+    return Intl.message(
+      'Server not responding',
+      name: 'verdictServerNotResponding',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Secure handshake failed`
+  String get verdictTlsFailed {
+    return Intl.message(
+      'Secure handshake failed',
+      name: 'verdictTlsFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can't pass traffic`
+  String get verdictCantPassTraffic {
+    return Intl.message(
+      'Can\'t pass traffic',
+      name: 'verdictCantPassTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Healthy`
+  String get verdictHealthy {
+    return Intl.message('Healthy', name: 'verdictHealthy', desc: '', args: []);
+  }
+
+  /// `Incomplete`
+  String get verdictIncomplete {
+    return Intl.message(
+      'Incomplete',
+      name: 'verdictIncomplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We couldn't look up this server's address. This is almost always a problem with your internet or DNS, not the server.`
+  String get adviceDnsExplanation {
+    return Intl.message(
+      'We couldn\'t look up this server\'s address. This is almost always a problem with your internet or DNS, not the server.',
+      name: 'adviceDnsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check your network connection, then refresh the subscription.`
+  String get adviceDnsFix {
+    return Intl.message(
+      'Check your network connection, then refresh the subscription.',
+      name: 'adviceDnsFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This server isn't responding from your network. It may be temporarily down, or blocked by your ISP/firewall.`
+  String get adviceTcpExplanation {
+    return Intl.message(
+      'This server isn\'t responding from your network. It may be temporarily down, or blocked by your ISP/firewall.',
+      name: 'adviceTcpExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch to another node. If many nodes fail, check your network or contact support.`
+  String get adviceTcpFix {
+    return Intl.message(
+      'Switch to another node. If many nodes fail, check your network or contact support.',
+      name: 'adviceTcpFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server is reachable, but the secure (TLS/Reality) handshake failed. The server keys in your subscription may be outdated.`
+  String get adviceTlsExplanation {
+    return Intl.message(
+      'The server is reachable, but the secure (TLS/Reality) handshake failed. The server keys in your subscription may be outdated.',
+      name: 'adviceTlsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh the subscription. If it still fails, switch nodes or contact support.`
+  String get adviceTlsFix {
+    return Intl.message(
+      'Refresh the subscription. If it still fails, switch nodes or contact support.',
+      name: 'adviceTlsFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This node connects, but can't reach the internet through it — usually a temporary server-side routing issue on that node.`
+  String get adviceHttpExplanation {
+    return Intl.message(
+      'This node connects, but can\'t reach the internet through it — usually a temporary server-side routing issue on that node.',
+      name: 'adviceHttpExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch to another node. If it persists across nodes, contact support.`
+  String get adviceHttpFix {
+    return Intl.message(
+      'Switch to another node. If it persists across nodes, contact support.',
+      name: 'adviceHttpFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This node is reachable and passing traffic normally.`
+  String get adviceHealthyExplanation {
+    return Intl.message(
+      'This node is reachable and passing traffic normally.',
+      name: 'adviceHealthyExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You're good to go — select this node to connect.`
+  String get adviceHealthyFix {
+    return Intl.message(
+      'You\'re good to go — select this node to connect.',
+      name: 'adviceHealthyFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Testing did not complete.`
+  String get adviceIncompleteExplanation {
+    return Intl.message(
+      'Testing did not complete.',
+      name: 'adviceIncompleteExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try running again.`
+  String get adviceIncompleteFix {
+    return Intl.message(
+      'Try running again.',
+      name: 'adviceIncompleteFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking real exit IP…`
+  String get exitIpChecking {
+    return Intl.message(
+      'Checking real exit IP…',
+      name: 'exitIpChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit IP unavailable — the active node can't reach the internet`
+  String get exitIpUnavailable {
+    return Intl.message(
+      'Exit IP unavailable — the active node can\'t reach the internet',
+      name: 'exitIpUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit IP: {value}`
+  String exitIpValue(Object value) {
+    return Intl.message(
+      'Exit IP: $value',
+      name: 'exitIpValue',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `{count} healthy`
+  String nHealthy(Object count) {
+    return Intl.message(
+      '$count healthy',
+      name: 'nHealthy',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} failing`
+  String nFailing(Object count) {
+    return Intl.message(
+      '$count failing',
+      name: 'nFailing',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} total`
+  String nTotal(Object count) {
+    return Intl.message(
+      '$count total',
+      name: 'nTotal',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Tap ▶ to test`
+  String get tapToTest {
+    return Intl.message('Tap ▶ to test', name: 'tapToTest', desc: '', args: []);
+  }
+
+  /// `No nodes found in the active profile.`
+  String get noNodesFound {
+    return Intl.message(
+      'No nodes found in the active profile.',
+      name: 'noNodesFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No active profile. Import a subscription first.`
+  String get noActiveProfileImport {
+    return Intl.message(
+      'No active profile. Import a subscription first.',
+      name: 'noActiveProfileImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile file not found.`
+  String get profileFileNotFound {
+    return Intl.message(
+      'Profile file not found.',
+      name: 'profileFileNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to read nodes: {error}`
+  String failedToReadNodes(Object error) {
+    return Intl.message(
+      'Failed to read nodes: $error',
+      name: 'failedToReadNodes',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `Diagnostic report copied to clipboard`
+  String get reportCopied {
+    return Intl.message(
+      'Diagnostic report copied to clipboard',
+      name: 'reportCopied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reachable — {ms} ms`
+  String detailReachableMs(Object ms) {
+    return Intl.message(
+      'Reachable — $ms ms',
+      name: 'detailReachableMs',
+      desc: '',
+      args: [ms],
+    );
+  }
+
+  /// `{ms} ms through the proxy`
+  String detailMsViaProxy(Object ms) {
+    return Intl.message(
+      '$ms ms through the proxy',
+      name: 'detailMsViaProxy',
+      desc: '',
+      args: [ms],
+    );
+  }
+
+  /// `No response through the proxy`
+  String get detailNoResponseProxy {
+    return Intl.message(
+      'No response through the proxy',
+      name: 'detailNoResponseProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skipped (fast ping)`
+  String get detailSkippedFastPing {
+    return Intl.message(
+      'Skipped (fast ping)',
+      name: 'detailSkippedFastPing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No server address (provider-based)`
+  String get detailNoServerAddress {
+    return Intl.message(
+      'No server address (provider-based)',
+      name: 'detailNoServerAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct IP ({server}) — no lookup needed`
+  String detailDirectIp(Object server) {
+    return Intl.message(
+      'Direct IP ($server) — no lookup needed',
+      name: 'detailDirectIp',
+      desc: '',
+      args: [server],
+    );
+  }
+
+  /// `No address records for {server}`
+  String detailNoAddressRecords(Object server) {
+    return Intl.message(
+      'No address records for $server',
+      name: 'detailNoAddressRecords',
+      desc: '',
+      args: [server],
+    );
+  }
+
+  /// `No host:port available`
+  String get detailNoHostPort {
+    return Intl.message(
+      'No host:port available',
+      name: 'detailNoHostPort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skipped — server didn't connect`
+  String get detailTlsSkippedNoTcp {
+    return Intl.message(
+      'Skipped — server didn\'t connect',
+      name: 'detailTlsSkippedNoTcp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Handshake OK`
+  String get detailHandshakeOk {
+    return Intl.message(
+      'Handshake OK',
+      name: 'detailHandshakeOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Handshake OK (cert: {cn})`
+  String detailHandshakeOkCert(Object cn) {
+    return Intl.message(
+      'Handshake OK (cert: $cn)',
+      name: 'detailHandshakeOkCert',
+      desc: '',
+      args: [cn],
+    );
+  }
+
+  /// `Timed out`
+  String get timedOut {
+    return Intl.message('Timed out', name: 'timedOut', desc: '', args: []);
+  }
+
+  /// `Data`
+  String get dataLabel {
+    return Intl.message('Data', name: 'dataLabel', desc: '', args: []);
+  }
+
+  /// `Used {used} of {total}`
+  String usedOfTotal(Object used, Object total) {
+    return Intl.message(
+      'Used $used of $total',
+      name: 'usedOfTotal',
+      desc: '',
+      args: [used, total],
+    );
+  }
+
+  /// `{amount} left`
+  String amountLeft(Object amount) {
+    return Intl.message(
+      '$amount left',
+      name: 'amountLeft',
+      desc: '',
+      args: [amount],
+    );
+  }
+
+  /// `Plan`
+  String get planLabel {
+    return Intl.message('Plan', name: 'planLabel', desc: '', args: []);
+  }
+
+  /// `Expires`
+  String get expires {
+    return Intl.message('Expires', name: 'expires', desc: '', args: []);
+  }
+
+  /// `Devices`
+  String get devices {
+    return Intl.message('Devices', name: 'devices', desc: '', args: []);
+  }
+
+  /// `Balance`
+  String get balance {
+    return Intl.message('Balance', name: 'balance', desc: '', args: []);
+  }
+
+  /// `No expiry`
+  String get noExpiry {
+    return Intl.message('No expiry', name: 'noExpiry', desc: '', args: []);
+  }
+
+  /// `Lifetime`
+  String get lifetime {
+    return Intl.message('Lifetime', name: 'lifetime', desc: '', args: []);
+  }
+
+  /// `{count} days left`
+  String nDaysLeft(Object count) {
+    return Intl.message(
+      '$count days left',
+      name: 'nDaysLeft',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `days left`
+  String get daysLeftLabel {
+    return Intl.message('days left', name: 'daysLeftLabel', desc: '', args: []);
+  }
+
+  /// `Active`
+  String get statusActive {
+    return Intl.message('Active', name: 'statusActive', desc: '', args: []);
+  }
+
+  /// `Expiring soon`
+  String get statusExpiringSoon {
+    return Intl.message(
+      'Expiring soon',
+      name: 'statusExpiringSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expired`
+  String get statusExpired {
+    return Intl.message('Expired', name: 'statusExpired', desc: '', args: []);
+  }
+
+  /// `Inactive`
+  String get statusInactive {
+    return Intl.message('Inactive', name: 'statusInactive', desc: '', args: []);
+  }
+
+  /// `Renew / Upgrade`
+  String get renewUpgrade {
+    return Intl.message(
+      'Renew / Upgrade',
+      name: 'renewUpgrade',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Get a plan`
+  String get getAPlan {
+    return Intl.message('Get a plan', name: 'getAPlan', desc: '', args: []);
+  }
+
+  /// `Log out`
+  String get logOut {
+    return Intl.message('Log out', name: 'logOut', desc: '', args: []);
+  }
+
+  /// `Renew Now`
+  String get renewNow {
+    return Intl.message('Renew Now', name: 'renewNow', desc: '', args: []);
+  }
+
+  /// `Manage Plan`
+  String get managePlan {
+    return Intl.message('Manage Plan', name: 'managePlan', desc: '', args: []);
+  }
+
+  /// `Reset data`
+  String get resetData {
+    return Intl.message('Reset data', name: 'resetData', desc: '', args: []);
+  }
+
+  /// `Current version`
+  String get currentVersion {
+    return Intl.message(
+      'Current version',
+      name: 'currentVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latest version`
+  String get latestVersion {
+    return Intl.message(
+      'Latest version',
+      name: 'latestVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update now`
+  String get updateNow {
+    return Intl.message('Update now', name: 'updateNow', desc: '', args: []);
+  }
+
+  /// `Downloading update…`
+  String get downloadingUpdate {
+    return Intl.message(
+      'Downloading update…',
+      name: 'downloadingUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installer launched — follow the prompts to finish updating.`
+  String get installerLaunched {
+    return Intl.message(
+      'Installer launched — follow the prompts to finish updating.',
+      name: 'installerLaunched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download failed. Opening the releases page instead.`
+  String get updateDownloadFailed {
+    return Intl.message(
+      'Download failed. Opening the releases page instead.',
+      name: 'updateDownloadFailed',
+      desc: '',
+      args: [],
+    );
   }
 }
 

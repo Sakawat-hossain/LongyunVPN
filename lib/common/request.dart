@@ -59,6 +59,15 @@ class Request {
     return response;
   }
 
+  /// Downloads [url] to [savePath] (used for the in-app installer update).
+  Future<void> downloadFile(
+    String url,
+    String savePath, {
+    void Function(int received, int total)? onProgress,
+  }) async {
+    await dio.download(url, savePath, onReceiveProgress: onProgress);
+  }
+
   Future<MemoryImage?> getImage(String url) async {
     if (url.isEmpty) return null;
     final response = await dio.get<Uint8List>(

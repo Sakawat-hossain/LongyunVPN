@@ -28,6 +28,12 @@ class Navigation {
             : [],
       ),
       NavigationItem(
+        icon: const Icon(Icons.workspace_premium),
+        label: PageLabel.premium,
+        builder: (_) =>
+            const PremiumView(key: GlobalObjectKey(PageLabel.premium)),
+      ),
+      NavigationItem(
         icon: const Icon(Icons.folder),
         label: PageLabel.profiles,
         builder: (_) =>

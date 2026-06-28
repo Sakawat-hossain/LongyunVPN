@@ -112,9 +112,10 @@ type Method string
 type MessageType string
 
 type Delay struct {
-	Url   string `json:"url"`
-	Name  string `json:"name"`
-	Value int32  `json:"value"`
+	Url     string `json:"url"`
+	Name    string `json:"name"`
+	Value   int32  `json:"value"`
+	Message string `json:"message"`
 }
 
 type Message struct {
