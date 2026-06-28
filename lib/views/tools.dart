@@ -19,6 +19,7 @@ import 'package:path/path.dart' show dirname, join;
 
 import 'config/advanced.dart';
 import 'developer.dart';
+import 'diagnostics.dart';
 import 'theme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
@@ -29,6 +30,8 @@ class ToolsView extends ConsumerStatefulWidget {
 }
 
 class _ToolViewState extends ConsumerState<ToolsView> {
+  bool _showSettings = false;
+
   Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
       leading: navigationItem.icon,
@@ -53,31 +56,75 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     );
   }
 
-  List<Widget> _getOtherList(bool enableDeveloperMode) {
+  // About (was "More"): the app info entry.
+  List<Widget> _getAboutList() {
     return generateSection(
-      title: context.appLocalizations.other,
-      items: [
-        const _DisclaimerItem(),
-        if (enableDeveloperMode) const _DeveloperItem(),
-        const _InfoItem(),
-      ],
+      title: context.appLocalizations.about,
+      items: [const _InfoItem()],
+      isFirst: true,
     );
   }
 
+  // Settings, behind a Show/Hide toggle on the section header.
   List<Widget> _getSettingList() {
-    return generateSection(
-      title: context.appLocalizations.settings,
-      items: [
-        const _LocaleItem(),
-        const _ThemeItem(),
-        const _BackupItem(),
-        if (system.isDesktop) const _HotkeyItem(),
-        if (system.isWindows) const _LoopbackItem(),
-        if (system.isAndroid) const _AccessItem(),
-        const _ConfigItem(),
-        const _AdvancedConfigItem(),
-        const _SettingItem(),
-      ],
+    final settingItems = <Widget>[
+      const _LocaleItem(),
+      const _ThemeItem(),
+      const _BackupItem(),
+      if (system.isDesktop) const _HotkeyItem(),
+      if (system.isWindows) const _LoopbackItem(),
+      if (system.isAndroid) const _AccessItem(),
+      const _ConfigItem(),
+      const _AdvancedConfigItem(),
+      const _SettingItem(),
+      const _DiagnosticsItem(),
+    ];
+    return [
+      ListHeader(
+        title: context.appLocalizations.settings,
+        actions: [
+          TextButton.icon(
+            onPressed: () => setState(() => _showSettings = !_showSettings),
+            icon: Icon(
+              _showSettings ? Icons.visibility_off : Icons.visibility,
+              size: 18,
+            ),
+            label: Text(_showSettings
+                ? context.appLocalizations.hide
+                : context.appLocalizations.show),
+          ),
+        ],
+      ),
+      if (_showSettings)
+        for (var i = 0; i < settingItems.length; i++) ...[
+          settingItems[i],
+          if (i < settingItems.length - 1) const Divider(height: 0),
+        ],
+    ];
+  }
+
+  // Other: the "more tools" nav entries (Resources, Logs…) + Disclaimer +
+  // Developer.
+  Widget _buildOtherSection(bool enableDeveloperMode) {
+    return Consumer(
+      builder: (_, ref, _) {
+        final navigationItems =
+            ref.watch(moreToolsSelectorStateProvider).navigationItems;
+        return Column(
+          children: [
+            ListHeader(title: context.appLocalizations.other),
+            if (navigationItems.isNotEmpty) ...[
+              _buildNavigationMenu(navigationItems),
+              const Divider(height: 0),
+            ],
+            const _DisclaimerItem(),
+            if (enableDeveloperMode) ...[
+              const Divider(height: 0),
+              const _DeveloperItem(),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -89,22 +136,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       ),
     );
     final items = [
-      Consumer(
-        builder: (_, ref, _) {
-          final state = ref.watch(moreToolsSelectorStateProvider);
-          if (state.navigationItems.isEmpty) {
-            return Container();
-          }
-          return Column(
-            children: [
-              ListHeader(title: context.appLocalizations.more),
-              _buildNavigationMenu(state.navigationItems),
-            ],
-          );
-        },
-      ),
+      ..._getAboutList(),
       ..._getSettingList(),
-      ..._getOtherList(vm2.b),
+      _buildOtherSection(vm2.b),
     ];
     return CommonScaffold(
       title: context.appLocalizations.tools,
@@ -265,6 +299,20 @@ class _SettingItem extends StatelessWidget {
       title: Text(context.appLocalizations.application),
       subtitle: Text(context.appLocalizations.applicationDesc),
       delegate: const OpenDelegate(widget: ApplicationSettingView()),
+    );
+  }
+}
+
+class _DiagnosticsItem extends StatelessWidget {
+  const _DiagnosticsItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListItem.open(
+      leading: const Icon(Icons.network_check),
+      title: Text(context.appLocalizations.diagnostics),
+      subtitle: Text(context.appLocalizations.diagnosticsDesc),
+      delegate: const OpenDelegate(widget: DiagnosticsView()),
     );
   }
 }

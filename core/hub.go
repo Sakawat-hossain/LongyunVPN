@@ -234,6 +234,7 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 
 		if proxy == nil {
 			delayData.Value = -1
+			delayData.Message = "proxy not found"
 			data, _ := json.Marshal(delayData)
 			fn(string(data))
 			return false, nil
@@ -248,6 +249,11 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 		delay, err := proxy.URLTest(ctx, testUrl, expectedStatus)
 		if err != nil || delay == 0 {
 			delayData.Value = -1
+			if err != nil {
+				delayData.Message = err.Error()
+			} else {
+				delayData.Message = "no response (unexpected status or empty reply)"
+			}
 			data, _ := json.Marshal(delayData)
 			fn(string(data))
 			return false, nil
