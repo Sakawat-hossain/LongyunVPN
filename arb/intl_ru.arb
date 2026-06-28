@@ -686,5 +686,15 @@
   "updateNow": "Обновить сейчас",
   "downloadingUpdate": "Загрузка обновления…",
   "installerLaunched": "Установщик запущен — следуйте инструкциям для завершения обновления.",
-  "updateDownloadFailed": "Не удалось загрузить. Открываю страницу релизов."
+  "updateDownloadFailed": "Не удалось загрузить. Открываю страницу релизов.",
+  "noActiveSubscription": "Нет активной подписки",
+  "noSubscriptionServersMessage": "У вас нет активного VPN-пакета.\nКупите план для доступа к VPN-серверам.",
+  "buyPremium": "Купить Premium",
+  "nodeStatus": "Состояние узлов",
+  "refreshStatus": "Обновить состояние",
+  "totalNodes": "Всего узлов",
+  "onlineNodes": "Узлы онлайн",
+  "offlineNodes": "Узлы офлайн",
+  "online": "Онлайн",
+  "offline": "Офлайн"
 }

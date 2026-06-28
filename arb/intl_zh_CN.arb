@@ -686,5 +686,15 @@
   "updateNow": "立即更新",
   "downloadingUpdate": "正在下载更新…",
   "installerLaunched": "安装程序已启动 — 请按提示完成更新。",
-  "updateDownloadFailed": "下载失败，已改为打开发布页面。"
+  "updateDownloadFailed": "下载失败，已改为打开发布页面。",
+  "noActiveSubscription": "无有效订阅",
+  "noSubscriptionServersMessage": "您还没有有效的 VPN 套餐。\n购买套餐以访问 VPN 服务器。",
+  "buyPremium": "购买会员",
+  "nodeStatus": "节点状态",
+  "refreshStatus": "刷新状态",
+  "totalNodes": "节点总数",
+  "onlineNodes": "在线节点",
+  "offlineNodes": "离线节点",
+  "online": "在线",
+  "offline": "离线"
 }
