@@ -686,5 +686,15 @@
   "updateNow": "Update now",
   "downloadingUpdate": "Downloading update…",
   "installerLaunched": "Installer launched — follow the prompts to finish updating.",
-  "updateDownloadFailed": "Download failed. Opening the releases page instead."
+  "updateDownloadFailed": "Download failed. Opening the releases page instead.",
+  "noActiveSubscription": "No Active Subscription",
+  "noSubscriptionServersMessage": "You don't have an active VPN package.\nPurchase a plan to access VPN servers.",
+  "buyPremium": "Buy Premium",
+  "nodeStatus": "Node Status",
+  "refreshStatus": "Refresh Status",
+  "totalNodes": "Total Nodes",
+  "onlineNodes": "Online Nodes",
+  "offlineNodes": "Offline Nodes",
+  "online": "Online",
+  "offline": "Offline"
 }

@@ -220,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bind": MessageLookupByLibrary.simpleMessage("バインド"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("ブラックリストモード"),
     "buy": MessageLookupByLibrary.simpleMessage("購入"),
+    "buyPremium": MessageLookupByLibrary.simpleMessage("プレミアムを購入"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("バイパスドメイン"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("システムプロキシ有効時のみ適用"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
@@ -595,6 +596,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noActiveProfileImport": MessageLookupByLibrary.simpleMessage(
       "有効なプロファイルがありません。まずサブスクリプションをインポートしてください。",
     ),
+    "noActiveSubscription": MessageLookupByLibrary.simpleMessage(
+      "有効なサブスクリプションがありません",
+    ),
     "noActiveSubscriptionYet": MessageLookupByLibrary.simpleMessage(
       "有効なサブスクリプションがまだありません。しばらくしてからお試しください。",
     ),
@@ -616,6 +620,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("IPを解決しない"),
     "noResolveHostname": MessageLookupByLibrary.simpleMessage("ホスト名を解決しない"),
     "noSubscription": MessageLookupByLibrary.simpleMessage("サブスクリプションなし"),
+    "noSubscriptionServersMessage": MessageLookupByLibrary.simpleMessage(
+      "有効な VPN プランがありません。\nプランを購入して VPN サーバーにアクセスしてください。",
+    ),
+    "nodeStatus": MessageLookupByLibrary.simpleMessage("ノード状態"),
     "none": MessageLookupByLibrary.simpleMessage("なし"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",
@@ -625,10 +633,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nullTip": m28,
     "numberTip": m29,
+    "offline": MessageLookupByLibrary.simpleMessage("オフライン"),
+    "offlineNodes": MessageLookupByLibrary.simpleMessage("オフラインノード"),
     "onDemand": MessageLookupByLibrary.simpleMessage("On Demand"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "Configure the program running state for specific scenarios",
     ),
+    "online": MessageLookupByLibrary.simpleMessage("オンライン"),
+    "onlineNodes": MessageLookupByLibrary.simpleMessage("オンラインノード"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("アイコンのみ"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("プロキシのみ統計"),
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
@@ -758,6 +770,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redirポート"),
     "redo": MessageLookupByLibrary.simpleMessage("やり直す"),
     "refresh": MessageLookupByLibrary.simpleMessage("更新"),
+    "refreshStatus": MessageLookupByLibrary.simpleMessage("状態を更新"),
     "remote": MessageLookupByLibrary.simpleMessage("リモート"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "WebDAVにデータをバックアップ",
@@ -1014,6 +1027,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("トグル"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("トーンスポット"),
     "tools": MessageLookupByLibrary.simpleMessage("ツール"),
+    "totalNodes": MessageLookupByLibrary.simpleMessage("ノード総数"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxyポート"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),

@@ -9,6 +9,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'node_status.dart';
 import 'setting.dart';
 import 'tab.dart';
 
@@ -134,6 +135,19 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
 
   @override
   Widget build(BuildContext context) {
+    // Gate the whole Servers page behind an active subscription. With no usable
+    // plan we hide the server list/tabs entirely and show a clean empty state;
+    // the four tabs return automatically once the subscription becomes active.
+    final hasActiveSubscription = ref.watch(
+      authProvider.select((state) => state.hasActiveSubscription),
+    );
+    if (!hasActiveSubscription) {
+      return CommonScaffold(
+        key: _scaffoldKey,
+        title: context.appLocalizations.proxies,
+        body: const NoSubscriptionView(),
+      );
+    }
     final proxiesType = ref.watch(
       proxiesStyleSettingProvider.select((state) => state.type),
     );

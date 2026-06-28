@@ -268,6 +268,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bind": MessageLookupByLibrary.simpleMessage("Bind"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("Blacklist mode"),
     "buy": MessageLookupByLibrary.simpleMessage("Buy"),
+    "buyPremium": MessageLookupByLibrary.simpleMessage("Buy Premium"),
     "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domain"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Only takes effect when the system proxy is enabled",
@@ -731,6 +732,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noActiveProfileImport": MessageLookupByLibrary.simpleMessage(
       "No active profile. Import a subscription first.",
     ),
+    "noActiveSubscription": MessageLookupByLibrary.simpleMessage(
+      "No Active Subscription",
+    ),
     "noActiveSubscriptionYet": MessageLookupByLibrary.simpleMessage(
       "No active subscription yet. Try again shortly.",
     ),
@@ -758,6 +762,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "No resolve hostname",
     ),
     "noSubscription": MessageLookupByLibrary.simpleMessage("No subscription"),
+    "noSubscriptionServersMessage": MessageLookupByLibrary.simpleMessage(
+      "You don\'t have an active VPN package.\nPurchase a plan to access VPN servers.",
+    ),
+    "nodeStatus": MessageLookupByLibrary.simpleMessage("Node Status"),
     "none": MessageLookupByLibrary.simpleMessage("none"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",
@@ -767,10 +775,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nullTip": m28,
     "numberTip": m29,
+    "offline": MessageLookupByLibrary.simpleMessage("Offline"),
+    "offlineNodes": MessageLookupByLibrary.simpleMessage("Offline Nodes"),
     "onDemand": MessageLookupByLibrary.simpleMessage("On Demand"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "Configure the program running state for specific scenarios",
     ),
+    "online": MessageLookupByLibrary.simpleMessage("Online"),
+    "onlineNodes": MessageLookupByLibrary.simpleMessage("Online Nodes"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Only statistics proxy",
@@ -920,6 +932,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
     "redo": MessageLookupByLibrary.simpleMessage("redo"),
     "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
+    "refreshStatus": MessageLookupByLibrary.simpleMessage("Refresh Status"),
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to WebDAV",
@@ -1224,6 +1237,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("TonalSpot"),
     "tools": MessageLookupByLibrary.simpleMessage("Tools"),
+    "totalNodes": MessageLookupByLibrary.simpleMessage("Total Nodes"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy Port"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),

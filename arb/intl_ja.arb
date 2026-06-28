@@ -686,5 +686,15 @@
   "updateNow": "今すぐ更新",
   "downloadingUpdate": "更新をダウンロード中…",
   "installerLaunched": "インストーラーを起動しました — 画面の指示に従って更新を完了してください。",
-  "updateDownloadFailed": "ダウンロードに失敗しました。リリースページを開きます。"
+  "updateDownloadFailed": "ダウンロードに失敗しました。リリースページを開きます。",
+  "noActiveSubscription": "有効なサブスクリプションがありません",
+  "noSubscriptionServersMessage": "有効な VPN プランがありません。\nプランを購入して VPN サーバーにアクセスしてください。",
+  "buyPremium": "プレミアムを購入",
+  "nodeStatus": "ノード状態",
+  "refreshStatus": "状態を更新",
+  "totalNodes": "ノード総数",
+  "onlineNodes": "オンラインノード",
+  "offlineNodes": "オフラインノード",
+  "online": "オンライン",
+  "offline": "オフライン"
 }
