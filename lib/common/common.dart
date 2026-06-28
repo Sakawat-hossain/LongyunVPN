@@ -45,4 +45,5 @@ export 'text.dart';
 export 'tray.dart';
 export 'utils.dart';
 export 'window.dart';
+export 'xboard.dart';
 export 'yaml.dart';
