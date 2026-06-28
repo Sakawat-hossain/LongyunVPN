@@ -5503,6 +5503,81 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `No Active Subscription`
+  String get noActiveSubscription {
+    return Intl.message(
+      'No Active Subscription',
+      name: 'noActiveSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You don't have an active VPN package.\nPurchase a plan to access VPN servers.`
+  String get noSubscriptionServersMessage {
+    return Intl.message(
+      'You don\'t have an active VPN package.\nPurchase a plan to access VPN servers.',
+      name: 'noSubscriptionServersMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Buy Premium`
+  String get buyPremium {
+    return Intl.message('Buy Premium', name: 'buyPremium', desc: '', args: []);
+  }
+
+  /// `Node Status`
+  String get nodeStatus {
+    return Intl.message('Node Status', name: 'nodeStatus', desc: '', args: []);
+  }
+
+  /// `Refresh Status`
+  String get refreshStatus {
+    return Intl.message(
+      'Refresh Status',
+      name: 'refreshStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Nodes`
+  String get totalNodes {
+    return Intl.message('Total Nodes', name: 'totalNodes', desc: '', args: []);
+  }
+
+  /// `Online Nodes`
+  String get onlineNodes {
+    return Intl.message(
+      'Online Nodes',
+      name: 'onlineNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Offline Nodes`
+  String get offlineNodes {
+    return Intl.message(
+      'Offline Nodes',
+      name: 'offlineNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Online`
+  String get online {
+    return Intl.message('Online', name: 'online', desc: '', args: []);
+  }
+
+  /// `Offline`
+  String get offline {
+    return Intl.message('Offline', name: 'offline', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

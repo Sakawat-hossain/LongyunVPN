@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card.dart';
 import 'common.dart';
+import 'node_status.dart';
 
 typedef ProxyGroupViewKeyMap =
     Map<String, GlobalObjectKey<_ProxyGroupViewState>>;
@@ -43,7 +44,9 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         final groupNames = next.a;
         final currentGroupName = next.b;
         final index = groupNames.indexWhere((item) => item == currentGroupName);
-        _updateTabController(groupNames.length, index);
+        // +1 for the trailing "Node Status" tab (only when there are groups).
+        final length = groupNames.isEmpty ? 0 : groupNames.length + 1;
+        _updateTabController(length, index);
       }
     }, fireImmediately: true);
   }
@@ -136,7 +139,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         groupIndex = currentIndex;
       }
       final currentGroups = getCurrentGroups();
-      if (groupIndex == null || groupIndex > currentGroups.length) {
+      // The last tab is "Node Status", which has no backing group — ignore it.
+      if (groupIndex == null || groupIndex >= currentGroups.length) {
         return;
       }
       final currentGroup = currentGroups[groupIndex];
@@ -218,6 +222,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                             },
                           ),
                         ),
+                      Tab(child: Text(appLocalizations.nodeStatus)),
                     ],
                   ),
                   if (value) Positioned(right: 0, child: child!),
@@ -254,6 +259,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                   columns: state.columns,
                   cardType: state.proxyCardType,
                 ),
+              const NodeStatusView(),
             ],
           ),
         ),
