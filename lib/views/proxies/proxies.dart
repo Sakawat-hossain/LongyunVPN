@@ -135,17 +135,31 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
 
   @override
   Widget build(BuildContext context) {
-    // Gate the whole Servers page behind an active subscription. With no usable
-    // plan we hide the server list/tabs entirely and show a clean empty state;
-    // the four tabs return automatically once the subscription becomes active.
-    final hasActiveSubscription = ref.watch(
-      authProvider.select((state) => state.hasActiveSubscription),
-    );
-    if (!hasActiveSubscription) {
+    // Gate the whole Servers page. The list/tabs are shown only when the account
+    // has an active subscription with a non-empty subscribe URL AND the
+    // downloaded config actually yielded at least one proxy group with a
+    // selectable node. Otherwise we show a clean empty state — "No Active
+    // Subscription" when there is no usable plan, or "No Nodes Available" when
+    // the subscription is active but produced no nodes. The tabs return
+    // automatically once a valid subscription with nodes is loaded.
+    final auth = ref.watch(authProvider);
+    final subscribeUrlEmpty = auth.subscribeInfo != null &&
+        auth.subscribeInfo!.subscribeUrl.isEmpty;
+    if (!auth.hasActiveSubscription || subscribeUrlEmpty) {
       return CommonScaffold(
         key: _scaffoldKey,
         title: context.appLocalizations.proxies,
         body: const NoSubscriptionView(),
+      );
+    }
+    final groups = ref.watch(
+      proxiesTabStateProvider.select((state) => state.groups),
+    );
+    if (groups.isEmpty || collectNodes(groups).isEmpty) {
+      return CommonScaffold(
+        key: _scaffoldKey,
+        title: context.appLocalizations.proxies,
+        body: const NoSubscriptionView(noNodes: true),
       );
     }
     final proxiesType = ref.watch(

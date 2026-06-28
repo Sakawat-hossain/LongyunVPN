@@ -696,5 +696,22 @@
   "onlineNodes": "Online Nodes",
   "offlineNodes": "Offline Nodes",
   "online": "Online",
-  "offline": "Offline"
+  "offline": "Offline",
+  "noNodesAvailable": "No Nodes Available",
+  "noNodesFoundTitle": "No nodes found",
+  "refreshSubscriptionHint": "Please refresh your subscription.",
+  "unknown": "Unknown",
+  "unknownNodes": "Unknown Nodes",
+  "lastUpdated": "Last Updated",
+  "lastChecked": "Last checked",
+  "never": "Never",
+  "refreshing": "Refreshing…",
+  "completed": "Completed",
+  "checkingProgress": "Checking… ({done}/{total})",
+  "@checkingProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }
