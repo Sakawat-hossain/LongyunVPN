@@ -5,8 +5,6 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
 }
 
 val localPropertiesFile = rootProject.file("local.properties")
@@ -40,8 +38,15 @@ android {
         applicationId = "com.follow.clash"
         minSdk = flutter.minSdkVersion
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = flutter.versionCode
+        // LongyunVPN ships a plain semantic version (e.g. 1.0.1) with no Flutter
+        // build suffix, matching the desktop build. Keep versionName identical
+        // and derive a monotonic Android versionCode from it (1.0.1 -> 10001).
         versionName = flutter.versionName
+        versionCode = flutter.versionName.split(".").let { parts ->
+            (parts.getOrNull(0)?.toIntOrNull() ?: 1) * 10000 +
+                (parts.getOrNull(1)?.toIntOrNull() ?: 0) * 100 +
+                (parts.getOrNull(2)?.toIntOrNull() ?: 0)
+        }
     }
 
     signingConfigs {
@@ -103,7 +108,4 @@ dependencies {
     implementation(libs.smali.dexlib2) {
         exclude(group = "com.google.guava", module = "guava")
     }
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics.ndk)
-    implementation(libs.firebase.analytics)
 }
