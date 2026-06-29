@@ -1,8 +1,9 @@
 name: release
 
-# Builds the Windows installer and publishes a GitHub Release whenever a
-# version tag (e.g. v1.0.0) is pushed. The in-app updater reads the latest
-# release from this repository and downloads the .exe asset attached here.
+# Builds the Windows installer and the Android APK, and publishes a GitHub
+# Release whenever a version tag (e.g. v1.0.0) is pushed. The in-app updater
+# reads the latest release from this repository: on Windows it downloads the
+# .exe installer, on Android it opens the release page to grab the .apk.
 
 on:
   push:
@@ -53,5 +54,82 @@ jobs:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           files: dist/**/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.9
+          cache: true
+
+      - name: Setup NDK
+        id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r28c
+          add-to-path: true
+          link-to-sdk: true
+
+      # Optional release signing. Add these repository secrets to ship a
+      # properly-signed APK; without them the build is debug-signed (installable
+      # for sideloading/testing, with a .dev application id):
+      #   ANDROID_KEYSTORE_BASE64  – base64 of your release keystore (.jks)
+      #   ANDROID_STORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+      - name: Configure signing (optional)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 --decode > android/app/keystore.jks
+            {
+              echo "storePassword=$STORE_PASSWORD"
+              echo "keyAlias=$KEY_ALIAS"
+              echo "keyPassword=$KEY_PASSWORD"
+            } >> android/local.properties
+            echo "Release signing configured."
+          else
+            echo "No keystore secret set — building a debug-signed APK."
+          fi
+
+      - name: Get Flutter dependencies
+        run: |
+          flutter --version
+          flutter pub get
+
+      # Build the arm64 APK (the proven per-arch path used by the original
+      # workflow; arm64 covers all modern Android devices). The Gradle hook that
+      # compiles the Go core into libclash.so requires the ANDROID_NDK env var.
+      - name: Build APK (arm64)
+        env:
+          ANDROID_NDK: ${{ steps.ndk.outputs.ndk-path }}
+        run: dart setup.dart android --arch arm64 --env stable -v
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: dist/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
