@@ -35,7 +35,10 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.follow.clash"
+        // Published application id (what the store / device sees). The code
+        // namespace stays "com.follow.clash" (the Kotlin package), which is an
+        // internal compile-time detail and does not need to match.
+        applicationId = "com.longyunvpn.app"
         minSdk = flutter.minSdkVersion
         targetSdk = libs.versions.targetSdk.get().toInt()
         // LongyunVPN ships a plain semantic version (e.g. 1.0.1) with no Flutter
