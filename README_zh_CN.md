@@ -1,132 +1,43 @@
-<div>
+# LongyunVPN（龙云）
 
 [**English**](README.md)
 
-</div>
+一款基于 Clash.Meta（mihomo）内核的高速、安全、多平台 VPN 客户端。
+LongyunVPN 接入龙云订阅服务，提供简洁、本地化的界面来管理服务器、订阅与流量。
 
-## FlClash
+作者：**Sakawat Hossain** · 采用 **GNU GPL-3.0** 协议（见 [LICENSE](LICENSE)）。
 
-[![Downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases/)[![Last Version](https://img.shields.io/github/release/chen08209/FlClash/all.svg?style=flat-square)](https://github.com/chen08209/FlClash/releases/)[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
+## 功能特性
 
-[![Channel](https://img.shields.io/badge/Telegram-Channel-blue?style=flat-square&logo=telegram)](https://t.me/FlClash)
+- 基于内置 mihomo 内核的高性能代理
+- 一键购买与续费订阅（套餐、优惠码、流量重置）
+- 账户面板：套餐、到期时间、设备数、余额与用量
+- 服务器页面在有有效订阅时才显示，并提供节点状态健康监控
+- 单节点诊断（DNS / TCP / TLS / HTTP）及通俗易懂的修复建议
+- 快速 TCP Ping 与 URL 延迟测试
+- 完整本地化（English、简体中文、日本語、Русский）
+- 通过 GitHub Releases 的应用内自动更新
 
-基于ClashMeta的多平台代理客户端，简单易用，开源无广告。
+## 平台
 
-on Desktop:
-<p style="text-align: center;">
-    <img alt="desktop" src="snapshots/desktop.gif">
-</p>
+- **Windows** —— 安装包（`LongyunVPN-Setup.exe`），支持应用内自动更新。
+- **Android** —— APK（`LongyunVPN.apk`，应用 ID `com.longyunvpn.app`）。
 
-on Mobile:
-<p style="text-align: center;">
-    <img alt="mobile" src="snapshots/mobile.gif">
-</p>
+## 发布新版本
 
-## Features
+在 [`pubspec.yaml`](pubspec.yaml) 中修改版本号（纯语义化，例如 `version: 1.0.2`），
+提交后推送对应标签：
 
-✈️ 多平台: Android, Windows, macOS and Linux
+```bash
+git tag v1.0.2
+git push origin v1.0.2
+```
 
-💻 自适应多个屏幕尺寸,多种颜色主题可供选择
+推送 `v*` 标签会触发 [`.github/workflows/release.yml`](.github/workflows/release.yml)，
+自动构建 Windows 安装包与 Android APK，并发布到 GitHub Release。
 
-💡 基本 Material You 设计, 类[Surfboard](https://github.com/getsurfboard/surfboard)用户界面
+## 协议与致谢
 
-☁️ 支持通过WebDAV同步数据
-
-✨ 支持一键导入订阅, 深色模式
-
-## Use
-
-### Linux
-
-⚠️ 使用前请确保安装以下依赖
-
-   ```bash
-    sudo apt-get install libayatana-appindicator3-dev
-    sudo apt-get install libkeybinder-3.0-dev
-   ```
-
-### Android
-
-支持下列操作
-
-   ```bash
-    com.follow.clash.action.START
-    
-    com.follow.clash.action.STOP
-    
-    com.follow.clash.action.TOGGLE
-   ```
-
-## Download
-
-<a href="https://chen08209.github.io/FlClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="200px"/></a> <a href="https://github.com/chen08209/FlClash/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="200px"/></a>
-
-## Build
-
-1. 更新 submodules
-   ```bash
-   git submodule update --init --recursive
-   ```
-
-2. 安装 `Flutter` 以及 `Golang` 环境
-
-3. 构建应用
-
-    - android
-
-        1. 安装  `Android SDK` ,  `Android NDK`
-
-        2. 设置 `ANDROID_NDK` 环境变量
-
-        3. 运行构建脚本
-
-           ```bash
-           dart setup.dart android
-           ```
-
-    - windows
-
-        1. 你需要一个windows客户端
-
-        2. 安装 `GCC`，`Inno Setup`
-
-        3. 运行构建脚本
-
-           ```bash
-           dart setup.dart windows
-           ```
-
-    - linux
-
-        1. 你需要一个linux客户端
-
-        2. 依赖会由 setup 脚本自动安装，也可以手动安装：
-           ```bash
-           sudo apt-get install -y libayatana-appindicator3-dev libkeybinder-3.0-dev
-           ```
-
-        3. 运行构建脚本
-
-           ```bash
-           dart setup.dart linux
-           ```
-
-    - macOS
-
-        1. 你需要一个macOS客户端
-
-        2. 运行构建脚本
-
-           ```bash
-           dart setup.dart macos
-           ```
-
-## Star
-
-支持开发者的最简单方式是点击页面顶部的星标（⭐）。
-
-<p style="text-align: center;">
-    <a href="https://api.star-history.com/svg?repos=chen08209/FlClash&Date">
-        <img alt="start" width=50% src="https://api.star-history.com/svg?repos=chen08209/FlClash&Date"/>
-    </a>
-</p>
+本项目采用 GNU GPL-3.0 协议，并基于开源的
+[mihomo / Clash.Meta](https://github.com/MetaCubeX/mihomo) 内核构建。
+完整条款见 [LICENSE](LICENSE)。
