@@ -176,6 +176,11 @@ Future<int> _package(
   final depExit = await _ensureDependencies(platform, arch);
   if (depExit != 0) return depExit;
 
+  // Windows ships an installer ("LongyunVPN-Setup.exe"); other platforms keep a
+  // plain product name ("LongyunVPN.apk", "LongyunVPN.dmg", …).
+  final artifactName =
+      platform == 'windows' ? '{{name}}-Setup.{{ext}}' : '{{name}}.{{ext}}';
+
   final process = await Process.start(
     'flutter_distributor',
     [
@@ -186,7 +191,7 @@ Future<int> _package(
       '--targets',
       targets,
       '--artifact-name',
-      '{{name}}-Setup.{{ext}}',
+      artifactName,
       if (androidArch != null)
         '--build-target-platform=${_androidFlutterTarget[androidArch]!}',
       if (flutterBuildArgs.isNotEmpty)

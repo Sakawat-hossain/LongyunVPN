@@ -3,8 +3,6 @@ package com.follow.clash.common
 
 import android.app.Application
 import android.util.Log
-import com.google.firebase.FirebaseApp
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -35,13 +33,9 @@ object GlobalState : CoroutineScope by CoroutineScope(Dispatchers.Default) {
         _application = application
     }
 
+    // Crash reporting (Firebase Crashlytics) was removed for the LongyunVPN
+    // release so the app ships no third-party telemetry. Kept as a no-op so the
+    // existing callers (State / Service / RemoteService) continue to compile.
     fun setCrashlytics(enable: Boolean) {
-        _application?.let {
-            FirebaseApp.initializeApp(it)
-            FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = enable
-            if (enable) {
-                log("init crashlytics ${it.processName}")
-            }
-        }
     }
 }
