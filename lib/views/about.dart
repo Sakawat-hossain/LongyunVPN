@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -27,11 +28,14 @@ class AboutView extends StatelessWidget {
       separated: false,
       title: appLocalizations.more,
       items: [
-        ListItem(
-          title: Text(appLocalizations.checkUpdate),
-          trailing: const Icon(Icons.update),
-          onTap: () => _checkUpdate(context),
-        ),
+        // The in-app update check is desktop-only — mobile updates via the app
+        // store (Google Play), which disallows self-update prompts.
+        if (!Platform.isAndroid && !Platform.isIOS)
+          ListItem(
+            title: Text(appLocalizations.checkUpdate),
+            trailing: const Icon(Icons.update),
+            onTap: () => _checkUpdate(context),
+          ),
         ListItem(
           title: const Text('Telegram'),
           trailing: const Icon(Icons.launch),

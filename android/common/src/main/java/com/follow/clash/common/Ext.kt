@@ -112,7 +112,7 @@ fun Service.startForeground(notification: Notification) {
         if (channel == null) {
             channel = NotificationChannel(
                 GlobalState.NOTIFICATION_CHANNEL,
-                "SERVICE_CHANNEL",
+                "LongyunVPN",
                 NotificationManager.IMPORTANCE_LOW
             )
             manager?.createNotificationChannel(channel)

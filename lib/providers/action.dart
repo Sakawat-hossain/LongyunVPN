@@ -65,6 +65,10 @@ class CommonAction extends _$CommonAction {
   }
 
   Future<void> autoCheckUpdate() async {
+    // On mobile the app is distributed/updated through the app store (Google
+    // Play), which prohibits in-app self-update prompts — only the desktop
+    // builds check GitHub Releases.
+    if (Platform.isAndroid || Platform.isIOS) return;
     if (!ref.read(appSettingProvider).autoCheckUpdate) return;
     final res = await request.checkForUpdate();
     checkUpdateResultHandle(data: res);
@@ -157,16 +161,20 @@ class CommonAction extends _$CommonAction {
     }
     final savePath =
         '${Directory.systemTemp.path}${Platform.pathSeparator}$name';
+    // downloadFile never throws — it returns false after retrying, so the user
+    // never sees a raw socket error. On any failure we fall back to opening the
+    // releases page in the browser (which can resume large downloads better).
+    final ok = await globalState.loadingRun<bool>(
+      () => request.downloadFile(url, savePath),
+      title: l.downloadingUpdate,
+      tag: null,
+    );
+    if (ok != true) {
+      globalState.showNotifier(l.updateDownloadFailed);
+      _openReleasesPage();
+      return;
+    }
     try {
-      final ok = await globalState.loadingRun<bool>(
-        () async {
-          await request.downloadFile(url, savePath);
-          return true;
-        },
-        title: l.downloadingUpdate,
-        tag: null,
-      );
-      if (ok != true) return;
       await Process.start(savePath, const [], mode: ProcessStartMode.detached);
       globalState.showNotifier(l.installerLaunched);
     } catch (_) {
