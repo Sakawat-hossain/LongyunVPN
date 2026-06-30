@@ -44,11 +44,35 @@ List<Proxy> collectNodes(List<Group> groups) {
   return nodes;
 }
 
-/// Parses a leading 2-letter ISO country code from a node name, e.g.
-/// "HK 香港L01 | x1.5" -> "HK". Returns null when none is found.
+/// Parses the leading country code from a node name, e.g. "HK 香港L01 | x1.5"
+/// -> "HK", "USA 美国L01" -> "US". Anchored to the start so a mid-name token
+/// (like the "GB" in a "… 252 GB" traffic label) is never mistaken for a flag.
 String? _countryCode(String name) {
-  final match = RegExp(r'\b([A-Za-z]{2})\b').firstMatch(name);
-  return match?.group(1)?.toUpperCase();
+  final match = RegExp(r'^\s*([A-Za-z]{2,3})\b').firstMatch(name);
+  if (match == null) return null;
+  final raw = match.group(1)!.toUpperCase();
+  const aliases = {'USA': 'US', 'UK': 'GB', 'ENG': 'GB', 'UAE': 'AE'};
+  final code = aliases[raw] ?? raw;
+  return code.length >= 2 ? code.substring(0, 2) : null;
+}
+
+/// Filters out the panel's informational pseudo-entries (remaining traffic,
+/// plan expiry, reset countdown, subscription links, …) that V2Board/Xboard
+/// inject into the proxy list. A real server node carries a traffic multiplier
+/// (e.g. "| x1") or a leading 2–3 letter country code; the info entries have
+/// neither, and are additionally matched by a few well-known markers.
+bool isRealServerNode(String name) {
+  const infoMarkers = [
+    '剩余流量', '套餐到期', '距离下次', '重置', '到期', '过期', '官网', '订阅',
+    'expire', 'expir', 'traffic', 'reset', 'remaining', 'official', 'subscribe',
+  ];
+  final lower = name.toLowerCase();
+  for (final marker in infoMarkers) {
+    if (lower.contains(marker.toLowerCase())) return false;
+  }
+  final hasMultiplier = RegExp(r'[xX]\d').hasMatch(name);
+  final hasCountryPrefix = RegExp(r'^\s*[A-Za-z]{2,3}\b').hasMatch(name);
+  return hasMultiplier || hasCountryPrefix;
 }
 
 /// Converts an ISO country code to its flag emoji (regional indicators).
@@ -368,6 +392,9 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
           if (p is! YamlMap) continue;
           final name = p['name']?.toString() ?? '';
           if (name.isEmpty) continue;
+          // Show real servers only — skip the panel's traffic/expiry/reset
+          // info entries that are injected into the proxy list.
+          if (!isRealServerNode(name)) continue;
           final portRaw = p['port'];
           // Carry over the last health result so a reload doesn't wipe status.
           final prev = previous[name];
