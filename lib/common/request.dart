@@ -60,12 +60,48 @@ class Request {
   }
 
   /// Downloads [url] to [savePath] (used for the in-app installer update).
-  Future<void> downloadFile(
+  ///
+  /// Returns true on success. Never throws: large GitHub release downloads can
+  /// stall (especially on restricted networks), so this retries a few times
+  /// with a generous receive timeout, cleans up partial files, and reports
+  /// failure via the bool so the caller can fall back to opening the browser
+  /// instead of surfacing a raw socket error to the user.
+  Future<bool> downloadFile(
     String url,
     String savePath, {
     void Function(int received, int total)? onProgress,
+    int retries = 3,
   }) async {
-    await dio.download(url, savePath, onReceiveProgress: onProgress);
+    for (var attempt = 1; attempt <= retries; attempt++) {
+      try {
+        await dio.download(
+          url,
+          savePath,
+          onReceiveProgress: onProgress,
+          deleteOnError: true,
+          options: Options(
+            headers: {'User-Agent': browserUa},
+            followRedirects: true,
+            sendTimeout: const Duration(seconds: 30),
+            receiveTimeout: const Duration(minutes: 15),
+          ),
+        );
+        return true;
+      } catch (e) {
+        commonPrint.log(
+          'downloadFile attempt $attempt/$retries failed: $e',
+          logLevel: LogLevel.warning,
+        );
+        try {
+          final file = File(savePath);
+          if (await file.exists()) await file.delete();
+        } catch (_) {}
+        if (attempt < retries) {
+          await Future.delayed(const Duration(seconds: 2));
+        }
+      }
+    }
+    return false;
   }
 
   Future<MemoryImage?> getImage(String url) async {
