@@ -124,12 +124,28 @@ jobs:
           ANDROID_NDK: ${{ steps.ndk.outputs.ndk-path }}
         run: dart setup.dart android --arch arm64 --env stable -v
 
+      # Play App Bundle (all ABIs) for the Google Play Console. AAB can't be
+      # sideloaded — Play generates per-device APKs from it. Requires the
+      # release keystore secrets to be set (Play needs a signed upload).
+      - name: Build Play App Bundle (AAB)
+        env:
+          ANDROID_NDK: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          echo '{"APP_ENV":"stable","CORE_SHA256":""}' > env.json
+          flutter build appbundle --release \
+            --dart-define-from-file=env.json \
+            --target-platform android-arm,android-arm64,android-x64
+          mkdir -p dist
+          cp build/app/outputs/bundle/release/app-release.aab dist/LongyunVPN.aab
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: dist/**/*.apk
+          files: |
+            dist/**/*.apk
+            dist/**/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
