@@ -85,16 +85,27 @@ class CommonAction extends _$CommonAction {
       final submits = utils.parseReleaseBody(body);
       final currentVersion = globalState.packageInfo.version;
 
-      // Locate the Windows installer asset (.exe) and its size.
+      // Locate the Windows installer asset (.exe) matching this machine's
+      // architecture (releases ship both amd64 and arm64 installers), falling
+      // back to any .exe if no arch-specific match is found.
       Map<String, dynamic>? exeAsset;
       final assets = data['assets'];
       if (assets is List) {
-        for (final a in assets.whereType<Map<String, dynamic>>()) {
-          if ((a['name'] ?? '').toString().toLowerCase().endsWith('.exe')) {
+        final exeAssets = assets
+            .whereType<Map<String, dynamic>>()
+            .where((a) =>
+                (a['name'] ?? '').toString().toLowerCase().endsWith('.exe'))
+            .toList();
+        final procArch =
+            (Platform.environment['PROCESSOR_ARCHITECTURE'] ?? '').toLowerCase();
+        final archTag = procArch.contains('arm') ? 'arm64' : 'amd64';
+        for (final a in exeAssets) {
+          if ((a['name'] ?? '').toString().toLowerCase().contains(archTag)) {
             exeAsset = a;
             break;
           }
         }
+        exeAsset ??= exeAssets.isNotEmpty ? exeAssets.first : null;
       }
       final sizeText = exeAsset != null && exeAsset['size'] is num
           ? ' (${_formatSize((exeAsset['size'] as num).toInt())})'
