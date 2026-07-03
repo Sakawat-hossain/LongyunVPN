@@ -1,14 +1,12 @@
 name: release
 
-# Builds every platform/arch on a version tag (e.g. v1.0.4) and publishes a
-# single GitHub Release with all artifacts:
+# Builds every platform/arch on a version tag (e.g. v1.0.5) and publishes them
+# to a single GitHub Release. Each job uploads its own assets directly (the
+# proven approach), so a failure in one platform never blocks the others.
 #   Windows: LongyunVPN-<ver>-windows-amd64-setup.exe / .zip
 #            LongyunVPN-<ver>-windows-arm64-setup.exe / .zip
-#   Android: LongyunVPN-<ver>-android-arm64-v8a.apk / -armeabi-v7a.apk / -x86_64.apk
+#   Android: LongyunVPN-arm64-v8a.apk / -armeabi-v7a.apk / -x86_64.apk
 #            LongyunVPN-<ver>-android.aab  (Google Play upload)
-#
-# Each build job uploads its output as a workflow artifact; a final release job
-# gathers them and publishes once (avoids concurrent-release races).
 
 on:
   push:
@@ -19,20 +17,17 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: build ${{ matrix.platform }}-${{ matrix.arch }}
+  windows:
+    name: windows-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { platform: windows, os: windows-2022, arch: amd64 }
-          - { platform: windows, os: windows-11-arm, arch: arm64 }
-          - { platform: android, os: ubuntu-latest, arch: arm64 }
-          - { platform: android, os: ubuntu-latest, arch: arm }
-          - { platform: android, os: ubuntu-latest, arch: amd64 }
+          - { os: windows-2022, arch: amd64 }
+          - { os: windows-11-arm, arch: arm64 }
     steps:
-      - name: Setup Rust (Windows arm64)
+      - name: Setup Rust (arm64)
         if: matrix.os == 'windows-11-arm'
         run: |
           Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
@@ -44,8 +39,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Enable git long paths (Windows)
-        if: startsWith(matrix.platform, 'windows')
+      - name: Enable git long paths
         run: git config --global core.longpaths true
 
       - name: Setup Go
@@ -62,7 +56,7 @@ jobs:
           flutter-version: 3.41.9
           cache: true
 
-      - name: Setup Flutter (master, Windows arm64)
+      - name: Setup Flutter (master, arm64)
         if: matrix.os == 'windows-11-arm'
         uses: subosito/flutter-action@v2
         with:
@@ -70,60 +64,17 @@ jobs:
           flutter-version: 3.44.0-0.1.pre
           cache: true
 
-      - name: Setup NDK
-        id: ndk
-        if: matrix.platform == 'android'
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r28c
-          add-to-path: true
-          link-to-sdk: true
-
-      # Optional release signing for the APK. Add these repository secrets to
-      # ship a properly-signed APK; without them the build is debug-signed:
-      #   ANDROID_KEYSTORE_BASE64, ANDROID_STORE_PASSWORD,
-      #   ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
-      - name: Configure Android signing (optional)
-        if: matrix.platform == 'android'
-        env:
-          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          if [ -n "$KEYSTORE_B64" ]; then
-            echo "$KEYSTORE_B64" | base64 --decode > android/app/keystore.jks
-            {
-              echo "storePassword=$STORE_PASSWORD"
-              echo "keyAlias=$KEY_ALIAS"
-              echo "keyPassword=$KEY_PASSWORD"
-            } >> android/local.properties
-            echo "Release signing configured."
-          else
-            echo "No keystore secret set — building a debug-signed APK."
-          fi
-
       - name: Get Flutter dependencies
         run: |
           flutter --version
           flutter pub get
 
-      - name: Build (Windows)
-        if: startsWith(matrix.platform, 'windows')
+      - name: Build installer
         run: dart setup.dart windows --env stable -v
 
-      - name: Build (Android)
-        if: matrix.platform == 'android'
-        env:
-          ANDROID_NDK: ${{ steps.ndk.outputs.ndk-path }}
-        run: dart setup.dart android --arch ${{ matrix.arch }} --env stable -v
-
-      # Optional Authenticode signing to satisfy SmartScreen / Smart App Control.
-      # Requires a trusted code-signing certificate. Add secrets:
-      #   WINDOWS_CERT_BASE64  – base64 of your .pfx
-      #   WINDOWS_CERT_PASSWORD
-      - name: Sign Windows installer (optional)
-        if: startsWith(matrix.platform, 'windows')
+      # Optional Authenticode signing (SmartScreen / Smart App Control). Add
+      # secrets WINDOWS_CERT_BASE64 (base64 of a .pfx) + WINDOWS_CERT_PASSWORD.
+      - name: Sign installer (optional)
         shell: pwsh
         env:
           CERT_B64: ${{ secrets.WINDOWS_CERT_BASE64 }}
@@ -140,18 +91,23 @@ jobs:
             }
             Remove-Item $pfx
           } else {
-            Write-Host "No WINDOWS_CERT_BASE64 secret — installer left unsigned (SmartScreen / Smart App Control will warn until signed with a trusted certificate)."
+            Write-Host "No WINDOWS_CERT_BASE64 secret — installer left unsigned (SmartScreen / Smart App Control will warn until signed)."
           }
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: dist-${{ matrix.platform }}-${{ matrix.arch }}
-          path: dist/
-          if-no-files-found: warn
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/**/*.exe
+            dist/**/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  android-aab:
-    name: build android-aab (Play)
+  android:
+    name: android
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -180,7 +136,13 @@ jobs:
           add-to-path: true
           link-to-sdk: true
 
-      - name: Configure Android signing (optional)
+      - name: Export NDK path
+        run: echo "ANDROID_NDK=${{ steps.ndk.outputs.ndk-path }}" >> "$GITHUB_ENV"
+
+      # Optional release signing. Add secrets ANDROID_KEYSTORE_BASE64,
+      # ANDROID_STORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD to ship a
+      # properly-signed APK/AAB; without them the build is debug-signed.
+      - name: Configure signing (optional)
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
@@ -196,7 +158,7 @@ jobs:
             } >> android/local.properties
             echo "Release signing configured."
           else
-            echo "No keystore secret set — building a debug-signed bundle."
+            echo "No keystore secret set — building a debug-signed APK/AAB."
           fi
 
       - name: Get Flutter dependencies
@@ -204,37 +166,26 @@ jobs:
           flutter --version
           flutter pub get
 
-      - name: Build AAB (all ABIs)
-        env:
-          ANDROID_NDK: ${{ steps.ndk.outputs.ndk-path }}
+      # Per-arch APKs, built sequentially in one job (the proven path). Each run
+      # produces LongyunVPN-<abi>.apk in dist/.
+      - name: Build APK (arm64-v8a)
+        run: dart setup.dart android --arch arm64 --env stable -v
+
+      - name: Build APK (armeabi-v7a)
+        run: dart setup.dart android --arch arm --env stable -v
+
+      - name: Build APK (x86_64)
+        run: dart setup.dart android --arch amd64 --env stable -v
+
+      # Play App Bundle (all ABIs) for the Google Play Console.
+      - name: Build Play App Bundle (AAB)
         run: |
           echo '{"APP_ENV":"stable","CORE_SHA256":""}' > env.json
           flutter build appbundle --release \
             --dart-define-from-file=env.json \
             --target-platform android-arm,android-arm64,android-x64
-          mkdir -p dist
           cp build/app/outputs/bundle/release/app-release.aab \
             "dist/LongyunVPN-${GITHUB_REF_NAME#v}-android.aab"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-android-aab
-          path: dist/
-          if-no-files-found: warn
-
-  release:
-    name: publish release
-    needs: [build, android-aab]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          pattern: dist-*
-          merge-multiple: true
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -243,8 +194,6 @@ jobs:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            dist/**/*.exe
-            dist/**/*.zip
             dist/**/*.apk
             dist/**/*.aab
         env:
