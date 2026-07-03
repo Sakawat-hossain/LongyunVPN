@@ -17,6 +17,13 @@ const _androidFlutterTarget = {
   'amd64': 'android-x64',
 };
 
+// Android ABI label used in artifact filenames (…-android-<abi>.apk).
+const _androidAbi = {
+  'arm': 'armeabi-v7a',
+  'arm64': 'arm64-v8a',
+  'amd64': 'x86_64',
+};
+
 const _hostPlatform = {
   'linux': 'linux',
   'macos': 'macos',
@@ -168,18 +175,20 @@ Future<int> _package(
     platform: platform,
     verbose: verbose,
   );
-  final descriptionArgs = <String>[];
-  if (platform != 'android') {
-    descriptionArgs.addAll(['--description', arch]);
-  }
-
   final depExit = await _ensureDependencies(platform, arch);
   if (depExit != 0) return depExit;
 
-  // Windows ships an installer ("LongyunVPN-Setup.exe"); other platforms keep a
-  // plain product name ("LongyunVPN.apk", "LongyunVPN.dmg", …).
+  // Bake platform + arch into the artifact filename so every platform/arch
+  // build produces a distinct, conventionally-named file:
+  //   LongyunVPN-1.0.4-windows-amd64-setup.exe / -windows-amd64.zip
+  //   LongyunVPN-1.0.4-windows-arm64-setup.exe / -windows-arm64.zip
+  //   LongyunVPN-1.0.4-android-arm64-v8a.apk / -armeabi-v7a.apk / -x86_64.apk
+  final archLabel = platform == 'android'
+      ? (_androidAbi[androidArch] ?? androidArch ?? arch)
+      : arch;
   final artifactName =
-      platform == 'windows' ? '{{name}}-Setup.{{ext}}' : '{{name}}.{{ext}}';
+      '{{name}}-{{build_name}}-$platform-$archLabel'
+      '{{#is_installer}}-setup{{/is_installer}}.{{ext}}';
 
   final process = await Process.start(
     'flutter_distributor',
@@ -196,7 +205,6 @@ Future<int> _package(
         '--build-target-platform=${_androidFlutterTarget[androidArch]!}',
       if (flutterBuildArgs.isNotEmpty)
         '--flutter-build-args=${flutterBuildArgs.join(',')}',
-      ...descriptionArgs,
     ],
     includeParentEnvironment: true,
     environment: {'ANDROID_ARCH': ?androidArch},
