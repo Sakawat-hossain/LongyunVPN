@@ -139,7 +139,11 @@ enum CoreEventType { log, delay, request, loaded, crash }
 
 enum InvokeMessageType { protect, process }
 
-enum FindProcessMode { always, off }
+// Mirrors mihomo's find-process-mode. `strict` (the mihomo/Clash Verge Rev
+// default) resolves the owning process only when a PROCESS-* rule needs it;
+// `always` resolves it for every connection (heavy — a per-connection process
+// lookup, and on Android an FFI callback into Dart); `off` never resolves.
+enum FindProcessMode { always, strict, off }
 
 enum RestoreOption { all, onlyProfiles }
 

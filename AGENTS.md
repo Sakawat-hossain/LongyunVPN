@@ -31,7 +31,7 @@ bash plugins/setup/buildkit/run_build_tool.sh android
 ### Flutter Development
 
 ```bash
-# Project is pinned with FVM (.fvmrc currently uses Flutter 3.35.7)
+# Project is pinned with FVM (.fvmrc uses Flutter 3.41.9, matching the release CI)
 fvm flutter pub get
 fvm flutter run
 fvm flutter test

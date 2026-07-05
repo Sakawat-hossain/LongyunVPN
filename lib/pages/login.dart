@@ -16,6 +16,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _emailError;
 
   @override
   void dispose() {
@@ -28,6 +29,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (email.isEmpty || password.isEmpty) {
+      return;
+    }
+    // Catch a malformed address before a round-trip to the panel (same rule as
+    // the sign-up form).
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) {
+      setState(() => _emailError = context.appLocalizations.emailInvalid);
       return;
     }
     await ref.read(authProvider.notifier).login(email, password);
@@ -73,9 +81,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) {
+                      if (_emailError != null) {
+                        setState(() => _emailError = null);
+                      }
+                    },
                     decoration: InputDecoration(
                       labelText: context.appLocalizations.email,
                       border: const OutlineInputBorder(),
+                      errorText: _emailError,
                     ),
                   ),
                   const SizedBox(height: 12),

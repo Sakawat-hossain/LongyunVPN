@@ -350,6 +350,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Управление глобальными добавленными правилами",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Копировать"),
+    "copyEffectiveConfig": MessageLookupByLibrary.simpleMessage(
+      "Копировать активную конфигурацию",
+    ),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Копирование переменных окружения",
     ),
@@ -515,6 +518,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Ожидаемый статус"),
     "expires": MessageLookupByLibrary.simpleMessage("Истекает"),
     "expiresDate": m15,
+    "exportCrashLog": MessageLookupByLibrary.simpleMessage(
+      "Экспортировать журнал сбоев",
+    ),
+    "exportEffectiveConfig": MessageLookupByLibrary.simpleMessage(
+      "Экспортировать активную конфигурацию",
+    ),
     "exportFile": MessageLookupByLibrary.simpleMessage("Экспорт файла"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Экспорт логов"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Экспорт успешен"),
@@ -777,6 +786,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noActiveSubscriptionYet": MessageLookupByLibrary.simpleMessage(
       "Активная подписка ещё не найдена. Повторите позже.",
+    ),
+    "noCrashLog": MessageLookupByLibrary.simpleMessage(
+      "Журнала сбоев пока нет",
     ),
     "noData": MessageLookupByLibrary.simpleMessage("Нет данных"),
     "noExpiry": MessageLookupByLibrary.simpleMessage("Бессрочно"),
@@ -1220,6 +1232,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запуск в фоновом режиме",
     ),
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
+    "skipThisVersion": MessageLookupByLibrary.simpleMessage(
+      "Пропустить эту версию",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks-порт"),
     "sort": MessageLookupByLibrary.simpleMessage("Сортировка"),
     "source": MessageLookupByLibrary.simpleMessage("Источник"),
@@ -1350,6 +1365,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удалось загрузить. Открываю страницу релизов.",
     ),
     "updateNow": MessageLookupByLibrary.simpleMessage("Обновить сейчас"),
+    "updateVerificationFailed": MessageLookupByLibrary.simpleMessage(
+      "Проверка обновления не удалась. Открываю страницу релизов.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(

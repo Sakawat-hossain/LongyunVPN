@@ -123,7 +123,10 @@ class Request {
       );
       if (response.statusCode != 200) return null;
       final data = response.data as Map<String, dynamic>;
+      // Guard against a malformed/empty tag: calling replaceAll on a null (or
+      // non-String) tag_name used to throw and get swallowed as "no update".
       final remoteVersion = data['tag_name'];
+      if (remoteVersion is! String || remoteVersion.isEmpty) return null;
       final version = globalState.packageInfo.version;
       final hasUpdate =
           utils.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;

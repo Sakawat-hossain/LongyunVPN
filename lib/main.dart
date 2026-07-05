@@ -11,8 +11,11 @@ import 'application.dart';
 import 'common/common.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Capture uncaught framework/async errors to a persistent rolling log before
+  // anything else runs, so field crashes leave a trace even on a hard exit.
+  CrashLog.install();
   try {
-    WidgetsFlutterBinding.ensureInitialized();
     if (system.isDesktop) {
       await RustLib.init();
     }
@@ -26,6 +29,7 @@ Future<void> main() async {
       ),
     );
   } catch (e, s) {
+    await CrashLog.record(e, s, context: 'init');
     return runApp(
       MaterialApp(
         home: InitErrorScreen(error: e, stack: s),

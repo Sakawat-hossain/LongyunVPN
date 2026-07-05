@@ -238,7 +238,6 @@ func updateConfig(params *UpdateParams) {
 }
 
 func applyConfig(params *SetupParams) error {
-	runtime.GC()
 	runLock.Lock()
 	defer runLock.Unlock()
 	var err error
@@ -250,6 +249,12 @@ func applyConfig(params *SetupParams) error {
 	hub.ApplyConfig(currentConfig)
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
+	// Reclaim the replaced config's memory off the hot path. This used to be a
+	// synchronous runtime.GC() before the lock, stalling every connect / proxy
+	// switch / settings change with a stop-the-world GC. Running it in a
+	// goroutine after the new config is live keeps the memory hygiene without
+	// blocking config application.
+	go runtime.GC()
 	return err
 }
 

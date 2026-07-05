@@ -286,6 +286,8 @@ Future<int> _ensureLinuxDependencies(String arch) async {
     ['ninja-build', 'libgtk-3-dev'],
     ['libayatana-appindicator3-dev'],
     ['libkeybinder-3.0-dev'],
+    // libsecret backs flutter_secure_storage on Linux (the Xboard token store).
+    ['libsecret-1-dev'],
     ['locate'],
   ];
   if (arch == 'amd64') {
