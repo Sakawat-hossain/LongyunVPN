@@ -65,8 +65,13 @@ class AuthNotifier extends Notifier<AuthState> {
     }
     xboardApi.setToken(token);
     try {
-      final userInfo = await xboardApi.getUserInfo();
-      final subscribeInfo = await xboardApi.getSubscribe();
+      // Independent panel calls — fetch in parallel to halve cold-start
+      // session-restore latency (the app is blocked on AuthStatus.unknown
+      // until both return).
+      final (userInfo, subscribeInfo) = await (
+        xboardApi.getUserInfo(),
+        xboardApi.getSubscribe(),
+      ).wait;
       state = AuthState(
         status: AuthStatus.loggedIn,
         email: userInfo.email,
@@ -85,6 +90,9 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final token = await xboardApi.login(email, password);
       await preferences.setXboardToken(token);
+      // Sequential here (not parallelized) so a failing panel call surfaces its
+      // own XboardApiException message to the login UI rather than a wrapped
+      // ParallelWaitError.
       final userInfo = await xboardApi.getUserInfo();
       final subscribeInfo = await xboardApi.getSubscribe();
       state = AuthState(
@@ -132,8 +140,10 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> refresh() async {
     if (state.status != AuthStatus.loggedIn) return;
     try {
-      final userInfo = await xboardApi.getUserInfo();
-      final subscribeInfo = await xboardApi.getSubscribe();
+      final (userInfo, subscribeInfo) = await (
+        xboardApi.getUserInfo(),
+        xboardApi.getSubscribe(),
+      ).wait;
       state = state.copyWith(userInfo: userInfo, subscribeInfo: subscribeInfo);
     } catch (_) {}
   }
