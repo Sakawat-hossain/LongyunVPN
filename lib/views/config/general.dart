@@ -339,9 +339,13 @@ class FindProcessItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
+    // On = strict (resolve process only when a rule needs it — the low-overhead
+    // mihomo/Verge default); Off = never resolve. We intentionally no longer
+    // wire the switch to `always` (per-connection resolution), which was the
+    // forced default and a measurable per-connection cost.
     final findProcess = ref.watch(
       patchClashConfigProvider.select(
-        (state) => state.findProcessMode == FindProcessMode.always,
+        (state) => state.findProcessMode != FindProcessMode.off,
       ),
     );
 
@@ -357,7 +361,7 @@ class FindProcessItem extends ConsumerWidget {
               .update(
                 (state) => state.copyWith(
                   findProcessMode: value
-                      ? FindProcessMode.always
+                      ? FindProcessMode.strict
                       : FindProcessMode.off,
                 ),
               );

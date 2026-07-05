@@ -46,7 +46,7 @@ fn start(start_params: StartParams) -> impl Reply {
         }
     }
     stop();
-    let mut process = PROCESS.lock().unwrap();
+    let mut process = PROCESS.lock().unwrap_or_else(|e| e.into_inner());
     match Command::new(&start_params.path)
         .stderr(Stdio::piped())
         .arg(&start_params.arg)
@@ -80,7 +80,7 @@ fn start(start_params: StartParams) -> impl Reply {
 }
 
 fn stop() -> impl Reply {
-    let mut process = PROCESS.lock().unwrap();
+    let mut process = PROCESS.lock().unwrap_or_else(|e| e.into_inner());
     if let Some(mut child) = process.take() {
         let _ = child.kill();
         let _ = child.wait();
@@ -90,7 +90,7 @@ fn stop() -> impl Reply {
 }
 
 fn log_message(message: String) {
-    let mut log_buffer = LOGS.lock().unwrap();
+    let mut log_buffer = LOGS.lock().unwrap_or_else(|e| e.into_inner());
     if log_buffer.len() == 100 {
         log_buffer.pop_front();
     }
@@ -98,7 +98,7 @@ fn log_message(message: String) {
 }
 
 fn get_logs() -> impl Reply {
-    let log_buffer = LOGS.lock().unwrap();
+    let log_buffer = LOGS.lock().unwrap_or_else(|e| e.into_inner());
     let value = log_buffer
         .iter()
         .cloned()

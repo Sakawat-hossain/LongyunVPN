@@ -4,6 +4,7 @@ export 'compute.dart';
 export 'constant.dart';
 export 'context.dart';
 export 'converter.dart';
+export 'crash.dart';
 export 'datetime.dart';
 export 'file.dart';
 export 'fixed.dart';
