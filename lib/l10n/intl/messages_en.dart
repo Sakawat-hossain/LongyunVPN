@@ -339,6 +339,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Control global added rules",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Copy"),
+    "copyEffectiveConfig": MessageLookupByLibrary.simpleMessage(
+      "Copy effective config",
+    ),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Copying environment variables",
     ),
@@ -498,6 +501,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
     "expires": MessageLookupByLibrary.simpleMessage("Expires"),
     "expiresDate": m15,
+    "exportCrashLog": MessageLookupByLibrary.simpleMessage("Export crash log"),
+    "exportEffectiveConfig": MessageLookupByLibrary.simpleMessage(
+      "Export effective config",
+    ),
     "exportFile": MessageLookupByLibrary.simpleMessage("Export file"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Export Success"),
@@ -745,6 +752,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noActiveSubscriptionYet": MessageLookupByLibrary.simpleMessage(
       "No active subscription yet. Try again shortly.",
     ),
+    "noCrashLog": MessageLookupByLibrary.simpleMessage("No crash log yet"),
     "noData": MessageLookupByLibrary.simpleMessage("No data"),
     "noExpiry": MessageLookupByLibrary.simpleMessage("No expiry"),
     "noHotKey": MessageLookupByLibrary.simpleMessage("No HotKey"),
@@ -1163,6 +1171,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start in the background",
     ),
     "size": MessageLookupByLibrary.simpleMessage("Size"),
+    "skipThisVersion": MessageLookupByLibrary.simpleMessage(
+      "Skip this version",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks Port"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
@@ -1277,6 +1288,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Download failed. Opening the releases page instead.",
     ),
     "updateNow": MessageLookupByLibrary.simpleMessage("Update now"),
+    "updateVerificationFailed": MessageLookupByLibrary.simpleMessage(
+      "Update verification failed. Opening the releases page instead.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(

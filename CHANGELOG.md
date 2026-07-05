@@ -1,3 +1,23 @@
+## v1.0.6
+
+- Store account login securely in the system keychain
+
+- Verify update installers before running them
+
+- Publish macOS and Linux builds
+
+- Record crashes to a log for easier diagnosis
+
+- Faster startup and smoother server switching
+
+- "Skip this version" for update prompts (no longer disables all update checks)
+
+- Email format check on the login screen
+
+- More reliable Windows helper service
+
+- Various performance and stability improvements
+
 ## v0.8.93
 
 - Support custom overwrite

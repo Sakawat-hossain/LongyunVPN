@@ -1934,6 +1934,46 @@ class AppLocalizations {
     return Intl.message('Export logs', name: 'exportLogs', desc: '', args: []);
   }
 
+  /// `Copy effective config`
+  String get copyEffectiveConfig {
+    return Intl.message(
+      'Copy effective config',
+      name: 'copyEffectiveConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export effective config`
+  String get exportEffectiveConfig {
+    return Intl.message(
+      'Export effective config',
+      name: 'exportEffectiveConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export crash log`
+  String get exportCrashLog {
+    return Intl.message(
+      'Export crash log',
+      name: 'exportCrashLog',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No crash log yet`
+  String get noCrashLog {
+    return Intl.message(
+      'No crash log yet',
+      name: 'noCrashLog',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Export Success`
   String get exportSuccess {
     return Intl.message(
@@ -3109,6 +3149,16 @@ class AppLocalizations {
     return Intl.message(
       'Don\'t remind again',
       name: 'noLongerRemind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip this version`
+  String get skipThisVersion {
+    return Intl.message(
+      'Skip this version',
+      name: 'skipThisVersion',
       desc: '',
       args: [],
     );
@@ -5499,6 +5549,16 @@ class AppLocalizations {
     return Intl.message(
       'Download failed. Opening the releases page instead.',
       name: 'updateDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update verification failed. Opening the releases page instead.`
+  String get updateVerificationFailed {
+    return Intl.message(
+      'Update verification failed. Opening the releases page instead.',
+      name: 'updateVerificationFailed',
       desc: '',
       args: [],
     );
