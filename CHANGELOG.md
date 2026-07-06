@@ -1,3 +1,7 @@
+## v1.0.7
+
+- Fix Android build: rename an app icon resource that had an invalid filename
+
 ## v1.0.6
 
 - Store account login securely in the system keychain
