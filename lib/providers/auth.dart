@@ -145,7 +145,11 @@ class AuthNotifier extends Notifier<AuthState> {
         xboardApi.getSubscribe(),
       ).wait;
       state = state.copyWith(userInfo: userInfo, subscribeInfo: subscribeInfo);
-    } catch (_) {}
+    } catch (e) {
+      // Non-fatal: keep the existing session/state, just note why a background
+      // refresh didn't land.
+      commonPrint.log('account refresh failed: $e');
+    }
   }
 }
 

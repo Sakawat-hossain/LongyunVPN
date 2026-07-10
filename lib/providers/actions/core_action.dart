@@ -18,6 +18,15 @@ class CoreAction extends _$CoreAction {
     _reconnectAttempts = 0;
   }
 
+  /// Backoff delay for reconnect [attempt] (0-based), or null once the attempt
+  /// cap is reached (i.e. give up). Pure — the backoff *policy*, separated from
+  /// the scheduling mechanism so it can be unit-tested.
+  static Duration? reconnectDelayFor(int attempt) {
+    if (attempt >= _maxReconnectAttempts) return null;
+    final index = attempt.clamp(0, _reconnectDelaysSeconds.length - 1);
+    return Duration(seconds: _reconnectDelaysSeconds[index]);
+  }
+
   /// Schedules an auto-reconnect after an *unexpected* core drop, with capped
   /// exponential backoff. No-op unless the user still intends to be connected
   /// (not stopped, not suspended). Gives up after [_maxReconnectAttempts].
@@ -26,7 +35,8 @@ class CoreAction extends _$CoreAction {
       cancelReconnect();
       return;
     }
-    if (_reconnectAttempts >= _maxReconnectAttempts) {
+    final delay = reconnectDelayFor(_reconnectAttempts);
+    if (delay == null) {
       cancelReconnect();
       globalState.showNotifier(
         currentAppLocalizations.reconnectFailed,
@@ -40,11 +50,6 @@ class CoreAction extends _$CoreAction {
       );
       return;
     }
-    final index = _reconnectAttempts.clamp(
-      0,
-      _reconnectDelaysSeconds.length - 1,
-    );
-    final delay = Duration(seconds: _reconnectDelaysSeconds[index]);
     _reconnectAttempts++;
     // Surface the recovery in the UI (the start button already renders this).
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
@@ -57,7 +62,12 @@ class CoreAction extends _$CoreAction {
       }
       try {
         await restartCore(true);
-      } catch (_) {}
+      } catch (e) {
+        commonPrint.log(
+          'auto-reconnect attempt failed: $e',
+          logLevel: LogLevel.warning,
+        );
+      }
       if (ref.read(coreStatusProvider) == CoreStatus.connected) {
         cancelReconnect();
       } else {

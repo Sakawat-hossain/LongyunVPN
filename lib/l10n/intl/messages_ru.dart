@@ -92,16 +92,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(label) => "${label} должен быть числом от 1024 до 49151";
 
-  static String m32(count) => "Выбрано ${count} элементов";
+  static String m32(name) => "Подключено к ${name}";
 
-  static String m33(error) =>
+  static String m33(count) => "Выбрано ${count} элементов";
+
+  static String m34(error) =>
       "Не удалось загрузить требования регистрации: ${error}";
 
-  static String m34(label) => "${label} должен быть URL";
+  static String m35(label) => "${label} должен быть URL";
 
-  static String m35(used, total) => "Использовано ${used} из ${total}";
+  static String m36(used, total) => "Использовано ${used} из ${total}";
 
-  static String m36(count) =>
+  static String m37(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1000,6 +1002,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Сканируйте QR-код для получения профиля",
     ),
+    "quickConnect": MessageLookupByLibrary.simpleMessage("Быстрое подключение"),
+    "quickConnectNoNode": MessageLookupByLibrary.simpleMessage(
+      "Ни один узел не ответил",
+    ),
+    "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радужные"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage(
@@ -1230,14 +1237,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, выберите подправило",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m33,
     "sendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),
     "signIn": MessageLookupByLibrary.simpleMessage("Вход"),
     "signUp": MessageLookupByLibrary.simpleMessage("Регистрация"),
-    "signupConfigError": m33,
+    "signupConfigError": m34,
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Тихий запуск"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Запуск в фоновом режиме",
@@ -1384,12 +1391,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m34,
+    "urlTip": m35,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
     ),
-    "usedOfTotal": m35,
+    "usedOfTotal": m36,
     "value": MessageLookupByLibrary.simpleMessage("Значение"),
     "verdictCantPassTraffic": MessageLookupByLibrary.simpleMessage(
       "Не пропускает трафик",
@@ -1435,7 +1442,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m36,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

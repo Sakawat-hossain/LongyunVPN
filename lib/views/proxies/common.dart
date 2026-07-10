@@ -85,6 +85,57 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   globalState.container.read(sortNumProvider.notifier).add();
 }
 
+/// Built-in pseudo proxies that Quick Connect must never select as "fastest".
+const _quickConnectExclude = {
+  'DIRECT',
+  'REJECT',
+  'REJECT-DROP',
+  'PASS',
+  'COMPATIBLE',
+  'GLOBAL',
+};
+
+/// The name of the fastest proxy in [proxies] — the lowest *positive* delay per
+/// [delayOf] — skipping [exclude]d names. Null when none has a usable latency.
+/// Pure, so the selection logic can be unit-tested independently of the UI.
+String? fastestProxyName(
+  List<Proxy> proxies,
+  int? Function(String name) delayOf, {
+  Set<String> exclude = const {},
+}) {
+  String? best;
+  var bestDelay = 0;
+  for (final proxy in proxies) {
+    if (exclude.contains(proxy.name)) continue;
+    final delay = delayOf(proxy.name);
+    if (delay == null || delay <= 0) continue;
+    if (best == null || delay < bestDelay) {
+      best = proxy.name;
+      bestDelay = delay;
+    }
+  }
+  return best;
+}
+
+/// Tests every node in [group] and switches the group's selection to the
+/// fastest responder. Returns the selected proxy name, or null if no node
+/// responded. Only meaningful for a manually-selectable group.
+Future<String?> quickSelectFastest(Group group) async {
+  await delayTest(group.all, group.testUrl);
+  final ref = globalState.container;
+  final fastest = fastestProxyName(
+    group.all,
+    (name) => ref.read(delayProvider(proxyName: name, testUrl: group.testUrl)),
+    exclude: _quickConnectExclude,
+  );
+  if (fastest != null) {
+    await ref
+        .read(proxiesActionProvider.notifier)
+        .changeProxy(groupName: group.name, proxyName: fastest);
+  }
+  return fastest;
+}
+
 double getScrollToSelectedOffset({
   required String groupName,
   required List<Proxy> proxies,
