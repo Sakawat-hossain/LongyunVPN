@@ -644,6 +644,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tcp keep alive interval",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Key"),
+    "killSwitch": MessageLookupByLibrary.simpleMessage("Kill switch"),
+    "killSwitchDesc": MessageLookupByLibrary.simpleMessage(
+      "Block the internet if the VPN drops (Always-on VPN)",
+    ),
+    "killSwitchGuide": MessageLookupByLibrary.simpleMessage(
+      "In system settings, turn on \"Always-on VPN\" and \"Block connections without VPN\" for LongyunVPN. This blocks all traffic whenever the VPN is not connected, preventing leaks.",
+    ),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "lastChecked": MessageLookupByLibrary.simpleMessage("Last checked"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("Last Updated"),
@@ -809,6 +816,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "When turned on, only statistics proxy traffic",
     ),
+    "openSettings": MessageLookupByLibrary.simpleMessage("Open settings"),
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),

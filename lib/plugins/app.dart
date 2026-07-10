@@ -63,6 +63,12 @@ class App {
         false;
   }
 
+  /// Opens the system VPN settings (Always-on VPN / "Block connections without
+  /// VPN" — the OS-level kill switch). Android only.
+  Future<bool> openVpnSettings() async {
+    return await methodChannel.invokeMethod<bool>('openVpnSettings') ?? false;
+  }
+
   Future<ImageProvider?> getPackageIcon(String packageName) async {
     final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
       'packageName': packageName,

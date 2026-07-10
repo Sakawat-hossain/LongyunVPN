@@ -671,6 +671,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Интервал поддержания TCP-соединения",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Ключ"),
+    "killSwitch": MessageLookupByLibrary.simpleMessage("Аварийное отключение"),
+    "killSwitchDesc": MessageLookupByLibrary.simpleMessage(
+      "Блокировать интернет при разрыве VPN (постоянный VPN)",
+    ),
+    "killSwitchGuide": MessageLookupByLibrary.simpleMessage(
+      "В системных настройках включите для LongyunVPN «Постоянный VPN» и «Блокировать подключения без VPN». Это заблокирует весь трафик, когда VPN не подключён, предотвращая утечки.",
+    ),
     "language": MessageLookupByLibrary.simpleMessage("Язык"),
     "lastChecked": MessageLookupByLibrary.simpleMessage("Проверено"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("Обновлено"),
@@ -848,6 +855,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "При включении будет учитываться только трафик прокси",
     ),
+    "openSettings": MessageLookupByLibrary.simpleMessage("Открыть настройки"),
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),

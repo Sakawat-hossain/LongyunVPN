@@ -720,5 +720,9 @@
       "done": { "type": "int" },
       "total": { "type": "int" }
     }
-  }
+  },
+  "killSwitch": "キルスイッチ",
+  "killSwitchDesc": "VPN切断時に通信を遮断（常時接続VPN）",
+  "killSwitchGuide": "システム設定で LongyunVPN の「常時接続VPN」と「VPNなしでは接続しない」を有効にしてください。VPN未接続時に全通信を遮断し、漏洩を防ぎます。",
+  "openSettings": "設定を開く"
 }
