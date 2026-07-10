@@ -1,3 +1,7 @@
+## v1.0.9
+
+- Replace the last FlClash-branded icon (Android quick-settings tile) with the LongyunVPN shield
+
 ## v1.0.8
 
 - Replace the old launcher and splash-screen icon with the LongyunVPN logo on Android
