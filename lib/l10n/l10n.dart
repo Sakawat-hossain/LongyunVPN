@@ -5564,6 +5564,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Couldn't reconnect automatically. Tap to try again.`
+  String get reconnectFailed {
+    return Intl.message(
+      'Couldn\'t reconnect automatically. Tap to try again.',
+      name: 'reconnectFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `No Active Subscription`
   String get noActiveSubscription {
     return Intl.message(

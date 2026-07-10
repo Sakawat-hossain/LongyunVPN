@@ -95,6 +95,9 @@ class SetupAction extends _$SetupAction {
         }
       }
     } else {
+      // User-initiated stop: abort any in-flight auto-reconnect so we don't
+      // fight the user's intent.
+      ref.read(coreActionProvider.notifier).cancelReconnect();
       await handleStop();
       coreController.resetTraffic();
       ref.read(trafficsProvider.notifier).clear();

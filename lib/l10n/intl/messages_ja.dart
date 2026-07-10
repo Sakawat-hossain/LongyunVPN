@@ -782,6 +782,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("出口 IP を再確認"),
+    "reconnectFailed": MessageLookupByLibrary.simpleMessage(
+      "自動再接続に失敗しました。タップして再試行します。",
+    ),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redirポート"),
     "redo": MessageLookupByLibrary.simpleMessage("やり直す"),
     "refresh": MessageLookupByLibrary.simpleMessage("更新"),

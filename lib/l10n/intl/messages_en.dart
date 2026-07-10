@@ -948,6 +948,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("Re-check exit IP"),
+    "reconnectFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t reconnect automatically. Tap to try again.",
+    ),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
     "redo": MessageLookupByLibrary.simpleMessage("redo"),
     "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),

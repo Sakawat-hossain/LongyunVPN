@@ -2,8 +2,69 @@ part of '../action.dart';
 
 @Riverpod(keepAlive: true)
 class CoreAction extends _$CoreAction {
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
+  static const _maxReconnectAttempts = 5;
+  static const _reconnectDelaysSeconds = [2, 4, 8, 16, 30];
+
   @override
   void build() {}
+
+  /// Cancels any pending auto-reconnect and resets the backoff. Call on a
+  /// user-initiated stop or after a successful (re)connect.
+  void cancelReconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _reconnectAttempts = 0;
+  }
+
+  /// Schedules an auto-reconnect after an *unexpected* core drop, with capped
+  /// exponential backoff. No-op unless the user still intends to be connected
+  /// (not stopped, not suspended). Gives up after [_maxReconnectAttempts].
+  void scheduleReconnect() {
+    if (!ref.read(isStartProvider) || ref.read(suspendProvider)) {
+      cancelReconnect();
+      return;
+    }
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      cancelReconnect();
+      globalState.showNotifier(
+        currentAppLocalizations.reconnectFailed,
+        actionState: MessageActionState(
+          actionText: currentAppLocalizations.retry,
+          action: () {
+            cancelReconnect();
+            ref.read(setupActionProvider.notifier).updateStatus(true);
+          },
+        ),
+      );
+      return;
+    }
+    final index = _reconnectAttempts.clamp(
+      0,
+      _reconnectDelaysSeconds.length - 1,
+    );
+    final delay = Duration(seconds: _reconnectDelaysSeconds[index]);
+    _reconnectAttempts++;
+    // Surface the recovery in the UI (the start button already renders this).
+    ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(delay, () async {
+      // The user may have stopped or suspended while we were waiting.
+      if (!ref.read(isStartProvider) || ref.read(suspendProvider)) {
+        cancelReconnect();
+        return;
+      }
+      try {
+        await restartCore(true);
+      } catch (_) {}
+      if (ref.read(coreStatusProvider) == CoreStatus.connected) {
+        cancelReconnect();
+      } else {
+        scheduleReconnect();
+      }
+    });
+  }
 
   Future<void> initCore() async {
     final isInit = await coreController.isInit;
