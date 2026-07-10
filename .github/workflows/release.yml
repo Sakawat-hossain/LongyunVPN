@@ -202,12 +202,15 @@ jobs:
   macos:
     name: macos-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    # Apple-Silicon (arm64) only. The Intel runner (macos-13) is being retired by
+    # GitHub and queues indefinitely; arm64 covers all current Macs. To also ship
+    # Intel later, add a universal build (ARCHS="arm64 x86_64") on macos-14 rather
+    # than reintroducing the scarce Intel runner.
     strategy:
       fail-fast: false
       matrix:
         include:
           - { os: macos-14, arch: arm64 }
-          - { os: macos-13, arch: amd64 }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
