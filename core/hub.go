@@ -222,9 +222,6 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 			return false, nil
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(params.Timeout))
-		defer cancel()
-
 		proxies := tunnel.AllProxies()
 		proxy := proxies[params.ProxyName]
 
@@ -246,7 +243,18 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 			testUrl = params.TestUrl
 		}
 		delayData.Url = testUrl
-		delay, err := proxy.URLTest(ctx, testUrl, expectedStatus)
+		// Retry once on failure so a single dropped packet / transient timeout
+		// doesn't mark a healthy node as dead (the common "false red" in the
+		// node list and diagnostics). Each attempt gets its own timeout budget.
+		var delay uint16
+		for attempt := 0; attempt < 2; attempt++ {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(params.Timeout))
+			delay, err = proxy.URLTest(ctx, testUrl, expectedStatus)
+			cancel()
+			if err == nil && delay != 0 {
+				break
+			}
+		}
 		if err != nil || delay == 0 {
 			delayData.Value = -1
 			if err != nil {
