@@ -85,15 +85,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(label) => "${label} 必须在 1024 到 49151 之间";
 
-  static String m32(count) => "已选择 ${count} 项";
+  static String m32(name) => "已连接到 ${name}";
 
-  static String m33(error) => "无法加载注册配置：${error}";
+  static String m33(count) => "已选择 ${count} 项";
 
-  static String m34(label) => "${label}必须为URL";
+  static String m34(error) => "无法加载注册配置：${error}";
 
-  static String m35(used, total) => "已用 ${used} / ${total}";
+  static String m35(label) => "${label}必须为URL";
 
-  static String m36(count) => "${count} 年前";
+  static String m36(used, total) => "已用 ${used} / ${total}";
+
+  static String m37(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -681,6 +683,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
     "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
+    "quickConnect": MessageLookupByLibrary.simpleMessage("快速连接"),
+    "quickConnectNoNode": MessageLookupByLibrary.simpleMessage("没有节点响应"),
+    "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("重新检测出口 IP"),
@@ -831,14 +836,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectSplitStrategy": MessageLookupByLibrary.simpleMessage("请选择分流策略"),
     "selectSubRule": MessageLookupByLibrary.simpleMessage("请选择子规则"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m33,
     "sendCode": MessageLookupByLibrary.simpleMessage("发送验证码"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
     "signIn": MessageLookupByLibrary.simpleMessage("登录"),
     "signUp": MessageLookupByLibrary.simpleMessage("注册"),
-    "signupConfigError": m33,
+    "signupConfigError": m34,
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
@@ -935,10 +940,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m34,
+    "urlTip": m35,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
-    "usedOfTotal": m35,
+    "usedOfTotal": m36,
     "value": MessageLookupByLibrary.simpleMessage("值"),
     "verdictCantPassTraffic": MessageLookupByLibrary.simpleMessage("无法传输流量"),
     "verdictDnsFailed": MessageLookupByLibrary.simpleMessage("域名解析失败"),
@@ -966,7 +971,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m36,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

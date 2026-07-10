@@ -5768,6 +5768,36 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Quick connect`
+  String get quickConnect {
+    return Intl.message(
+      'Quick connect',
+      name: 'quickConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connected to {name}`
+  String quickConnectedTo(Object name) {
+    return Intl.message(
+      'Connected to $name',
+      name: 'quickConnectedTo',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `No node responded`
+  String get quickConnectNoNode {
+    return Intl.message(
+      'No node responded',
+      name: 'quickConnectNoNode',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -3,12 +3,14 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/models/state.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'common.dart';
 import 'node_status.dart';
 import 'setting.dart';
 import 'tab.dart';
@@ -49,6 +51,11 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         popup: CommonPopupMenu(
           items: [
             PopupMenuItemData(
+              icon: Icons.bolt,
+              label: appLocalizations.quickConnect,
+              onPressed: () => _quickConnect(context),
+            ),
+            PopupMenuItemData(
               icon: Icons.tune,
               label: appLocalizations.settings,
               onPressed: () {
@@ -81,6 +88,21 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         ),
       ),
     ];
+  }
+
+  Future<void> _quickConnect(BuildContext context) async {
+    final l = context.appLocalizations;
+    final group = getGroups().getGroup(getCurrentGroupName() ?? '');
+    if (group == null) return;
+    final selected = await globalState.loadingRun<String?>(
+      () => quickSelectFastest(group),
+      title: l.quickConnect,
+      tag: null,
+    );
+    if (!context.mounted) return;
+    globalState.showNotifier(
+      selected != null ? l.quickConnectedTo(selected) : l.quickConnectNoNode,
+    );
   }
 
   Widget? _buildFAB() {

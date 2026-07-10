@@ -85,15 +85,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(label) => "${label} は 1024 から 49151 の間でなければなりません";
 
-  static String m32(count) => "${count} 項目が選択されています";
+  static String m32(name) => "${name} に接続しました";
 
-  static String m33(error) => "登録設定を読み込めませんでした：${error}";
+  static String m33(count) => "${count} 項目が選択されています";
 
-  static String m34(label) => "${label}はURLである必要があります";
+  static String m34(error) => "登録設定を読み込めませんでした：${error}";
 
-  static String m35(used, total) => "${total} 中 ${used} 使用";
+  static String m35(label) => "${label}はURLである必要があります";
 
-  static String m36(count) => "${count}年前";
+  static String m36(used, total) => "${total} 中 ${used} 使用";
+
+  static String m37(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -787,6 +789,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("純黒モード"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QRコード"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QRコードをスキャンしてプロファイルを取得"),
+    "quickConnect": MessageLookupByLibrary.simpleMessage("クイック接続"),
+    "quickConnectNoNode": MessageLookupByLibrary.simpleMessage("応答するノードがありません"),
+    "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("出口 IP を再確認"),
@@ -973,14 +978,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selectSubRule": MessageLookupByLibrary.simpleMessage("サブルールを選択してください"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
-    "selectedCountTitle": m32,
+    "selectedCountTitle": m33,
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "shrink": MessageLookupByLibrary.simpleMessage("縮小"),
     "signIn": MessageLookupByLibrary.simpleMessage("サインイン"),
     "signUp": MessageLookupByLibrary.simpleMessage("登録"),
-    "signupConfigError": m33,
+    "signupConfigError": m34,
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
@@ -1085,10 +1090,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m34,
+    "urlTip": m35,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
-    "usedOfTotal": m35,
+    "usedOfTotal": m36,
     "value": MessageLookupByLibrary.simpleMessage("値"),
     "verdictCantPassTraffic": MessageLookupByLibrary.simpleMessage("通信できません"),
     "verdictDnsFailed": MessageLookupByLibrary.simpleMessage("名前解決に失敗"),
@@ -1118,7 +1123,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m36,
+    "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }
