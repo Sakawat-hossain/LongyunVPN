@@ -1,0 +1,23 @@
+# Dependabot opens reviewable PRs for out-of-date dependencies so upstream fixes
+# (including security patches) don't silently rot. Nothing is auto-merged — the
+# maintainer reviews and tests each PR.
+#
+# Note: the git submodules (core/Clash.Meta = mihomo, plugins/*) are pinned and
+# tightly coupled to the CGO/Dart wrappers, so they are intentionally NOT tracked
+# here and must be bumped manually with a full build + test.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
