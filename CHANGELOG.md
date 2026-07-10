@@ -1,3 +1,8 @@
+## v1.1.1
+
+- More reliable delay tests (retry once so a dropped packet doesn't mark a good server dead)
+- Lower battery use: pause traffic polling while the app is in the background
+
 ## v1.1.0
 
 - Auto-reconnect if the VPN drops unexpectedly (crash or core death)
