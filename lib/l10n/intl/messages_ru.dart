@@ -997,6 +997,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "recheckExitIp": MessageLookupByLibrary.simpleMessage(
       "Проверить выходной IP снова",
     ),
+    "reconnectFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось переподключиться автоматически. Нажмите, чтобы повторить.",
+    ),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir-порт"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "refresh": MessageLookupByLibrary.simpleMessage("Обновить"),

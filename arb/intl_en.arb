@@ -693,6 +693,7 @@
   "installerLaunched": "Installer launched — follow the prompts to finish updating.",
   "updateDownloadFailed": "Download failed. Opening the releases page instead.",
   "updateVerificationFailed": "Update verification failed. Opening the releases page instead.",
+  "reconnectFailed": "Couldn't reconnect automatically. Tap to try again.",
   "noActiveSubscription": "No Active Subscription",
   "noSubscriptionServersMessage": "You don't have an active VPN package.\nPurchase a plan to access VPN servers.",
   "buyPremium": "Buy Premium",

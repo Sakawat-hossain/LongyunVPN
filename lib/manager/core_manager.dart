@@ -107,6 +107,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       context.showNotifier(message);
     }
     await coreController.shutdown(false);
+    // Unexpected drop (crash / core-process death): auto-reconnect with backoff
+    // if the user still intends to be connected.
+    ref.read(coreActionProvider.notifier).scheduleReconnect();
     super.onCrash(message);
   }
 }

@@ -676,6 +676,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("重新检测出口 IP"),
+    "reconnectFailed": MessageLookupByLibrary.simpleMessage("自动重连失败，点击重试。"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir端口"),
     "redo": MessageLookupByLibrary.simpleMessage("重做"),
     "refresh": MessageLookupByLibrary.simpleMessage("刷新"),

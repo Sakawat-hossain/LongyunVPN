@@ -693,6 +693,7 @@
   "installerLaunched": "インストーラーを起動しました — 画面の指示に従って更新を完了してください。",
   "updateDownloadFailed": "ダウンロードに失敗しました。リリースページを開きます。",
   "updateVerificationFailed": "更新の検証に失敗しました。リリースページを開きます。",
+  "reconnectFailed": "自動再接続に失敗しました。タップして再試行します。",
   "noActiveSubscription": "有効なサブスクリプションがありません",
   "noSubscriptionServersMessage": "有効な VPN プランがありません。\nプランを購入して VPN サーバーにアクセスしてください。",
   "buyPremium": "プレミアムを購入",
