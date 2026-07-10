@@ -1,3 +1,7 @@
+## v1.0.8
+
+- Replace the old launcher and splash-screen icon with the LongyunVPN logo on Android
+
 ## v1.0.7
 
 - Fix Android build: rename an app icon resource that had an invalid filename
