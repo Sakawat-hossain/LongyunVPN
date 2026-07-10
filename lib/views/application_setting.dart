@@ -1,5 +1,7 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -268,6 +270,34 @@ class AutoCheckUpdateItem extends ConsumerWidget {
   }
 }
 
+/// Android kill switch. Apps can't toggle Android's "Block connections without
+/// VPN" themselves, so this explains it and opens the system VPN settings where
+/// the user enables Always-on VPN + lockdown.
+class KillSwitchItem extends StatelessWidget {
+  const KillSwitchItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    return ListItem(
+      leading: const Icon(Icons.gpp_good_outlined),
+      title: Text(l.killSwitch),
+      subtitle: Text(l.killSwitchDesc),
+      trailing: const Icon(Icons.open_in_new, size: 18),
+      onTap: () async {
+        final ok = await globalState.showMessage(
+          title: l.killSwitch,
+          message: TextSpan(text: l.killSwitchGuide),
+          confirmText: l.openSettings,
+        );
+        if (ok == true) {
+          await app?.openVpnSettings();
+        }
+      },
+    );
+  }
+}
+
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
@@ -283,6 +313,7 @@ class ApplicationSettingView extends StatelessWidget {
       const CloseConnectionsItem(),
       const UsageItem(),
       if (system.isAndroid) const CrashlyticsItem(),
+      if (system.isAndroid) const KillSwitchItem(),
       const AutoCheckUpdateItem(),
     ];
     return BaseScaffold(

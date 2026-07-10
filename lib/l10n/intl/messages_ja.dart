@@ -522,6 +522,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "TCPキープアライブ間隔",
     ),
     "key": MessageLookupByLibrary.simpleMessage("キー"),
+    "killSwitch": MessageLookupByLibrary.simpleMessage("キルスイッチ"),
+    "killSwitchDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN切断時に通信を遮断（常時接続VPN）",
+    ),
+    "killSwitchGuide": MessageLookupByLibrary.simpleMessage(
+      "システム設定で LongyunVPN の「常時接続VPN」と「VPNなしでは接続しない」を有効にしてください。VPN未接続時に全通信を遮断し、漏洩を防ぎます。",
+    ),
     "language": MessageLookupByLibrary.simpleMessage("言語"),
     "lastChecked": MessageLookupByLibrary.simpleMessage("最終チェック"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("最終更新"),
@@ -661,6 +668,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとプロキシトラフィックのみ統計",
     ),
+    "openSettings": MessageLookupByLibrary.simpleMessage("設定を開く"),
     "optional": MessageLookupByLibrary.simpleMessage("オプション"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),
     "other": MessageLookupByLibrary.simpleMessage("その他"),

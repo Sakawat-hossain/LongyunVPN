@@ -720,5 +720,9 @@
       "done": { "type": "int" },
       "total": { "type": "int" }
     }
-  }
+  },
+  "killSwitch": "Kill switch",
+  "killSwitchDesc": "Block the internet if the VPN drops (Always-on VPN)",
+  "killSwitchGuide": "In system settings, turn on \"Always-on VPN\" and \"Block connections without VPN\" for LongyunVPN. This blocks all traffic whenever the VPN is not connected, preventing leaks.",
+  "openSettings": "Open settings"
 }

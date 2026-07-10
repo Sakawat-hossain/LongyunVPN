@@ -5733,6 +5733,41 @@ class AppLocalizations {
       args: [done, total],
     );
   }
+
+  /// `Kill switch`
+  String get killSwitch {
+    return Intl.message('Kill switch', name: 'killSwitch', desc: '', args: []);
+  }
+
+  /// `Block the internet if the VPN drops (Always-on VPN)`
+  String get killSwitchDesc {
+    return Intl.message(
+      'Block the internet if the VPN drops (Always-on VPN)',
+      name: 'killSwitchDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In system settings, turn on "Always-on VPN" and "Block connections without VPN" for LongyunVPN. This blocks all traffic whenever the VPN is not connected, preventing leaks.`
+  String get killSwitchGuide {
+    return Intl.message(
+      'In system settings, turn on "Always-on VPN" and "Block connections without VPN" for LongyunVPN. This blocks all traffic whenever the VPN is not connected, preventing leaks.',
+      name: 'killSwitchGuide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open settings`
+  String get openSettings {
+    return Intl.message(
+      'Open settings',
+      name: 'openSettings',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

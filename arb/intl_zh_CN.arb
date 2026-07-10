@@ -720,5 +720,9 @@
       "done": { "type": "int" },
       "total": { "type": "int" }
     }
-  }
+  },
+  "killSwitch": "断网保护",
+  "killSwitchDesc": "VPN 断开时阻断联网（始终开启的 VPN）",
+  "killSwitchGuide": "在系统设置中为 LongyunVPN 开启“始终开启 VPN”和“禁止在无 VPN 时联网”。这样在 VPN 未连接时会阻断所有流量，防止泄漏。",
+  "openSettings": "打开设置"
 }

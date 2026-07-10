@@ -460,6 +460,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "justNow": MessageLookupByLibrary.simpleMessage("刚刚"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage("TCP保持活动间隔"),
     "key": MessageLookupByLibrary.simpleMessage("键"),
+    "killSwitch": MessageLookupByLibrary.simpleMessage("断网保护"),
+    "killSwitchDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN 断开时阻断联网（始终开启的 VPN）",
+    ),
+    "killSwitchGuide": MessageLookupByLibrary.simpleMessage(
+      "在系统设置中为 LongyunVPN 开启“始终开启 VPN”和“禁止在无 VPN 时联网”。这样在 VPN 未连接时会阻断所有流量，防止泄漏。",
+    ),
     "language": MessageLookupByLibrary.simpleMessage("语言"),
     "lastChecked": MessageLookupByLibrary.simpleMessage("最近检测"),
     "lastUpdated": MessageLookupByLibrary.simpleMessage("最近更新"),
@@ -577,6 +584,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "开启后，将只统计代理流量",
     ),
+    "openSettings": MessageLookupByLibrary.simpleMessage("打开设置"),
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),

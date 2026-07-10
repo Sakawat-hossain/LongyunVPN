@@ -172,6 +172,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(openAppSettings())
             }
 
+            "openVpnSettings" -> {
+                result.success(openVpnSettings())
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -235,6 +239,18 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 data = "package:${GlobalState.application.packageName}".toUri()
             }
             activityRef?.get()?.startActivity(intent)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    // Opens the system VPN settings, where the user can enable Always-on VPN and
+    // "Block connections without VPN" (Android's built-in kill switch — apps
+    // cannot toggle it programmatically).
+    private fun openVpnSettings(): Boolean {
+        return try {
+            activityRef?.get()?.startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
             true
         } catch (_: Exception) {
             false
