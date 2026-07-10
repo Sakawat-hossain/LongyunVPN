@@ -84,6 +84,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (state == AppLifecycleState.resumed) {
       permissions.check();
       render?.resume();
+      // Resume the per-second traffic/runtime polling paused while backgrounded.
+      ref.read(setupActionProvider.notifier).resumePolling();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final ref = globalState.container;
         ref.read(setupActionProvider.notifier).tryCheckIp();
@@ -91,6 +93,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           ref.read(coreActionProvider.notifier).tryStartCore();
         }
       });
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      // Backgrounded: stop polling for stats nobody can see (saves battery).
+      ref.read(setupActionProvider.notifier).pausePolling();
     }
   }
 

@@ -34,10 +34,32 @@ class SetupAction extends _$SetupAction {
     if (!ref.read(suspendProvider)) {
       await coreController.startListener();
     }
+    _startPollingTimer();
+  }
+
+  void _startPollingTimer() {
+    _updateTimer?.cancel();
     _updateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       ref.read(commonActionProvider.notifier).updateRunTime();
       ref.read(commonActionProvider.notifier).updateTraffic();
     });
+  }
+
+  /// Stops the 1-second traffic/runtime polling while the app is backgrounded —
+  /// that data only feeds the visible UI. The tunnel keeps running natively and
+  /// runtime is recomputed from [startTime] on resume, so nothing is lost.
+  void pausePolling() {
+    _updateTimer?.cancel();
+    _updateTimer = null;
+  }
+
+  /// Resumes polling when the app returns to the foreground. No-op when not
+  /// running or already polling.
+  void resumePolling() {
+    if (!isStart || _updateTimer != null) return;
+    ref.read(commonActionProvider.notifier).updateRunTime();
+    ref.read(commonActionProvider.notifier).updateTraffic();
+    _startPollingTimer();
   }
 
   Future _updateStartTime() async {
