@@ -20,8 +20,12 @@ LongyunVPN 接入龙云订阅服务，提供简洁、本地化的界面来管理
 
 ## 平台
 
-- **Windows** —— 安装包（`LongyunVPN-Setup.exe`），支持应用内自动更新。
-- **Android** —— APK（`LongyunVPN.apk`，应用 ID `com.longyunvpn.app`）。
+- **Windows** —— `amd64` / `arm64` 安装包（`.exe`）与便携版 `.zip`，支持应用内自动更新。
+- **Android** —— 分架构 APK（`arm64-v8a`、`armeabi-v7a`、`x86_64`）及 Play `.aab`，应用 ID `com.longyunvpn.app`。
+- **macOS** —— `arm64` / `amd64` `.dmg`。
+- **Linux** —— `amd64` 的 `.deb`、`.AppImage`、`.rpm`（以及 `arm64` 的 `.deb`）。
+
+移动端通过应用商店更新，桌面端在应用内检查 GitHub Releases。（暂不支持 iOS。）
 
 ## 发布新版本
 
@@ -34,7 +38,7 @@ git push origin v1.0.2
 ```
 
 推送 `v*` 标签会触发 [`.github/workflows/release.yml`](.github/workflows/release.yml)，
-自动构建 Windows 安装包与 Android APK，并发布到 GitHub Release。
+并行构建全部平台（Windows、Android、macOS、Linux），并将所有产物发布到同一个 GitHub Release。
 
 ## 协议与致谢
 
