@@ -19,8 +19,12 @@ Author: **Sakawat Hossain** · Licensed under **GNU GPL-3.0** (see [LICENSE](LIC
 
 ## Platforms
 
-- **Windows** — installer (`LongyunVPN-Setup.exe`) with in-app auto-update.
-- **Android** — APK (`LongyunVPN.apk`, application id `com.longyunvpn.app`).
+- **Windows** — `amd64` / `arm64` installer (`.exe`) and portable `.zip`, with in-app auto-update.
+- **Android** — per-ABI APKs (`arm64-v8a`, `armeabi-v7a`, `x86_64`) and a Play `.aab`; application id `com.longyunvpn.app`.
+- **macOS** — `arm64` / `amd64` `.dmg`.
+- **Linux** — `amd64` `.deb`, `.AppImage`, and `.rpm` (plus `arm64` `.deb`).
+
+Mobile builds update through the app store; desktop builds check GitHub Releases in-app. (iOS is not currently supported.)
 
 ## Releasing a new version
 
@@ -37,22 +41,25 @@ The release pipeline is fully automated. To publish an update:
    ```
 
 Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml),
-which builds the Windows installer and the Android APK and publishes a GitHub
-Release with both attached. Use semantic versioning: `v1.0.2` for fixes,
-`v1.1.0` for features.
+which builds all platforms (Windows, Android, macOS, Linux) in parallel and
+publishes a single GitHub Release with every artifact attached. Use semantic
+versioning: `v1.0.2` for fixes, `v1.1.0` for features.
 
 ## Building locally
 
 Requirements: Flutter 3.41.9 (stable) and Go 1.24+. For Windows also install the
 Desktop C++ workload (Visual Studio) and Inno Setup; for Android install the
-Android SDK and NDK r28c.
+Android SDK and NDK r28c; for macOS `npm i -g appdmg`; for Linux the apt build
+deps (`setup.dart` installs them automatically).
 
 ```bash
 git clone --recurse-submodules https://github.com/Sakawat-hossain/LongyunVPN.git
 cd LongyunVPN
 flutter pub get
-dart setup.dart windows --env stable -v          # Windows installer
+dart setup.dart windows --env stable -v                # Windows installer + zip
 dart setup.dart android --arch arm64 --env stable -v   # Android APK
+dart setup.dart macos --env stable -v                  # macOS .dmg
+dart setup.dart linux --env stable -v                  # Linux .deb/.AppImage/.rpm
 ```
 
 Build artifacts are written to the `dist/` directory.
