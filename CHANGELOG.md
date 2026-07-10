@@ -1,3 +1,9 @@
+## v1.1.0
+
+- Auto-reconnect if the VPN drops unexpectedly (crash or core death)
+- Kill switch: one-tap access to Android's Always-on VPN / block-without-VPN
+- Corrected supported-platform info (Windows, Android, macOS, Linux)
+
 ## v1.0.9
 
 - Replace the last FlClash-branded icon (Android quick-settings tile) with the LongyunVPN shield
