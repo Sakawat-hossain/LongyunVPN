@@ -1,3 +1,9 @@
+## v1.1.2
+
+- Quick Connect: one tap tests the current group and switches to the fastest server
+- macOS builds now publish reliably (Apple Silicon)
+- Better internal logging for auto-reconnect and account refresh, plus added test coverage
+
 ## v1.1.1
 
 - More reliable delay tests (retry once so a dropped packet doesn't mark a good server dead)
