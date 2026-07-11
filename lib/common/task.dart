@@ -128,7 +128,19 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['socks-port'] = realPatchConfig.socksPort;
   rawConfig['redir-port'] = realPatchConfig.redirPort;
   rawConfig['tproxy-port'] = realPatchConfig.tproxyPort;
-  rawConfig['find-process-mode'] = realPatchConfig.findProcessMode.name;
+  // 'always' resolves the owning process for *every* connection. On desktop
+  // that is pure overhead — the per-connection process display it enables is
+  // Android-only — and on Windows it means a TCP-table scan per connection,
+  // which drags throughput under load. Cap it at 'strict' on desktop (matching
+  // Clash Verge Rev); process rules still work. This also corrects installs
+  // that persisted the old 'always' default before it was changed to 'strict'.
+  final isDesktop =
+      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+  final findProcessMode =
+      isDesktop && realPatchConfig.findProcessMode == FindProcessMode.always
+      ? FindProcessMode.strict
+      : realPatchConfig.findProcessMode;
+  rawConfig['find-process-mode'] = findProcessMode.name;
   rawConfig['allow-lan'] = realPatchConfig.allowLan;
   rawConfig['mode'] = realPatchConfig.mode.name;
   if (rawConfig['tun'] == null) {
