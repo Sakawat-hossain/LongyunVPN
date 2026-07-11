@@ -1,3 +1,7 @@
+## v1.1.3
+
+- Fix Android app icon: regenerate the launcher/adaptive icon from the LongyunVPN shield (some devices were showing a default icon)
+
 ## v1.1.2
 
 - Quick Connect: one tap tests the current group and switches to the fastest server
