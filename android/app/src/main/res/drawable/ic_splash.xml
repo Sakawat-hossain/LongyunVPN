@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ splash-screen icon. The launcher masks/scales the splash icon, so
+  the shield is inset (padded) to sit fully inside the splash area instead of
+  being clipped at the edges. Reuses the shield launcher icon.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@mipmap/ic_launcher"
+    android:inset="22%" />

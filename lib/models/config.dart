@@ -44,16 +44,25 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkDetection,
   DashboardWidget.trafficUsage,
   DashboardWidget.intranetIp,
+  DashboardWidget.subscription,
 ];
 
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
   List<dynamic>? dashboardWidgets,
 ) {
   try {
-    return dashboardWidgets
+    final list =
+        dashboardWidgets
             ?.map((e) => $enumDecode(_$DashboardWidgetEnumMap, e))
             .toList() ??
-        defaultDashboardWidgets;
+        List<DashboardWidget>.of(defaultDashboardWidgets);
+    // The subscription/Premium card carries plan status, so it's always shown,
+    // but it's now a reorderable dashboard widget. Ensure it's present for
+    // installs whose layout was saved before this widget existed.
+    if (!list.contains(DashboardWidget.subscription)) {
+      list.add(DashboardWidget.subscription);
+    }
+    return list;
   } catch (_) {
     return defaultDashboardWidgets;
   }

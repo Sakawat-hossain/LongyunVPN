@@ -1,3 +1,9 @@
+## v1.1.4
+
+- Premium card is now a draggable dashboard widget — reorder it like the others
+- Fix the splash-screen icon (it was clipped)
+- Faster on desktop: no longer resolves the owning process for every connection
+
 ## v1.1.3
 
 - Fix Android app icon: regenerate the launcher/adaptive icon from the LongyunVPN shield (some devices were showing a default icon)

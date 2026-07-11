@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/common/system.dart';
+import 'package:fl_clash/views/dashboard/subscription_status.dart';
 import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -317,7 +318,8 @@ enum DashboardWidget {
     platforms: desktopPlatforms,
   ),
   intranetIp(GridItem(crossAxisCellCount: 4, child: IntranetIP())),
-  memoryInfo(GridItem(crossAxisCellCount: 4, child: MemoryInfo()));
+  memoryInfo(GridItem(crossAxisCellCount: 4, child: MemoryInfo())),
+  subscription(GridItem(crossAxisCellCount: 8, child: SubscriptionStatusCard()));
 
   final GridItem widget;
   final List<SupportPlatform> platforms;
