@@ -8,8 +8,10 @@ import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.TRANSPORT_SATELLITE
 import android.net.NetworkCapabilities.TRANSPORT_USB
 import android.net.NetworkRequest
+import android.net.VpnService
 import android.os.Build
 import androidx.core.content.getSystemService
+import com.follow.clash.common.GlobalState
 import com.follow.clash.core.Core
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -29,6 +31,7 @@ class NetworkObserveModule(private val service: Service) : Module() {
         service.getSystemService<ConnectivityManager>()
     }
     private var preDnsList = listOf<String>()
+    private var preUnderlyingNetwork: Network? = null
 
     private val request = NetworkRequest.Builder().apply {
         addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
@@ -49,21 +52,18 @@ class NetworkObserveModule(private val service: Service) : Module() {
         override fun onLosing(network: Network, maxMsToLive: Int) {
             networkInfos[network]?.losingMs = System.currentTimeMillis() + maxMsToLive
             onUpdateNetwork()
-            setUnderlyingNetworks(network)
             super.onLosing(network, maxMsToLive)
         }
 
         override fun onLost(network: Network) {
             networkInfos.remove(network)
             onUpdateNetwork()
-            setUnderlyingNetworks(network)
             super.onLost(network)
         }
 
         override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
             networkInfos[network]?.dnsList = linkProperties.dnsServers
             onUpdateNetwork()
-            setUnderlyingNetworks(network)
             super.onLinkPropertiesChanged(network, linkProperties)
         }
     }
@@ -96,6 +96,10 @@ class NetworkObserveModule(private val service: Service) : Module() {
     }
 
     fun onUpdateNetwork() {
+        // Keep the VPN bound to the best available physical network on every
+        // change, so Wi-Fi <-> mobile handoffs migrate the tunnel instead of
+        // stalling until reconnect. Run this before the DNS early-return below.
+        updateUnderlyingNetworks()
         val dnsList = (networkInfos.asSequence().minByOrNull { networkToInt(it) }?.value?.dnsList
             ?: emptyList()).map { x -> x.asSocketAddressText(53) }
         if (dnsList == preDnsList) {
@@ -105,10 +109,35 @@ class NetworkObserveModule(private val service: Service) : Module() {
         Core.updateDNS(dnsList.toSet().joinToString(","))
     }
 
-    fun setUnderlyingNetworks(network: Network) {
-//        if (service is VpnService && Build.VERSION.SDK_INT in 22..28) {
-//            service.setUnderlyingNetworks(arrayOf(network))
-//        }
+    // Tell the system which underlying (non-VPN) network currently carries the
+    // tunnel's traffic. VpnService.setUnderlyingNetworks() is API 22+, so it is
+    // always available at our minSdk 23 with no guard needed. Passing null means
+    // "follow the system default connection" and is our fallback when no network
+    // is tracked yet (e.g. right after install, or momentarily mid-handoff).
+    // Uses the same networkToInt() ranking as DNS selection so both stay in sync.
+    private fun updateUnderlyingNetworks() {
+        val vpn = service as? VpnService ?: return
+        val best = networkInfos.entries.minByOrNull { networkToInt(it) }?.key
+        // onLinkPropertiesChanged fires frequently; only touch the system (and
+        // log) when the selected underlying network actually changes. Network
+        // equality is by netId, so this reliably detects a real handoff.
+        if (best == preUnderlyingNetwork) {
+            return
+        }
+        preUnderlyingNetwork = best
+        vpn.setUnderlyingNetworks(best?.let { arrayOf(it) })
+        GlobalState.log("Underlying network -> ${transportName(best)}")
+    }
+
+    private fun transportName(network: Network?): String {
+        if (network == null) return "system default"
+        val caps = connectivity?.getNetworkCapabilities(network) ?: return "unknown"
+        return when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WIFI"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "CELLULAR"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ETHERNET"
+            else -> "OTHER"
+        }
     }
 
     override fun onUninstall() {
