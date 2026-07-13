@@ -1,3 +1,11 @@
+## v1.1.5
+
+- Wi-Fi ⇄ mobile handoff: the VPN stays connected when your network switches, instead of stalling until it reconnects
+- Reconnect prompt after a restart: if auto-connect is on, one tap reconnects LongyunVPN (for true start-on-boot, enable Android's Always-on VPN)
+- Replaced the last FlClash mark — the status-bar/notification and Quick Settings icons are now the LongyunVPN shield
+- Consistent LongyunVPN tray icons across Windows, macOS, and Linux
+- Built with the latest Go toolchain for up-to-date security fixes
+
 ## v1.1.4
 
 - Premium card is now a draggable dashboard widget — reorder it like the others
