@@ -45,7 +45,7 @@ dependencies:
   ffi: ^2.1.4
 
   webdav_client: ^1.2.2
-  dio: ^5.8.0+1
+  dio: ^5.10.0
   win32: ^5.5.1
   re_editor:
     git:
