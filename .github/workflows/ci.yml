@@ -21,8 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # analyze/test run on the Dart VM and mock the native core, so the Go
-      # submodule is not needed here — keep the checkout fast.
+      # `tray_manager` is a pub path dependency that lives in a git submodule
+      # (plugins/tray_manager), so `flutter pub get` fails without it. Init just
+      # that submodule — the large Go core submodule isn't needed for analyze/test,
+      # so leave it out to keep the job fast.
+      - name: Fetch tray_manager submodule
+        run: git submodule update --init plugins/tray_manager
+
       - name: Setup Flutter (stable)
         uses: subosito/flutter-action@v2
         with:
