@@ -5,9 +5,9 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 Longyun Core (Go) build harness (FFI plugin).
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/Sakawat-hossain/LongyunVPN'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'LongyunVPN' => 'email@example.com' }
+  s.author           = { 'Sakawat Hossain' => 'sakawathossain2000@gmail.com' }
   s.module_name      = 'setup'
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
