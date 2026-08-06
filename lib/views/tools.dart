@@ -20,6 +20,8 @@ import 'package:path/path.dart' show dirname, join;
 import 'config/advanced.dart';
 import 'developer.dart';
 import 'diagnostics.dart';
+import 'leak_test.dart';
+import 'split_tunnel.dart';
 import 'theme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
@@ -77,7 +79,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       const _ConfigItem(),
       const _AdvancedConfigItem(),
       const _SettingItem(),
+      if (system.isDesktop) const _SplitTunnelItem(),
       const _DiagnosticsItem(),
+      const _LeakTestItem(),
     ];
     return [
       ListHeader(
@@ -313,6 +317,34 @@ class _DiagnosticsItem extends StatelessWidget {
       title: Text(context.appLocalizations.diagnostics),
       subtitle: Text(context.appLocalizations.diagnosticsDesc),
       delegate: const OpenDelegate(widget: DiagnosticsView()),
+    );
+  }
+}
+
+class _SplitTunnelItem extends StatelessWidget {
+  const _SplitTunnelItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListItem.open(
+      leading: const Icon(Icons.call_split),
+      title: Text(splitTunnelTitle(context)),
+      subtitle: Text(splitTunnelMenuDesc(context)),
+      delegate: const OpenDelegate(widget: SplitTunnelView()),
+    );
+  }
+}
+
+class _LeakTestItem extends StatelessWidget {
+  const _LeakTestItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListItem.open(
+      leading: const Icon(Icons.security),
+      title: Text(leakTestTitle(context)),
+      subtitle: Text(leakTestMenuDesc(context)),
+      delegate: const OpenDelegate(widget: LeakTestView()),
     );
   }
 }

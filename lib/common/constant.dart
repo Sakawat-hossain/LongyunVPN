@@ -12,13 +12,20 @@ import 'package:flutter/material.dart';
 const appName = 'LongyunVPN';
 const xboardBaseUrl = 'https://admin.jsssbd.com/api/v1';
 const xboardPanelUrl = 'https://admin.jsssbd.com/';
-const appHelperService = 'FlClashHelperService';
+const appHelperService = 'LongyunVPNHelperService';
+// The pre-rebrand Windows service name. Kept only so upgrades can stop and delete
+// the old service (see Windows.registerService) — do not register anything under
+// this name.
+const legacyHelperService = 'FlClashHelperService';
 const coreName = 'clash.meta';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-const packageName = 'com.follow.clash';
-final unixSocketPath = '/tmp/FlClashSocket_${Random().nextInt(10000)}.sock';
-final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${Random().nextInt(10000)}';
+// MethodChannel namespace shared with the Android side (Kotlin
+// `Components.PACKAGE_NAME`). Must stay equal to it — it names the `…/app` and
+// `…/tile` channels and the ComponentName class prefix for the quick-settings tile.
+const packageName = 'com.longyunvpn.app';
+final unixSocketPath = '/tmp/LongyunSocket_${Random().nextInt(10000)}.sock';
+final windowsPipeName = '\\\\.\\pipe\\LongyunCore_${Random().nextInt(10000)}';
 const helperPort = 47890;
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
@@ -113,9 +120,9 @@ double getWidgetHeight(num lines) {
 
 const maxLength = 1000;
 
-const mainIsolate = 'FlClashMainIsolate';
+const mainIsolate = 'LongyunMainIsolate';
 
-const serviceIsolate = 'FlClashServiceIsolate';
+const serviceIsolate = 'LongyunServiceIsolate';
 
 const defaultPrimaryColors = [
   0xFF795548,

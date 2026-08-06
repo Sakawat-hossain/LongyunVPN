@@ -23,7 +23,7 @@ val isRelease =
 
 
 android {
-    namespace = "com.follow.clash"
+    namespace = "com.longyunvpn.app"
     compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndkVersion.get()
 
@@ -35,9 +35,9 @@ android {
     }
 
     defaultConfig {
-        // Published application id (what the store / device sees). The code
-        // namespace stays "com.follow.clash" (the Kotlin package), which is an
-        // internal compile-time detail and does not need to match.
+        // Published application id (what the store / device sees). After the
+        // com.follow.clash → com.longyunvpn.app migration the Kotlin namespace
+        // matches this id.
         applicationId = "com.longyunvpn.app"
         minSdk = flutter.minSdkVersion
         targetSdk = libs.versions.targetSdk.get().toInt()

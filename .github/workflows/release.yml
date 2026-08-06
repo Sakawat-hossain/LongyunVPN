@@ -109,6 +109,19 @@ jobs:
     name: android
     runs-on: ubuntu-latest
     steps:
+      # A tagged release must never ship a debug-signed APK: debug keys use the
+      # `.dev` application id and can't be updated on a device that has a real
+      # build installed. Fail fast (before spending time on the build) if the
+      # release keystore secret is missing. See docs/ANDROID_SIGNING.md to set it.
+      - name: Require release keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is not set — refusing to publish a debug-signed release. See docs/ANDROID_SIGNING.md."
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
         with:

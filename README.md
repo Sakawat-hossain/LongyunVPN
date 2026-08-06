@@ -26,6 +26,26 @@ Author: **Sakawat Hossain** · Licensed under **GNU GPL-3.0** (see [LICENSE](LIC
 
 Mobile builds update through the app store; desktop builds check GitHub Releases in-app. (iOS is not currently supported.)
 
+## Opening on macOS
+
+The macOS `.dmg` is not signed with an Apple Developer ID or notarized (that
+requires a paid Apple Developer account), so on first launch macOS shows
+**"LongyunVPN cannot be opened because it is from an unidentified developer."**
+This is expected — the app is safe; macOS just can't verify an unsigned build.
+To open it:
+
+1. Drag **LongyunVPN** from the DMG into your **Applications** folder.
+2. Remove the download quarantine flag, then open the app. In **Terminal**:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/LongyunVPN.app
+   open /Applications/LongyunVPN.app
+   ```
+
+Alternatively, without Terminal: try to open the app once, then go to
+**Apple menu → System Settings → Privacy & Security**, scroll down, and click
+**"Open Anyway"** next to the LongyunVPN message. You only need to do this once.
+
 ## Releasing a new version
 
 The release pipeline is fully automated. To publish an update:

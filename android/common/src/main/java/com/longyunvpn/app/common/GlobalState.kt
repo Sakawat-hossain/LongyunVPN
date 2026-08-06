@@ -1,0 +1,44 @@
+package com.longyunvpn.app.common
+
+
+import android.app.Application
+import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+
+object GlobalState : CoroutineScope by CoroutineScope(Dispatchers.Default) {
+
+    // Internal channel id — kept as-is so existing users' notification-channel
+    // settings (importance/sound they may have customized) survive upgrades. The
+    // user-visible channel name is "LongyunVPN".
+    const val NOTIFICATION_CHANNEL = "FlClash"
+
+    const val NOTIFICATION_ID = 1
+
+    val packageName: String
+        get() = application.packageName
+
+    val RECEIVE_BROADCASTS_PERMISSIONS: String
+        get() = "${packageName}.permission.RECEIVE_BROADCASTS"
+
+
+    private var _application: Application? = null
+
+    val application: Application
+        get() = _application!!
+
+
+    fun log(text: String) {
+        Log.d("[LongyunVPN]", text)
+    }
+
+    fun init(application: Application) {
+        _application = application
+    }
+
+    // Crash reporting (Firebase Crashlytics) was removed for the LongyunVPN
+    // release so the app ships no third-party telemetry. Kept as a no-op so the
+    // existing callers (State / Service / RemoteService) continue to compile.
+    fun setCrashlytics(enable: Boolean) {
+    }
+}

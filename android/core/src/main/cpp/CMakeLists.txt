@@ -13,14 +13,14 @@ if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_link_options(-flto -Wl,--gc-sections,--strip-all)
 endif ()
 
-set(LIB_CLASH_PATH "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libclash.so")
+set(LIB_CLASH_PATH "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/liblongyuncore.so")
 set(LIB_CLASH_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../cpp/includes/${ANDROID_ABI}")
-set(LIB_CLASH_HEADER_PATH "${LIB_CLASH_INCLUDE_DIR}/libclash.h")
+set(LIB_CLASH_HEADER_PATH "${LIB_CLASH_INCLUDE_DIR}/liblongyuncore.h")
 set(BRIDE_HEADER_PATH "${LIB_CLASH_INCLUDE_DIR}/bride.h")
 
 message("LIB_CLASH_PATH ${LIB_CLASH_PATH}")
 if (EXISTS ${LIB_CLASH_PATH} AND EXISTS ${LIB_CLASH_HEADER_PATH} AND EXISTS ${BRIDE_HEADER_PATH})
-    message("Found libclash.so and headers for ABI ${ANDROID_ABI}")
+    message("Found liblongyuncore.so and headers for ABI ${ANDROID_ABI}")
     add_compile_definitions(LIBCLASH)
     include_directories(${LIB_CLASH_INCLUDE_DIR})
     link_directories(${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
@@ -28,9 +28,9 @@ if (EXISTS ${LIB_CLASH_PATH} AND EXISTS ${LIB_CLASH_HEADER_PATH} AND EXISTS ${BR
             jni_helper.cpp
             core.cpp)
     target_link_libraries(${CMAKE_PROJECT_NAME}
-            clash)
+            longyuncore)
 else ()
-    message("Not found complete libclash output for ABI ${ANDROID_ABI}; building core without LIBCLASH")
+    message("Not found complete liblongyuncore output for ABI ${ANDROID_ABI}; building core without LIBCLASH")
     add_library(${CMAKE_PROJECT_NAME} SHARED
             jni_helper.cpp
             core.cpp)

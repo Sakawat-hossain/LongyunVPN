@@ -33,11 +33,11 @@ class BuildConfig {
     tags: 'with_gvisor',
     goLdflags: '-w -s',
     coreDir: 'core',
-    coreName: 'FlClashCore',
-    libName: 'libclash',
+    coreName: 'LongyunCore',
+    libName: 'liblongyuncore',
     outputDir: 'libclash',
     helperDir: 'services/helper',
-    helperName: 'FlClashHelperService',
+    helperName: 'LongyunVPNHelperService',
     distDir: 'dist',
   );
 

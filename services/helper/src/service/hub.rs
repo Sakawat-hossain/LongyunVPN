@@ -7,7 +7,8 @@ use std::io::{BufRead, Error, Read};
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::{io, thread};
-use warp::{Filter, Reply};
+use warp::http::StatusCode;
+use warp::{Filter, Rejection, Reply};
 
 const LISTEN_PORT: u16 = 47890;
 
@@ -43,6 +44,13 @@ fn start(start_params: StartParams) -> impl Reply {
         let sha256 = sha256_file(start_params.path.as_str()).unwrap_or("".to_string());
         if sha256 != env!("TOKEN") {
             return format!("The SHA256 hash of the program requesting execution is: {}. The helper program only allows execution of applications with the SHA256 hash: {}.", sha256,  env!("TOKEN"),);
+        }
+        // The only legitimate argument the app passes is the IPC pipe address it
+        // just created (\\.\pipe\LongyunCore_<n>). Refuse anything else so the
+        // elevated helper can't be coaxed into launching the core with an
+        // attacker-chosen argument (e.g. a hostile working dir / config path).
+        if !start_params.arg.starts_with(r"\\.\pipe\") {
+            return "The core may only be started with its IPC pipe address.".to_string();
         }
     }
     stop();
@@ -107,21 +115,105 @@ fn get_logs() -> impl Reply {
     warp::reply::with_header(value, "Content-Type", "text/plain")
 }
 
+/// Rejection raised when a request fails the authorization / anti-CSRF gate.
+#[derive(Debug)]
+struct Unauthorized;
+impl warp::reject::Reject for Unauthorized {}
+
+/// True when `host` (which may include a port) is the loopback interface.
+fn is_local_host(host: &str) -> bool {
+    let name = host.rsplit_once(':').map(|(h, _)| h).unwrap_or(host);
+    name == "127.0.0.1" || name == "localhost"
+}
+
+/// A filter applied to every endpoint that extracts nothing but rejects any
+/// request that isn't a trusted local caller.
+///
+/// Release builds require `Authorization: <TOKEN>` (the core SHA256 baked into
+/// both the app and this helper). A cross-origin browser cannot set a custom
+/// `Authorization` header on a request without triggering a CORS preflight this
+/// server never approves — so this closes the "a website you're visiting silently
+/// POSTs /stop and drops your VPN" vector that the old unauthenticated /stop
+/// allowed, and stops the /ping endpoint from handing the token to any caller.
+/// As defense in depth it also rejects requests carrying a browser `Origin`
+/// header or a non-loopback `Host` (DNS-rebinding). Debug builds skip the gate so
+/// `flutter run` against a dev helper keeps working.
+fn auth_guard() -> impl Filter<Extract = (), Error = Rejection> + Clone {
+    warp::header::optional::<String>("authorization")
+        .and(warp::header::optional::<String>("origin"))
+        .and(warp::header::optional::<String>("host"))
+        .and_then(
+            |auth: Option<String>, origin: Option<String>, host: Option<String>| async move {
+                if cfg!(debug_assertions) {
+                    return Ok(());
+                }
+                // No legitimate local caller is a browser.
+                if origin.is_some() {
+                    return Err(warp::reject::custom(Unauthorized));
+                }
+                match host.as_deref() {
+                    Some(h) if is_local_host(h) => {}
+                    _ => return Err(warp::reject::custom(Unauthorized)),
+                }
+                match auth {
+                    Some(token) if token == env!("TOKEN") => Ok(()),
+                    _ => Err(warp::reject::custom(Unauthorized)),
+                }
+            },
+        )
+        .untuple_one()
+}
+
+async fn handle_rejection(err: Rejection) -> Result<impl Reply, std::convert::Infallible> {
+    if err.find::<Unauthorized>().is_some() {
+        Ok(warp::reply::with_status(
+            "unauthorized".to_string(),
+            StatusCode::UNAUTHORIZED,
+        ))
+    } else if err.is_not_found() {
+        Ok(warp::reply::with_status(
+            "not found".to_string(),
+            StatusCode::NOT_FOUND,
+        ))
+    } else {
+        Ok(warp::reply::with_status(
+            "bad request".to_string(),
+            StatusCode::BAD_REQUEST,
+        ))
+    }
+}
+
 pub async fn run_service() -> anyhow::Result<()> {
-    let api_ping = warp::get().and(warp::path("ping")).map(|| env!("TOKEN"));
+    // `/ping` now only confirms the helper accepted our token (returns "ok")
+    // instead of echoing the token back to whoever asked.
+    let api_ping = warp::get()
+        .and(warp::path("ping"))
+        .and(auth_guard())
+        .map(|| "ok");
 
     let api_start = warp::post()
         .and(warp::path("start"))
+        .and(auth_guard())
         .and(warp::body::json())
         .map(|start_params: StartParams| start(start_params));
 
-    let api_stop = warp::post().and(warp::path("stop")).map(|| stop());
+    let api_stop = warp::post()
+        .and(warp::path("stop"))
+        .and(auth_guard())
+        .map(|| stop());
 
-    let api_logs = warp::get().and(warp::path("logs")).map(|| get_logs());
+    let api_logs = warp::get()
+        .and(warp::path("logs"))
+        .and(auth_guard())
+        .map(|| get_logs());
 
-    warp::serve(api_ping.or(api_start).or(api_stop).or(api_logs))
-        .run(([127, 0, 0, 1], LISTEN_PORT))
-        .await;
+    let routes = api_ping
+        .or(api_start)
+        .or(api_stop)
+        .or(api_logs)
+        .recover(handle_rejection);
+
+    warp::serve(routes).run(([127, 0, 0, 1], LISTEN_PORT)).await;
 
     Ok(())
 }

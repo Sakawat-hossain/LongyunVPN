@@ -24,7 +24,7 @@ class Request {
         final client = HttpClient();
         client.findProxy = (Uri uri) {
           client.userAgent = globalState.ua;
-          return FlClashHttpOverrides.handleFindProxy(uri);
+          return LongyunHttpOverrides.handleFindProxy(uri);
         };
         return client;
       },
@@ -192,19 +192,30 @@ class Request {
     return res;
   }
 
+  /// The privileged helper authenticates every request against the core SHA256
+  /// (embedded in the app at build time as `CORE_SHA256`). Sending it as the
+  /// Authorization header is what lets a legitimate local call through while a
+  /// cross-origin browser request — which can't set this header without a CORS
+  /// preflight the helper never approves — is rejected.
+  Options _helperOptions() => Options(
+        responseType: ResponseType.plain,
+        headers: {'Authorization': globalState.coreSHA256},
+      );
+
   Future<bool> pingHelper() async {
     if (kDebugMode) return true;
     try {
       final response = await dio
           .get(
         'http://$localhost:$helperPort/ping',
-        options: Options(responseType: ResponseType.plain),
+        options: _helperOptions(),
       )
           .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
-      return (response.data as String) == globalState.coreSHA256;
+      // The helper replies "ok" once it has accepted our token.
+      return (response.data as String).trim() == 'ok';
     } catch (_) {
       return false;
     }
@@ -216,7 +227,7 @@ class Request {
           .post(
         'http://$localhost:$helperPort/start',
         data: json.encode({'path': appPath.corePath, 'arg': arg}),
-        options: Options(responseType: ResponseType.plain),
+        options: _helperOptions(),
       )
           .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
@@ -234,7 +245,7 @@ class Request {
       final response = await dio
           .post(
         'http://$localhost:$helperPort/stop',
-        options: Options(responseType: ResponseType.plain),
+        options: _helperOptions(),
       )
           .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
