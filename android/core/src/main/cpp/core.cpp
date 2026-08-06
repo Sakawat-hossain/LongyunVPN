@@ -3,7 +3,7 @@
 #ifdef LIBCLASH
 
 #include "jni_helper.h"
-#include "libclash.h"
+#include "liblongyuncore.h"
 #include "bride.h"
 
 extern "C"

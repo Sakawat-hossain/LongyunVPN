@@ -212,6 +212,11 @@ abstract class Tun with _$Tun {
     @Default(TunStack.mixed) TunStack stack,
     @JsonKey(name: 'dns-hijack') @Default(['any:53']) List<String> dnsHijack,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
+    // Kill switch: when true the core installs strict routing/firewall rules so
+    // no traffic can escape outside the tunnel while connected. Managed by the
+    // core, so it's torn down automatically when TUN stops — no external
+    // firewall state that could strand the user's network.
+    @JsonKey(name: 'strict-route') @Default(false) bool strictRoute,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
@@ -542,6 +547,46 @@ abstract class ClashConfig with _$ClashConfig {
       _$ClashConfigFromJson(json);
 }
 
+/// Desktop split tunnel: route selected processes around the VPN, or send only
+/// them through it, using the core's PROCESS-NAME rules.
+enum SplitTunnelMode {
+  /// Everything is tunneled normally.
+  off,
+
+  /// Listed processes bypass the VPN (go DIRECT); everything else is tunneled.
+  exclude,
+
+  /// Only listed processes are tunneled; everything else goes DIRECT.
+  include,
+}
+
+const defaultSplitTunnelProps = SplitTunnelProps();
+
+@freezed
+abstract class SplitTunnelProps with _$SplitTunnelProps {
+  const factory SplitTunnelProps({
+    @Default(SplitTunnelMode.off) SplitTunnelMode mode,
+
+    /// Executable/process names as the core sees them, e.g. `chrome.exe` on
+    /// Windows or `Telegram` on macOS/Linux. Matched by the core's find-process.
+    @Default(<String>[]) List<String> processList,
+  }) = _SplitTunnelProps;
+
+  factory SplitTunnelProps.fromJson(Map<String, Object?> json) =>
+      _$SplitTunnelPropsFromJson(json);
+
+  factory SplitTunnelProps.safeFromJson(Map<String, Object?>? json) {
+    if (json == null) {
+      return const SplitTunnelProps();
+    }
+    try {
+      return SplitTunnelProps.fromJson(json);
+    } catch (_) {
+      return const SplitTunnelProps();
+    }
+  }
+}
+
 @freezed
 abstract class PatchClashConfig with _$PatchClashConfig {
   const factory PatchClashConfig({
@@ -578,6 +623,9 @@ abstract class PatchClashConfig with _$PatchClashConfig {
     @JsonKey(name: 'external-controller')
     ExternalControllerStatus externalController,
     @Default({}) Map<String, String> hosts,
+    @Default(defaultSplitTunnelProps)
+    @JsonKey(name: 'split-tunnel', fromJson: SplitTunnelProps.safeFromJson)
+    SplitTunnelProps splitTunnel,
   }) = _PatchClashConfig;
 
   factory PatchClashConfig.fromJson(Map<String, Object?> json) =>

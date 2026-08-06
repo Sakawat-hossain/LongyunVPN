@@ -99,7 +99,7 @@ fails for nested freezed types.
 
 This is the most important architectural concept. The Go proxy core (`core/`) operates in two modes:
 
-- **Android (lib mode):** Go core compiled as C shared library (`libclash.so`) via `go build -buildmode=c-shared` with
+- **Android (lib mode):** Go core compiled as C shared library (`liblongyuncore.so`) via `go build -buildmode=c-shared` with
   CGO. Flutter calls it via FFI through the `service` plugin. Dart-side: `lib/core/lib.dart` (`CoreLib` class).
 
 - **Desktop (core mode):** Go core runs as a separate process with `CGO_ENABLED=0`. Flutter communicates via

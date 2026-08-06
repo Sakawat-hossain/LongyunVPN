@@ -27,6 +27,25 @@ LongyunVPN 接入龙云订阅服务，提供简洁、本地化的界面来管理
 
 移动端通过应用商店更新，桌面端在应用内检查 GitHub Releases。（暂不支持 iOS。）
 
+## 在 macOS 上打开
+
+macOS 版 `.dmg` 未使用 Apple 开发者 ID 签名，也未经过公证（这需要付费的 Apple
+开发者账号），因此首次启动时 macOS 会提示
+**“无法打开 LongyunVPN，因为它来自身份不明的开发者”**。这属于正常现象——应用本身是
+安全的，只是 macOS 无法验证未签名的构建。打开方式：
+
+1. 将 DMG 中的 **LongyunVPN** 拖入 **应用程序（Applications）** 文件夹。
+2. 移除下载隔离标记后再打开。在 **终端（Terminal）** 中执行：
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/LongyunVPN.app
+   open /Applications/LongyunVPN.app
+   ```
+
+或者不使用终端：先尝试打开一次应用，然后进入
+**苹果菜单 →「系统设置」→「隐私与安全性」**，向下滚动，点击 LongyunVPN 提示旁边的
+**“仍要打开”**。此操作只需执行一次。
+
 ## 发布新版本
 
 在 [`pubspec.yaml`](pubspec.yaml) 中修改版本号（纯语义化，例如 `version: 1.0.2`），

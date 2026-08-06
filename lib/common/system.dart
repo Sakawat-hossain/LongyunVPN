@@ -7,7 +7,6 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/input.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
@@ -98,28 +97,25 @@ class System {
       }
       return AuthorizeCode.success;
     } else if (Platform.isLinux) {
-      final shell = Platform.environment['SHELL'] ?? 'bash';
-      final password = await globalState.showCommonDialog<String>(
-        child: InputDialog(
-          obscureText: true,
-          title: currentAppLocalizations.pleaseInputAdminPassword,
-          value: '',
-        ),
-      );
-      if (password == null || password.isEmpty) {
-        return AuthorizeCode.error;
-      }
-      final escapedPassword = _shellEscape(password);
+      // Elevate via pkexec (polkit): the system's own authentication agent
+      // prompts for the password, so the app never sees it or places it on a
+      // command line. The previous `echo $pw | sudo -S …` exposed the password
+      // in the shell's argv (readable via /proc by other local users).
       final escapedCorePath = _shellEscape(appPath.corePath);
-      final arguments = [
-        '-c',
-        'echo $escapedPassword | sudo -S chown root:root $escapedCorePath && echo $escapedPassword | sudo -S chmod +sx $escapedCorePath',
-      ];
-      final result = await Process.run(shell, arguments);
-      if (result.exitCode != 0) {
+      try {
+        final result = await Process.run('pkexec', [
+          'sh',
+          '-c',
+          'chown root:root $escapedCorePath && chmod +sx $escapedCorePath',
+        ]);
+        if (result.exitCode != 0) {
+          return AuthorizeCode.error;
+        }
+        return AuthorizeCode.success;
+      } on ProcessException {
+        // pkexec/polkit not installed on this system.
         return AuthorizeCode.error;
       }
-      return AuthorizeCode.success;
     }
     return AuthorizeCode.error;
   }
@@ -243,6 +239,22 @@ class Windows {
 
     final command = [
       '/c',
+      // Upgrade path: always remove any pre-rebrand FlClash-named service left by
+      // an older install so it doesn't linger as a dead service. `&` (not `&&`)
+      // so a missing legacy service doesn't abort the rest of the chain.
+      'taskkill',
+      '/F',
+      '/IM',
+      '$legacyHelperService.exe',
+      '&',
+      'sc',
+      'stop',
+      legacyHelperService,
+      '&',
+      'sc',
+      'delete',
+      legacyHelperService,
+      '&',
       if (status == WindowsHelperServiceStatus.presence) ...[
         'taskkill',
         '/F',

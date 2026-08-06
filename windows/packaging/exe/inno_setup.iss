@@ -25,7 +25,10 @@ var
   i: Integer;
   ResultCode: Integer;
 begin
-  Processes := ['LongyunVPN.exe', 'FlClashCore.exe', 'FlClashHelperService.exe'];
+  // Include both the new (LongyunCore / LongyunVPNHelperService) and legacy
+  // (FlClashCore / FlClashHelperService) binary names so an upgrade from an old
+  // install can still terminate a running old core and helper.
+  Processes := ['LongyunVPN.exe', 'LongyunCore.exe', 'FlClashCore.exe', 'LongyunVPNHelperService.exe', 'FlClashHelperService.exe'];
 
   for i := 0 to GetArrayLength(Processes)-1 do
   begin

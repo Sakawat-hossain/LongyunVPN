@@ -1,9 +1,9 @@
 tags: with_gvisor
 go_ldflags: "-w -s"
 core_dir: core
-core_name: FlClashCore
-lib_name: libclash
+core_name: LongyunCore
+lib_name: liblongyuncore
 output_dir: libclash
 helper_dir: services/helper
-helper_name: FlClashHelperService
+helper_name: LongyunVPNHelperService
 dist_dir: dist

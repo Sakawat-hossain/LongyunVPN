@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.follow.clash.service"
+    namespace = "com.longyunvpn.app.service"
     compileSdk = 36
 
     defaultConfig {

@@ -1,0 +1,73 @@
+name: ci
+
+# Quality gate for every push to main and every pull request. Unlike release.yml
+# (which only runs on version tags), this catches analyzer errors, failing tests,
+# and Rust helper regressions BEFORE they can reach a release.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # analyze/test run on the Dart VM and mock the native core, so the Go
+      # submodule is not needed here — keep the checkout fast.
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.9
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      # Regenerate freezed / riverpod / drift / json output so analysis runs
+      # against sources that match the current models, even if the committed
+      # generated files are momentarily stale after a model change.
+      - name: Code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test (root package)
+        run: flutter test
+
+      # Bundled plugin Dart tests aren't discovered by the root `flutter test`;
+      # run the proxy plugin's suite explicitly (see AGENTS.md).
+      - name: Test (proxy plugin)
+        run: flutter test plugins/proxy/test/proxy_test.dart
+
+  helper:
+    name: rust helper check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: services/helper
+
+      # Compiles the cross-platform service logic (hub.rs / main.rs) without the
+      # windows-service feature. build.rs supplies a default (empty) TOKEN, so no
+      # secret is needed just to type-check.
+      - name: cargo check
+        working-directory: services/helper
+        run: cargo check --all-targets

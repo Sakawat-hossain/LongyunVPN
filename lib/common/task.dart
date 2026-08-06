@@ -152,6 +152,7 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
   rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
   rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
+  rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   if (rawConfig['sniffer']?['sniff'] != null) {
     for (final value in (rawConfig['sniffer']?['sniff'] as Map).values) {
@@ -277,6 +278,39 @@ Future<VM2<String, String>> _makeRealProfileTask(
   }
   if (data.proxyGroups.isNotEmpty) {
     rawConfig['proxy-groups'] = data.proxyGroups;
+  }
+  // Split tunnel (desktop only): prepend PROCESS-NAME rules so the selected
+  // apps are routed around, or exclusively through, the VPN. These sit at the
+  // top so they win over the profile's own rules. Process matching needs the
+  // core to resolve connection owners, so make sure find-process-mode isn't
+  // 'off' when split tunnel is active.
+  final splitTunnel = realPatchConfig.splitTunnel;
+  final splitProcesses = splitTunnel.processList
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty)
+      .toList();
+  if (isDesktop &&
+      splitTunnel.mode != SplitTunnelMode.off &&
+      splitProcesses.isNotEmpty) {
+    final splitRules = <String>[];
+    if (splitTunnel.mode == SplitTunnelMode.exclude) {
+      for (final name in splitProcesses) {
+        splitRules.add('PROCESS-NAME,$name,DIRECT');
+      }
+    } else {
+      // include: only the listed apps are tunneled (via the built-in GLOBAL
+      // selector, which follows the user's selected proxy); the trailing
+      // MATCH,DIRECT sends everything else out untunneled before it can reach
+      // the profile's proxy rules.
+      for (final name in splitProcesses) {
+        splitRules.add('PROCESS-NAME,$name,GLOBAL');
+      }
+      splitRules.add('MATCH,DIRECT');
+    }
+    if (rawConfig['find-process-mode'] == FindProcessMode.off.name) {
+      rawConfig['find-process-mode'] = FindProcessMode.strict.name;
+    }
+    rules = [...splitRules, ...rules];
   }
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));

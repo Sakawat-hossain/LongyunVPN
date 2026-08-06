@@ -298,6 +298,48 @@ class KillSwitchItem extends StatelessWidget {
   }
 }
 
+/// Desktop kill switch. Backed by the core's TUN `strict-route`, which blocks
+/// any traffic that would bypass the tunnel while connected. Core-managed, so it
+/// tears down when TUN stops — nothing can strand the user's network.
+class DesktopKillSwitchItem extends ConsumerWidget {
+  const DesktopKillSwitchItem({super.key});
+
+  String _desc(BuildContext context) {
+    switch (Localizations.localeOf(context).languageCode) {
+      case 'zh':
+        return '开启后阻止任何绕过 VPN 隧道的流量（严格路由，需开启 TUN 模式）。';
+      case 'ja':
+        return 'VPN トンネルを迂回する通信を遮断します（厳格ルーティング、TUN モードが必要）。';
+      case 'ru':
+        return 'Блокирует трафик в обход VPN-туннеля (строгая маршрутизация; нужен режим TUN).';
+      default:
+        return 'Block any traffic that would leak outside the VPN tunnel '
+            '(strict routing; requires TUN mode).';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final strictRoute = ref.watch(
+      patchClashConfigProvider.select((state) => state.tun.strictRoute),
+    );
+    return ListItem.switchItem(
+      leading: const Icon(Icons.gpp_good_outlined),
+      title: Text(l.killSwitch),
+      subtitle: Text(_desc(context)),
+      delegate: SwitchDelegate(
+        value: strictRoute,
+        onChanged: (bool value) {
+          ref
+              .read(patchClashConfigProvider.notifier)
+              .update((state) => state.copyWith.tun(strictRoute: value));
+        },
+      ),
+    );
+  }
+}
+
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
@@ -314,6 +356,7 @@ class ApplicationSettingView extends StatelessWidget {
       const UsageItem(),
       if (system.isAndroid) const CrashlyticsItem(),
       if (system.isAndroid) const KillSwitchItem(),
+      if (system.isDesktop) const DesktopKillSwitchItem(),
       const AutoCheckUpdateItem(),
     ];
     return BaseScaffold(
