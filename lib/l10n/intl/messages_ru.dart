@@ -370,7 +370,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
     "crashlytics": MessageLookupByLibrary.simpleMessage("Анализ сбоев"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "При включении автоматически загружает журналы сбоев без конфиденциальной информации, когда приложение выходит из строя",
+      "Когда включено, журналы сбоев хранятся на вашем устройстве для диагностики проблем — они не загружаются",
     ),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Create Profile"),
@@ -385,7 +385,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Обнаружены изменения данных, хотите сохранить?",
     ),
     "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "Это приложение использует Firebase Crashlytics для сбора информации о сбоях с целью улучшения стабильности приложения.\nСобираемые данные включают информацию об устройстве и подробности о сбоях, но не содержат персональных конфиденциальных данных.\nВы можете отключить эту функцию в настройках.",
+      "LongyunVPN сохраняет журнал сбоев на вашем устройстве для диагностики проблем.\nЖурнал остаётся на устройстве — он никогда не загружается, не собирается и не передаётся.\nВы можете экспортировать или очистить его, либо отключить это в настройках.",
     ),
     "dataCollectionTip": MessageLookupByLibrary.simpleMessage(
       "Уведомление о сборе данных",

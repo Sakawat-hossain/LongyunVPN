@@ -265,7 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("崩溃测试"),
     "crashlytics": MessageLookupByLibrary.simpleMessage("崩溃分析"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "开启后，应用崩溃时自动上传不包含敏感信息的崩溃日志",
+      "开启后，崩溃日志会保存在您的设备上以帮助排查问题——绝不会上传",
     ),
     "create": MessageLookupByLibrary.simpleMessage("创建"),
     "createProfile": MessageLookupByLibrary.simpleMessage("创建配置"),
@@ -278,7 +278,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboard": MessageLookupByLibrary.simpleMessage("仪表盘"),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage("检测到数据有更改，是否保存"),
     "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "本应用使用 Firebase Crashlytics 收集崩溃信息以改进应用稳定性。\n收集的数据包括设备信息和崩溃详情，不包含个人敏感数据。\n您可以在设置中关闭此功能。",
+      "LongyunVPN 会在您的设备上保存崩溃日志以帮助排查问题。\n该日志仅保留在您的设备上——绝不会上传、收集或共享。\n您可以在设置中导出、清除或关闭此功能。",
     ),
     "dataCollectionTip": MessageLookupByLibrary.simpleMessage("数据收集说明"),
     "dataLabel": MessageLookupByLibrary.simpleMessage("流量"),

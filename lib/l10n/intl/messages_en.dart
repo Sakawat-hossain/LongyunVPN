@@ -359,7 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "crashlytics": MessageLookupByLibrary.simpleMessage("Crash Analysis"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "When enabled, automatically uploads crash logs without sensitive information when the app crashes",
+      "When on, crash logs are kept on your device to help diagnose problems — never uploaded",
     ),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Create Profile"),
@@ -374,7 +374,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Data changes detected, do you want to save?",
     ),
     "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "This app uses Firebase Crashlytics to collect crash information to improve app stability.\nThe collected data includes device information and crash details, but does not contain personal sensitive data.\nYou can disable this feature in settings.",
+      "LongyunVPN keeps a crash log on your device to help diagnose problems.\nThe log stays on your device — it is never uploaded, collected, or shared.\nYou can export or clear it, or turn this off, in settings.",
     ),
     "dataCollectionTip": MessageLookupByLibrary.simpleMessage(
       "Data Collection Notice",

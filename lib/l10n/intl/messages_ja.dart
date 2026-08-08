@@ -293,7 +293,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashTest": MessageLookupByLibrary.simpleMessage("クラッシュテスト"),
     "crashlytics": MessageLookupByLibrary.simpleMessage("クラッシュ分析"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "有効にすると、アプリがクラッシュした際に機密情報を含まないクラッシュログを自動的にアップロードします",
+      "オンにすると、問題診断のためクラッシュログを端末内に保存します。アップロードは行いません",
     ),
     "create": MessageLookupByLibrary.simpleMessage("作成"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Create Profile"),
@@ -308,7 +308,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "データの変更が検出されました。保存しますか？",
     ),
     "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "本アプリはFirebase Crashlyticsを使用してクラッシュ情報を収集し、アプリの安定性を向上させます。\n収集されるデータにはデバイス情報とクラッシュ詳細が含まれますが、個人の機密データは含まれません。\n設定でこの機能を無効にすることができます。",
+      "LongyunVPN は問題診断のため、お使いの端末にクラッシュログを保存します。\nログは端末内にのみ保存され、アップロード・収集・共有されることはありません。\n設定でエクスポート・消去、または無効化できます。",
     ),
     "dataCollectionTip": MessageLookupByLibrary.simpleMessage("データ収集説明"),
     "dataLabel": MessageLookupByLibrary.simpleMessage("通信量"),
