@@ -68,7 +68,7 @@ dependencies:
     git:
       url: https://github.com/chen08209/flutter_js
       ref: master
-  flutter_svg: ^2.1.0
+  flutter_svg: ^2.3.0
   flutter_cache_manager: ^3.4.1
   crypto: ^3.0.3
   yaml_writer:
