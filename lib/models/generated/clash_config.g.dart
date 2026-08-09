@@ -176,6 +176,7 @@ _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  strictRoute: json['strict-route'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
@@ -185,6 +186,7 @@ Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'stack': _$TunStackEnumMap[instance.stack]!,
   'dns-hijack': instance.dnsHijack,
   'route-address': instance.routeAddress,
+  'strict-route': instance.strictRoute,
 };
 
 const _$TunStackEnumMap = {
@@ -418,6 +420,30 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'proxyTypeMap': instance.proxyTypeMap,
     };
 
+_SplitTunnelProps _$SplitTunnelPropsFromJson(Map<String, dynamic> json) =>
+    _SplitTunnelProps(
+      mode:
+          $enumDecodeNullable(_$SplitTunnelModeEnumMap, json['mode']) ??
+          SplitTunnelMode.off,
+      processList:
+          (json['processList'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+    );
+
+Map<String, dynamic> _$SplitTunnelPropsToJson(_SplitTunnelProps instance) =>
+    <String, dynamic>{
+      'mode': _$SplitTunnelModeEnumMap[instance.mode]!,
+      'processList': instance.processList,
+    };
+
+const _$SplitTunnelModeEnumMap = {
+  SplitTunnelMode.off: 'off',
+  SplitTunnelMode.exclude: 'exclude',
+  SplitTunnelMode.include: 'include',
+};
+
 _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
     _PatchClashConfig(
       mixedPort: (json['mixed-port'] as num?)?.toInt() ?? defaultMixedPort,
@@ -467,6 +493,11 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
+      splitTunnel: json['split-tunnel'] == null
+          ? defaultSplitTunnelProps
+          : SplitTunnelProps.safeFromJson(
+              json['split-tunnel'] as Map<String, Object?>?,
+            ),
     );
 
 Map<String, dynamic> _$PatchClashConfigToJson(_PatchClashConfig instance) =>
@@ -492,6 +523,7 @@ Map<String, dynamic> _$PatchClashConfigToJson(_PatchClashConfig instance) =>
       'external-controller':
           _$ExternalControllerStatusEnumMap[instance.externalController]!,
       'hosts': instance.hosts,
+      'split-tunnel': instance.splitTunnel,
     };
 
 const _$ModeEnumMap = {
