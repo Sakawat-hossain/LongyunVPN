@@ -51,7 +51,7 @@ dependencies:
   re_editor:
     git:
       url: https://github.com/Sakawat-hossain/re-editor
-      ref: 8f1c28514cc1730cffd5b927e715e8b83cc417c1
+      ref: 78e7671dfd7c411add6acce23a5d9afa3fcdfb5b
   re_highlight: ^0.0.3
   archive: ^4.0.7
   emoji_regex: ^0.0.5
