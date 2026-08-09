@@ -9,6 +9,16 @@ improve next. Tick items as you go.
   `LongyunVPNHelperService`, Android namespace `com.longyunvpn.app`).
 - **Core migrated** to `Sakawat-hossain/Longyun-Core` — and it **compiles**
   (built the desktop core with Go, all deps resolved).
+- **Core security backports (2026-08-10)** — pointer bumped `bfb281c8 → b937c8ba`
+  (fast-forward on `Longyun-Core/main`). Cherry-picked 6 upstream memory-safety
+  fixes from chen08209 v0.8.94 onto our base **without** a dep/API bump: socks4
+  unbounded alloc (DoS), vision TLS OOB read, trojan panic on oversized UDP
+  length, quic-sniffer single-packet OOB crash, exchangeQUIC context, dns
+  variable capture. Branding intact; core + full Windows app rebuilt clean.
+  *Deliberately NOT taken* (stability): full v0.8.94 bump (removes
+  `updater.Update*WithPath` our wrapper calls → build break), v0.8.95 (divergent
+  protocol rewrites), doq OOB fix (complex read-path conflict), dispatcher-nil
+  fix (needs dep bump).
 - **All 7 deps on your forks**, pinned to exact commits, reachable
   (core, tray_manager, flutter_distributor + window_manager, re-editor,
   flutter_js, yaml_writer). No `chen08209` refs left in code.
@@ -34,11 +44,15 @@ improve next. Tick items as you go.
       Authenticode cert. Until then the install warning stands (README documents the workaround).
 
 ## 🟠 Validate on your machine (needs flutter/dart/cargo/java — not available in the agent env)
-- [ ] **Debug run** Windows + Android per `docs/VALIDATION.md`.
+- [x] **Debug run Windows** — `flutter build windows --debug` + `flutter run -d windows`
+      both succeed; app launches, first frame renders, Dart VM service up, no
+      crash and no runtime exceptions in the console. (2026-08-10)
+- [ ] **Debug run Android** per `docs/VALIDATION.md`.
 - [ ] **Upgrade test** — install v1.1.6 over an existing v1.1.5: login/profiles
       preserved, old `FlClashHelperService` removed on Windows.
-- [ ] Confirm the migrated core loads at runtime (Android loads
-      `liblongyuncore.so`; desktop runs `LongyunCore`).
+- [x] Confirm the migrated core loads at runtime — **desktop `LongyunCore` starts
+      and stays resident** (verified on Windows: `LongyunCore.exe` alongside
+      `LongyunVPN.exe`). Android `liblongyuncore.so` still to verify. (2026-08-10)
 
 ## 🟡 Security & audit backlog
 - [ ] **`badCertificateCallback => true`** in `LongyunHttpOverrides` — accepts all
