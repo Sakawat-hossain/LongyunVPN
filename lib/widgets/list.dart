@@ -305,7 +305,7 @@ class ListItem<T> extends StatelessWidget {
         // openElevation: 0,
         closedBuilder: (context, action) {
           Future<void> openAction() async {
-            final isMobile = globalState.container.read(isMobileViewProvider);
+            final isMobile = globalState.rootRef.read(isMobileViewProvider);
             if (!isMobile || kDebugMode) {
               final res = await showExtend(
                 context,

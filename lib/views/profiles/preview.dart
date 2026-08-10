@@ -21,7 +21,7 @@ class _PreviewProfileViewState extends State<PreviewProfileView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final configMap = await globalState.container
+      final configMap = await globalState.rootRef
           .read(setupActionProvider.notifier)
           .getProfileWithId(widget.profile.id);
       final content = await encodeYamlTask(configMap);

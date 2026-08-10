@@ -11,20 +11,20 @@ class AddProfileView extends StatelessWidget {
   const AddProfileView({super.key, required this.context});
 
   Future<void> _handleAddProfileFormFile() async {
-    globalState.container
+    globalState.rootRef
         .read(profilesActionProvider.notifier)
         .addProfileFormFile();
   }
 
   Future<void> _handleAddProfileFormURL(String url) async {
-    globalState.container
+    globalState.rootRef
         .read(profilesActionProvider.notifier)
         .addProfileFormURL(url);
   }
 
   Future<void> _toScan() async {
     if (system.isDesktop) {
-      globalState.container
+      globalState.rootRef
           .read(profilesActionProvider.notifier)
           .addProfileFormQrCode();
       return;

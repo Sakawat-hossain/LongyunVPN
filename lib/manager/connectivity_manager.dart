@@ -31,11 +31,11 @@ class _ConnectivityManagerState extends State<ConnectivityManager> {
     subscription = Connectivity().onConnectivityChanged.listen((results) {
       if (results.contains(ConnectivityResult.wifi)) {
         WifiSsidManager.instance.getSsid().then((ssid) {
-          globalState.container.read(currentSSIDProvider.notifier).value = ssid;
+          globalState.rootRef.read(currentSSIDProvider.notifier).value = ssid;
           commonPrint.log('Wi-fi SSID: $ssid ', logLevel: LogLevel.info);
         });
       } else {
-        globalState.container.read(currentSSIDProvider.notifier).value = null;
+        globalState.rootRef.read(currentSSIDProvider.notifier).value = null;
       }
       if (widget.onConnectivityChanged != null) {
         widget.onConnectivityChanged!(results);

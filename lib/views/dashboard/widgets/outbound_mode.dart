@@ -13,7 +13,7 @@ class OutboundMode extends StatelessWidget {
   const OutboundMode({super.key});
 
   void _handleChangeMode(Mode mode) {
-    globalState.container.read(setupActionProvider.notifier).changeMode(mode);
+    globalState.rootRef.read(setupActionProvider.notifier).changeMode(mode);
   }
 
   @override
@@ -101,7 +101,7 @@ class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
   void _handleChangeMode(Mode mode) {
-    globalState.container.read(setupActionProvider.notifier).changeMode(mode);
+    globalState.rootRef.read(setupActionProvider.notifier).changeMode(mode);
   }
 
   Color _getTextColor(BuildContext context, Mode mode) {

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 class BaseNavigator {
   static Future<T?> push<T>(BuildContext context, Widget child) async {
-    if (!globalState.container.read(isMobileViewProvider)) {
+    if (!globalState.rootRef.read(isMobileViewProvider)) {
       return Navigator.of(
         context,
       ).push<T>(CommonDesktopRoute(builder: (context) => child));

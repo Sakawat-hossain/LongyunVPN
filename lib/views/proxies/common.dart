@@ -23,33 +23,33 @@ double getItemHeight(ProxyCardType proxyCardType) {
 }
 
 List<Group> getCurrentGroups() {
-  return globalState.container.read(currentGroupsStateProvider).value;
+  return globalState.rootRef.read(currentGroupsStateProvider).value;
 }
 
 List<Group> getGroups() {
-  return globalState.container.read(groupsProvider);
+  return globalState.rootRef.read(groupsProvider);
 }
 
 String? getCurrentGroupName() {
-  return globalState.container.read(
+  return globalState.rootRef.read(
     currentProfileProvider.select((state) => state?.currentGroupName),
   );
 }
 
 void updateCurrentGroupName(String groupName) {
-  globalState.container
+  globalState.rootRef
       .read(proxiesActionProvider.notifier)
       .updateCurrentGroupName(groupName);
 }
 
 void updateCurrentUnfoldSet(Set<String> value) {
-  globalState.container
+  globalState.rootRef
       .read(proxiesActionProvider.notifier)
       .updateCurrentUnfoldSet(value);
 }
 
 Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
-  final ref = globalState.container;
+  final ref = globalState.rootRef;
   final groups = getGroups();
   final selectedMap = ref.read(
     currentProfileProvider.select((state) => state?.selectedMap ?? {}),
@@ -82,7 +82,7 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   for (final batchDelayProxies in batchesDelayProxies) {
     await Future.wait(batchDelayProxies);
   }
-  globalState.container.read(sortNumProvider.notifier).add();
+  globalState.rootRef.read(sortNumProvider.notifier).add();
 }
 
 /// Built-in pseudo proxies that Quick Connect must never select as "fastest".
@@ -122,7 +122,7 @@ String? fastestProxyName(
 /// responded. Only meaningful for a manually-selectable group.
 Future<String?> quickSelectFastest(Group group) async {
   await delayTest(group.all, group.testUrl);
-  final ref = globalState.container;
+  final ref = globalState.rootRef;
   final fastest = fastestProxyName(
     group.all,
     (name) => ref.read(delayProvider(proxyName: name, testUrl: group.testUrl)),
@@ -140,7 +140,7 @@ double getScrollToSelectedOffset({
   required String groupName,
   required List<Proxy> proxies,
 }) {
-  final ref = globalState.container;
+  final ref = globalState.rootRef;
   final columns = ref.read(proxiesColumnsProvider);
   final proxyCardType = ref.read(
     proxiesStyleSettingProvider.select((state) => state.cardType),

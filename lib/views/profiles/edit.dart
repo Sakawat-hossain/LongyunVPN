@@ -71,7 +71,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         minutes: int.parse(_autoUpdateDurationController.text),
       ),
     );
-    final profilesAction = globalState.container.read(
+    final profilesAction = globalState.rootRef.read(
       profilesActionProvider.notifier,
     );
     final hasUpdate = widget.profile.url != profile.url;
@@ -209,7 +209,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     _fileInfoNotifier.dispose();
     _autoUpdateDurationController.dispose();
     super.dispose();
-    globalState.container.read(setupActionProvider.notifier).autoApplyProfile();
+    globalState.rootRef.read(setupActionProvider.notifier).autoApplyProfile();
   }
 
   @override

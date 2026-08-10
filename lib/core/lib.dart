@@ -27,7 +27,7 @@ class CoreLib extends CoreHandlerInterface {
     }
     _connectedCompleter.complete(true);
     final syncRes = await service?.syncState(
-      globalState.container.read(sharedStateProvider),
+      globalState.rootRef.read(sharedStateProvider),
     );
     return syncRes ?? '';
   }

@@ -73,7 +73,7 @@ class ProviderItem extends StatelessWidget {
 
   Future<void> _handleUpdateProvider() async {
     if (provider.vehicleType != 'HTTP') return;
-    final ref = globalState.container;
+    final ref = globalState.rootRef;
     await globalState.safeRun(() async {
       final message = await ref
           .read(proxiesActionProvider.notifier)
@@ -84,7 +84,7 @@ class ProviderItem extends StatelessWidget {
   }
 
   Future<void> _handleSideLoadProvider() async {
-    final ref = globalState.container;
+    final ref = globalState.rootRef;
     await globalState.safeRun<void>(() async {
       final platformFile = await picker.pickerFile();
       final bytes = platformFile?.bytes;

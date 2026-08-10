@@ -26,7 +26,7 @@ class CommonPrint {
     if (!globalState.isAttach) {
       return;
     }
-    globalState.container
+    globalState.rootRef
         .read(logsProvider.notifier)
         .add(Log.app(payload).copyWith(logLevel: logLevel));
   }

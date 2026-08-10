@@ -52,7 +52,7 @@ Future<T?> showSheet<T>({
   required WidgetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  final isMobile = globalState.container.read(isMobileViewProvider);
+  final isMobile = globalState.rootRef.read(isMobileViewProvider);
   return switch (isMobile) {
     true => showModalBottomSheet<T>(
       context: context,
@@ -89,7 +89,7 @@ Future<T?> showExtend<T>(
   required WidgetBuilder builder,
   ExtendProps props = const ExtendProps(),
 }) {
-  final isMobile = globalState.container.read(isMobileViewProvider);
+  final isMobile = globalState.rootRef.read(isMobileViewProvider);
   return switch (isMobile || props.forceFull) {
     true => BaseNavigator.push(
       context,

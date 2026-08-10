@@ -10,7 +10,7 @@ class LongyunHttpOverrides extends HttpOverrides {
     if ([localhost].contains(url.host)) {
       return 'DIRECT';
     }
-    final ref = globalState.container;
+    final ref = globalState.rootRef;
     final isStart = ref.read(isStartProvider);
     final suspend = ref.read(suspendProvider);
     // Deliberately don't log the request URL here: findProxy runs for every

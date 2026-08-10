@@ -16,7 +16,7 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   void _handleToPage(PageLabel pageLabel) {
-    globalState.container
+    globalState.rootRef
         .read(currentPageLabelProvider.notifier)
         .toPage(pageLabel);
   }

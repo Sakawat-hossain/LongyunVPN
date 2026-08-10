@@ -224,7 +224,7 @@ class _WindowHeaderState extends State<WindowHeader> {
         ),
         IconButton(
           onPressed: () {
-            globalState.container
+            globalState.rootRef
                 .read(systemActionProvider.notifier)
                 .handleBackOrExit();
           },

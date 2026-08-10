@@ -17,7 +17,7 @@ class AboutView extends StatelessWidget {
       request.checkForUpdate,
       title: context.appLocalizations.checkUpdate,
     );
-    globalState.container
+    globalState.rootRef
         .read(commonActionProvider.notifier)
         .checkUpdateResultHandle(data: data, isUser: true);
   }

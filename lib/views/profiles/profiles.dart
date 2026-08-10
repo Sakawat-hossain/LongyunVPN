@@ -66,7 +66,7 @@ class _ProfilesViewState extends State<ProfilesView> {
     final updateProfiles = profiles.map<Future>((profile) async {
       if (profile.type == ProfileType.file) return;
       try {
-        await globalState.container
+        await globalState.rootRef
             .read(profilesActionProvider.notifier)
             .updateProfile(profile, showLoading: true);
       } catch (e) {
@@ -222,7 +222,7 @@ class ProfileItem extends StatelessWidget {
     if (res != true) {
       return;
     }
-    await globalState.container
+    await globalState.rootRef
         .read(profilesActionProvider.notifier)
         .deleteProfile(profile.id);
   }
@@ -234,14 +234,14 @@ class ProfileItem extends StatelessWidget {
   Future updateProfile() async {
     if (profile.type == ProfileType.file) return;
     await globalState.loadingRun(() async {
-      await globalState.container
+      await globalState.rootRef
           .read(profilesActionProvider.notifier)
           .updateProfile(profile, showLoading: true);
     }, tag: LoadingTag.profiles);
     // Updating the subscription can change account usage/expiry — refresh the
     // Xboard account info so the dashboard Subscription card reflects it without
     // an app restart. No-op when not logged in.
-    await globalState.container.read(authProvider.notifier).refresh();
+    await globalState.rootRef.read(authProvider.notifier).refresh();
   }
 
   void _handleShowEditExtendPage(BuildContext context) {
@@ -524,7 +524,7 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
 
   void _handleSave() {
     Navigator.of(context).pop();
-    globalState.container.read(profilesProvider.notifier).reorder(profiles);
+    globalState.rootRef.read(profilesProvider.notifier).reorder(profiles);
   }
 
   @override

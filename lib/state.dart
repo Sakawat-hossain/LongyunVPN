@@ -32,6 +32,16 @@ class GlobalState {
   late CommonTheme theme;
   late Color accentColor;
   late ProviderContainer container;
+
+  /// The app-root [ProviderContainer], for **out-of-widget code only** —
+  /// managers, global HTTP/native callbacks, and top-level helpers that have no
+  /// [WidgetRef] in scope. It is the same container the widget tree reads from
+  /// via [UncontrolledProviderScope], so reads stay consistent.
+  ///
+  /// Widgets must NOT use this: use the `ref` from ConsumerWidget/ConsumerState
+  /// instead, so provider scoping, disposal, and testability behave correctly.
+  ProviderContainer get rootRef => container;
+
   bool needInitStatus = true;
 
   // ignore: deprecated_member_use

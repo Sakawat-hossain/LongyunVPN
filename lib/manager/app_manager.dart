@@ -33,14 +33,14 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     });
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {
-        globalState.container
+        globalState.rootRef
             .read(storeActionProvider.notifier)
             .savePreferencesDebounce();
       }
     });
     ref.listenManual(needUpdateGroupsProvider, (prev, next) {
       if (prev != next) {
-        globalState.container
+        globalState.rootRef
             .read(proxiesActionProvider.notifier)
             .updateGroupsDebounce();
       }
@@ -87,7 +87,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       // Resume the per-second traffic/runtime polling paused while backgrounded.
       ref.read(setupActionProvider.notifier).resumePolling();
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final ref = globalState.container;
+        final ref = globalState.rootRef;
         ref.read(setupActionProvider.notifier).tryCheckIp();
         if (system.isAndroid) {
           ref.read(coreActionProvider.notifier).tryStartCore();
@@ -102,7 +102,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void didChangePlatformBrightness() {
-    globalState.container.read(themeActionProvider.notifier).updateBrightness();
+    globalState.rootRef.read(themeActionProvider.notifier).updateBrightness();
   }
 
   @override
@@ -189,7 +189,7 @@ class AppSidebarContainer extends ConsumerWidget {
   }
 
   void _handleToPage(PageLabel pageLabel) {
-    globalState.container
+    globalState.rootRef
         .read(currentPageLabelProvider.notifier)
         .toPage(pageLabel);
   }

@@ -30,7 +30,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   }
 
   Future<void> _handleHotKeyAction(HotAction action) async {
-    final ref = globalState.container;
+    final ref = globalState.rootRef;
     final commonAction = ref.read(commonActionProvider.notifier);
     final systemAction = ref.read(systemActionProvider.notifier);
     switch (action) {
@@ -82,7 +82,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       child: Actions(
         actions: {
           CloseWindowIntent: CallbackAction<CloseWindowIntent>(
-            onInvoke: (_) => globalState.container
+            onInvoke: (_) => globalState.rootRef
                 .read(systemActionProvider.notifier)
                 .handleBackOrExit(),
           ),

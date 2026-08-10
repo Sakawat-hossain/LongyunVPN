@@ -71,7 +71,7 @@ class Tray {
       );
     }
     final List<MenuItem> menuItems = [];
-    final ref = globalState.container;
+    final ref = globalState.rootRef;
     final commonAction = ref.read(commonActionProvider.notifier);
     final systemAction = ref.read(systemActionProvider.notifier);
     final setupAction = ref.read(setupActionProvider.notifier);

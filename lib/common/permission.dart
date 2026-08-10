@@ -34,9 +34,9 @@ class Permissions {
     const tag = LoadingTag.batteryOptimization;
     try {
       if (needWaitingBatteryOptimizationSettings) {
-        globalState.container.read(loadingProvider(tag).notifier).value = true;
+        globalState.rootRef.read(loadingProvider(tag).notifier).value = true;
       }
-      globalState.container
+      globalState.rootRef
           .read(batteryOptimizationDisableProvider.notifier)
           .value = await retry<bool>(
         task: () async {
@@ -47,7 +47,7 @@ class Permissions {
         maxAttempts: needWaitingBatteryOptimizationSettings ? 5 : 1,
       );
     } finally {
-      globalState.container.read(loadingProvider(tag).notifier).value = false;
+      globalState.rootRef.read(loadingProvider(tag).notifier).value = false;
       needWaitingBatteryOptimizationSettings = false;
     }
   }
@@ -57,13 +57,13 @@ class Permissions {
       return;
     }
     final res = await WifiSsidManager.instance.checkPermission();
-    final current = globalState.container.read(locationPermissionsProvider);
+    final current = globalState.rootRef.read(locationPermissionsProvider);
     if (res == WifiSsidPermission.granted ||
         current != WifiSsidPermission.permanentlyDenied) {
-      globalState.container.read(locationPermissionsProvider.notifier).value =
+      globalState.rootRef.read(locationPermissionsProvider.notifier).value =
           res;
     }
-    final needRequestPermission = globalState.container.read(
+    final needRequestPermission = globalState.rootRef.read(
       excludeSSIDsProvider.select((state) => state.isNotEmpty),
     );
     if (res == WifiSsidPermission.denied &&
@@ -72,11 +72,11 @@ class Permissions {
       try {
         _isRequestingLocation = true;
         final res = await WifiSsidManager.instance.requestPermission();
-        globalState.container.read(locationPermissionsProvider.notifier).value =
+        globalState.rootRef.read(locationPermissionsProvider.notifier).value =
             res;
         if (res != WifiSsidPermission.granted) {
           final ssid = await WifiSsidManager.instance.getSsid();
-          globalState.container.read(currentSSIDProvider.notifier).value = ssid;
+          globalState.rootRef.read(currentSSIDProvider.notifier).value = ssid;
         }
       } finally {
         _isRequestingLocation = false;
