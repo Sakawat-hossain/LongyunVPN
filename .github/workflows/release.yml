@@ -176,25 +176,28 @@ jobs:
         run: |
           if [ -n "$KEYSTORE_B64" ]; then
             # Strip any whitespace the secret may carry (CRLF, line wrapping, a
-            # trailing newline from Out-File) before decoding — those are the
-            # usual cause of a corrupt keystore on the runner.
+            # trailing newline from Out-File) before decoding — a common cause of
+            # a corrupt keystore on the runner.
             printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]' | base64 -d > android/app/keystore.jks
-            # A valid JKS starts with the magic bytes FEEDFEED. If it doesn't, the
-            # secret was mis-encoded (double base64 / BOM / wrong file). Fail early
-            # with an actionable message instead of a cryptic Der/keytool error
-            # during the build.
-            magic=$(head -c4 android/app/keystore.jks | od -An -tx1 | tr -d ' \n')
-            if [ "$magic" != "feedfeed" ]; then
-              echo "::error::ANDROID_KEYSTORE_BASE64 did not decode to a valid JKS (magic=$magic, expected feedfeed). Re-create the secret from the ORIGINAL keystore — do NOT regenerate the key (that breaks updates). See docs/ANDROID_SIGNING.md."
+
+            # --- Inspect the decoded keystore BEFORE signing ---
+            echo "::group::Decoded keystore inspection"
+            ls -l android/app/keystore.jks
+            file android/app/keystore.jks || true
+            # First bytes tell the format: JKS=feedfeed, PKCS12(DER)=3082/3081/3083.
+            # ASCII letters here (e.g. 6?/2f) mean it decoded to TEXT (mis-encoded).
+            head2=$(head -c2 android/app/keystore.jks | od -An -tx1 | tr -d ' \n')
+            echo "first bytes: $head2 (expect feed=JKS or 3082=PKCS12)"
+            # keytool reads both JKS and PKCS12; this is the real validity gate.
+            keytool -list -keystore android/app/keystore.jks \
+              -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" && KT_OK=1 || KT_OK=0
+            echo "::endgroup::"
+
+            if [ "$KT_OK" != "1" ]; then
+              echo "::error::Decoded keystore is not readable (see inspection above). ANDROID_KEYSTORE_BASE64 is mis-encoded (double base64 / BOM / wrong file), or ANDROID_STORE_PASSWORD/ANDROID_KEY_ALIAS is wrong. Re-create the secret from the ORIGINAL keystore — do NOT regenerate the key (that breaks updates). See docs/ANDROID_SIGNING.md."
               exit 1
             fi
-            # Confirm the store password + alias actually open the keystore.
-            if command -v keytool >/dev/null 2>&1; then
-              if ! keytool -list -keystore android/app/keystore.jks -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null 2>&1; then
-                echo "::error::Keystore decoded OK but keytool could not read alias '$KEY_ALIAS' with the given store password. Check ANDROID_STORE_PASSWORD and ANDROID_KEY_ALIAS."
-                exit 1
-              fi
-            fi
+
             {
               echo "storePassword=$STORE_PASSWORD"
               echo "keyAlias=$KEY_ALIAS"
