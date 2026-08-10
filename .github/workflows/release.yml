@@ -1,11 +1,13 @@
 name: release
 
-# Builds every platform/arch on a version tag (e.g. v1.0.5) and publishes them
+# Builds every platform/arch on a version tag (e.g. v1.1.8) and publishes them
 # to a single GitHub Release. Each job uploads its own assets directly (the
 # proven approach), so a failure in one platform never blocks the others.
-#   Windows: LongyunVPN-<ver>-windows-amd64-setup.exe / .zip
-#            LongyunVPN-<ver>-windows-arm64-setup.exe / .zip
-#   Android: LongyunVPN-arm64-v8a.apk / -armeabi-v7a.apk / -x86_64.apk
+#   Windows: windows-amd64 setup.exe/.zip, windows-arm64 setup.exe/.zip
+#   Android: arm64-v8a.apk, armeabi-v7a.apk, x86_64.apk
+#   macOS:   macos-arm64.dmg   (universal/amd64 = follow-up)
+#   Linux:   linux-amd64 deb/AppImage/rpm, linux-arm64 deb
+#   + SHA256SUMS over all assets, and GitHub's auto source archives.
 
 on:
   # Manual runs (Actions -> Run workflow) build the full matrix WITHOUT
@@ -110,10 +112,9 @@ jobs:
 
   android:
     name: android
-    # Android is paused for TAG releases while the arm64 APK build is fixed, but
-    # still runs on a manual `workflow_dispatch` so the build can be tested on
-    # demand. To re-enable for releases, allow tag pushes here too.
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    # Runs on tag releases and on manual workflow_dispatch. The keystore secret
+    # is validated up-front (see "Configure signing"), so a bad secret fails fast
+    # with an actionable message instead of shipping a debug-signed build.
     runs-on: ubuntu-latest
     steps:
       # A tagged release must never ship a debug-signed APK: debug keys use the
@@ -292,8 +293,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   linux:
-    name: linux-amd64
-    runs-on: ubuntu-22.04
+    name: linux-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # amd64 gets deb + AppImage + rpm; arm64 gets deb (setup.dart only adds
+          # AppImage/rpm for amd64). setup.dart builds for the runner's host arch.
+          - { arch: amd64, runner: ubuntu-22.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -341,3 +350,28 @@ jobs:
             dist/**/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # After every platform job, hash all published assets into SHA256SUMS and add
+  # it to the release. `always()` so it still runs (over whatever DID upload) if
+  # one platform fails; tag-only, since manual dispatch publishes nothing.
+  checksums:
+    name: checksums
+    needs: [windows, android, macos, linux]
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate and upload SHA256SUMS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p assets && cd assets
+          # Download every asset currently attached to the release.
+          gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --pattern '*' --clobber
+          # Don't hash a previous checksums file into the new one.
+          rm -f SHA256SUMS
+          if [ -z "$(ls -A .)" ]; then
+            echo "::warning::No release assets found to checksum."; exit 0
+          fi
+          sha256sum * > SHA256SUMS
+          echo "----- SHA256SUMS -----"; cat SHA256SUMS
+          gh release upload "${GITHUB_REF_NAME}" SHA256SUMS --repo "${GITHUB_REPOSITORY}" --clobber
