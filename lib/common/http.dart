@@ -13,7 +13,8 @@ class LongyunHttpOverrides extends HttpOverrides {
     final ref = globalState.container;
     final isStart = ref.read(isStartProvider);
     final suspend = ref.read(suspendProvider);
-    commonPrint.log('find $url proxy: $isStart');
+    // Deliberately don't log the request URL here: findProxy runs for every
+    // request, so logging $url would record the user's browsing/API targets.
     if (!isStart || suspend) return 'DIRECT';
     final mixedPort = ref.read(
       patchClashConfigProvider.select((state) => state.mixedPort),
@@ -24,7 +25,15 @@ class LongyunHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
-    client.badCertificateCallback = (_, _, _) => true;
+    // Never blanket-accept invalid certificates. This client also serves the
+    // app's own API/auth traffic (which is tunnelled through the local proxy),
+    // so accepting any cert would expose that traffic — including the Xboard
+    // token — to MITM. TLS validates end-to-end through the proxy, so real
+    // endpoints must present a valid chain. Only the loopback proxy control
+    // socket is trusted, and it speaks plaintext HTTP so this never fires for
+    // it anyway; the guard is a defensive no-op, not a bypass.
+    client.badCertificateCallback = (cert, host, port) =>
+        host == localhost || host == 'localhost' || host == '::1';
     client.findProxy = handleFindProxy;
     return client;
   }
