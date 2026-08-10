@@ -110,6 +110,10 @@ jobs:
 
   android:
     name: android
+    # TEMPORARILY DISABLED: the Android release build/publish is paused while the
+    # arm64 APK build failure is investigated separately. Windows/macOS/Linux
+    # still release normally. Re-enable by removing this `if: false`.
+    if: false
     runs-on: ubuntu-latest
     steps:
       # A tagged release must never ship a debug-signed APK: debug keys use the
