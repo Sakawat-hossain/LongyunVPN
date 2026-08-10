@@ -175,13 +175,32 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ -n "$KEYSTORE_B64" ]; then
-            echo "$KEYSTORE_B64" | base64 --decode > android/app/keystore.jks
+            # Strip any whitespace the secret may carry (CRLF, line wrapping, a
+            # trailing newline from Out-File) before decoding — those are the
+            # usual cause of a corrupt keystore on the runner.
+            printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]' | base64 -d > android/app/keystore.jks
+            # A valid JKS starts with the magic bytes FEEDFEED. If it doesn't, the
+            # secret was mis-encoded (double base64 / BOM / wrong file). Fail early
+            # with an actionable message instead of a cryptic Der/keytool error
+            # during the build.
+            magic=$(head -c4 android/app/keystore.jks | od -An -tx1 | tr -d ' \n')
+            if [ "$magic" != "feedfeed" ]; then
+              echo "::error::ANDROID_KEYSTORE_BASE64 did not decode to a valid JKS (magic=$magic, expected feedfeed). Re-create the secret from the ORIGINAL keystore — do NOT regenerate the key (that breaks updates). See docs/ANDROID_SIGNING.md."
+              exit 1
+            fi
+            # Confirm the store password + alias actually open the keystore.
+            if command -v keytool >/dev/null 2>&1; then
+              if ! keytool -list -keystore android/app/keystore.jks -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null 2>&1; then
+                echo "::error::Keystore decoded OK but keytool could not read alias '$KEY_ALIAS' with the given store password. Check ANDROID_STORE_PASSWORD and ANDROID_KEY_ALIAS."
+                exit 1
+              fi
+            fi
             {
               echo "storePassword=$STORE_PASSWORD"
               echo "keyAlias=$KEY_ALIAS"
               echo "keyPassword=$KEY_PASSWORD"
             } >> android/local.properties
-            echo "Release signing configured."
+            echo "Release signing configured and keystore verified."
           else
             echo "No keystore secret set — building a debug-signed APK/AAB."
           fi
