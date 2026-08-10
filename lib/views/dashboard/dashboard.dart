@@ -54,7 +54,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     if (res != true) {
       return;
     }
-    globalState.container.read(coreActionProvider.notifier).restartCore();
+    ref.read(coreActionProvider.notifier).restartCore();
   }
 
   List<Widget> _buildActions(bool isEdit) {

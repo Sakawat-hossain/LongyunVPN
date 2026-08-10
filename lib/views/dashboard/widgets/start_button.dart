@@ -50,7 +50,7 @@ class _StartButtonState extends ConsumerState<StartButton>
     isStart = !isStart;
     updateController();
     debouncer.call(FunctionTag.updateStatus, () {
-      globalState.container
+      ref
           .read(setupActionProvider.notifier)
           .updateStatus(isStart, isInit: !ref.read(initProvider));
     }, duration: commonDuration);
