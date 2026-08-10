@@ -8,6 +8,10 @@ name: release
 #   Android: LongyunVPN-arm64-v8a.apk / -armeabi-v7a.apk / -x86_64.apk
 
 on:
+  # Manual runs (Actions -> Run workflow) build the full matrix WITHOUT
+  # publishing a release — used to test-build a platform (e.g. Android) on
+  # demand and read the result, without cutting a tag.
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -97,6 +101,8 @@ jobs:
           }
 
       - name: Publish GitHub Release
+        # Only publish on a version tag; manual runs are test-builds only.
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
@@ -110,10 +116,10 @@ jobs:
 
   android:
     name: android
-    # TEMPORARILY DISABLED: the Android release build/publish is paused while the
-    # arm64 APK build failure is investigated separately. Windows/macOS/Linux
-    # still release normally. Re-enable by removing this `if: false`.
-    if: false
+    # Android is paused for TAG releases while the arm64 APK build is fixed, but
+    # still runs on a manual `workflow_dispatch` so the build can be tested on
+    # demand. To re-enable for releases, allow tag pushes here too.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       # A tagged release must never ship a debug-signed APK: debug keys use the
@@ -200,6 +206,8 @@ jobs:
         run: dart setup.dart android --arch amd64 --env stable -v
 
       - name: Publish GitHub Release
+        # Only publish on a version tag; manual runs are test-builds only.
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
@@ -255,6 +263,8 @@ jobs:
         run: dart setup.dart macos --env stable -v
 
       - name: Publish GitHub Release
+        # Only publish on a version tag; manual runs are test-builds only.
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
@@ -302,6 +312,8 @@ jobs:
         run: dart setup.dart linux --env stable -v
 
       - name: Publish GitHub Release
+        # Only publish on a version tag; manual runs are test-builds only.
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
