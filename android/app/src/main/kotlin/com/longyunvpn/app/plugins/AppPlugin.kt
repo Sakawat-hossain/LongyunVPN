@@ -262,9 +262,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         val am = getSystemService(GlobalState.application, ActivityManager::class.java)
         val task = am?.appTasks?.firstOrNull {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                it.taskInfo.taskId == activityRef?.get()?.taskId
+                it.taskInfo?.taskId == activityRef?.get()?.taskId
             } else {
-                it.taskInfo.id == activityRef?.get()?.taskId
+                it.taskInfo?.id == activityRef?.get()?.taskId
             }
         }
 

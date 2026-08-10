@@ -6,23 +6,66 @@
 // It adds a task that runs build_tool android before mergeNativeLibs.
 
 def buildkitDir = file("${project.projectDir}/../buildkit").absolutePath
-def launcher = "${buildkitDir}/run_build_tool.sh"
+def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+def launcher = file(isWindows ? "${buildkitDir}/run_build_tool.cmd" : "${buildkitDir}/run_build_tool.sh").absolutePath
 def projectRoot = file("${buildkitDir}/../../..").absolutePath
 def androidArch = System.getenv('ANDROID_ARCH')
 def targetPlatform = project.findProperty('target-platform') ?:
         rootProject.findProperty('target-platform')
-def androidNdk = System.getenv('ANDROID_NDK')
+
+Properties localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+def androidNdk = System.getenv('ANDROID_NDK') ?: localProperties.getProperty('ndk.dir')
+
+if (androidNdk == null || androidNdk.isEmpty()) {
+    // Try to get NDK from AGP's android extension if available
+    try {
+        if (project.extensions.findByName('android')?.ndkDirectory) {
+            androidNdk = project.android.ndkDirectory.absolutePath
+        }
+    } catch (Exception ignored) {}
+
+    if (androidNdk == null || androidNdk.isEmpty()) {
+        def sdkDir = localProperties.getProperty('sdk.dir')
+        if (sdkDir != null) {
+            def ndkRoot = new File(sdkDir, "ndk")
+            if (ndkRoot.exists()) {
+                def versions = ndkRoot.list().findAll { new File(ndkRoot, it).isDirectory() }
+                if (versions) {
+                    versions.sort()
+                    androidNdk = new File(ndkRoot, versions.last()).absolutePath
+                }
+            }
+        }
+    }
+}
+
 def archArgs = androidArch
         ? ['--arch', androidArch]
         : (targetPlatform ? ['--target-platform', targetPlatform.toString()] : [])
 
 task buildGoCore(type: Exec) {
     workingDir buildkitDir
-    commandLine 'bash', launcher, 'android', *archArgs
+    if (isWindows) {
+        commandLine 'cmd', '/c', launcher, 'android', *archArgs
+    } else {
+        commandLine 'bash', launcher, 'android', *archArgs
+    }
 
-    environment 'ANDROID_NDK', androidNdk
+    environment 'ANDROID_NDK', androidNdk ?: ''
     environment 'APP_ENV', project.hasProperty('appEnv') ? project.appEnv : 'pre'
     environment 'PROJECT_DIR', projectRoot
+    environment 'CD', projectRoot
+    if (flutterRoot != null) {
+        environment 'FLUTTER_ROOT', flutterRoot
+    }
 }
 
 def goCoreTask = buildGoCore

@@ -3,8 +3,8 @@ setlocal
 
 setlocal ENABLEDELAYEDEXPANSION
 
-SET BASEDIR=%~dp0
-SET PROJECT_DIR=%CD%
+SET "BASEDIR=%~dp0"
+if "%PROJECT_DIR%"=="" SET "PROJECT_DIR=%CD%"
 
 if not exist "%PROJECT_DIR%\pubspec.yaml" (
     echo Error: Could not find project root at "%PROJECT_DIR%"
@@ -15,17 +15,21 @@ if not exist "%PROJECT_DIR%\core\" (
     exit /b 1
 )
 
-SET BUILD_TOOL_PKG_DIR=%BASEDIR%build_tool
-SET BUILD_TOOL_TEMP_DIR=%PROJECT_DIR%\build\setup_build_tool
+SET "BUILD_TOOL_PKG_DIR=%BASEDIR%build_tool"
+SET "BUILD_TOOL_TEMP_DIR=%PROJECT_DIR%\build\setup_build_tool"
 
 if not exist "%BUILD_TOOL_TEMP_DIR%" (
     mkdir "%BUILD_TOOL_TEMP_DIR%"
 )
 cd /D "%BUILD_TOOL_TEMP_DIR%"
 
-SET DART=%FLUTTER_ROOT%\bin\cache\dart-sdk\bin\dart
+if "%FLUTTER_ROOT%"=="" (
+    SET "DART=dart"
+) else (
+    SET "DART=%FLUTTER_ROOT%\bin\cache\dart-sdk\bin\dart"
+)
 
-set BUILD_TOOL_PKG_DIR_POSIX=%BUILD_TOOL_PKG_DIR:\=/%
+set "BUILD_TOOL_PKG_DIR_POSIX=%BUILD_TOOL_PKG_DIR:\=/%"
 
 (
     echo name: setup_build_tool_runner
@@ -51,11 +55,11 @@ if not exist bin (
     echo ^}
 ) >bin\build_tool_runner.dart
 
-SET PRECOMPILED=bin\build_tool_runner.dill
+SET "PRECOMPILED=bin\build_tool_runner.dill"
 
 REM To detect changes in package we compare output of DIR /s (recursive)
-set PREV_PACKAGE_INFO=.dart_tool\package_info.prev
-set CUR_PACKAGE_INFO=.dart_tool\package_info.cur
+set "PREV_PACKAGE_INFO=.dart_tool\package_info.prev"
+set "CUR_PACKAGE_INFO=.dart_tool\package_info.cur"
 
 if not exist ".dart_tool" (
     mkdir ".dart_tool"

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'environment.dart';
 import 'error.dart';
 
@@ -135,16 +137,21 @@ class Target {
 
   String get ndkCcName {
     if (abi == null) throw Exception('Not an Android target');
+    String name;
     switch (abi) {
       case 'armeabi-v7a':
-        return 'armv7a-linux-androideabi21-clang';
+        name = 'armv7a-linux-androideabi21-clang';
+        break;
       case 'arm64-v8a':
-        return 'aarch64-linux-android21-clang';
+        name = 'aarch64-linux-android21-clang';
+        break;
       case 'x86_64':
-        return 'x86_64-linux-android21-clang';
+        name = 'x86_64-linux-android21-clang';
+        break;
       default:
         throw Exception('Unknown ABI: $abi');
     }
+    return Platform.isWindows ? '$name.cmd' : name;
   }
 
   @override

@@ -54,6 +54,12 @@ class GoBuilder {
       'GOARCH': target.goarch,
     };
 
+    final ldflags = [
+      config.goLdflags,
+      if (target.goos == 'android') '-linkmode=external',
+      if (target.goos == 'android') '-extldflags=-Wl,-z,max-page-size=16384',
+    ].join(' ');
+
     if (target.isLib) {
       env['CGO_ENABLED'] = '1';
       env['CC'] = _resolveCc(target);
@@ -64,7 +70,7 @@ class GoBuilder {
 
     final args = [
       'build',
-      '-ldflags=${config.goLdflags}',
+      '-ldflags=$ldflags',
       '-tags=${config.tags}',
       if (target.isLib) '-buildmode=c-shared',
       '-o',
