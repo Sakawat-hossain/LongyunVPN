@@ -243,8 +243,8 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
 
   void order(int oldIndex, int newIndex) {
     final previous = List<Rule>.from(value);
-    int insertIndex = newIndex;
-    if (oldIndex < newIndex) insertIndex -= 1;
+    // onReorderItem already adjusts the target index for the removed item.
+    final insertIndex = newIndex;
     final nextItems = List<Rule>.from(previous);
     final item = nextItems.removeAt(oldIndex);
     nextItems.insert(insertIndex, item);
@@ -308,8 +308,8 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
 
   void order(int oldIndex, int newIndex) {
     final previous = List<Rule>.from(value);
-    int insertIndex = newIndex;
-    if (oldIndex < newIndex) insertIndex -= 1;
+    // onReorderItem already adjusts the target index for the removed item.
+    final insertIndex = newIndex;
     final nextItems = List<Rule>.from(previous);
     final item = nextItems.removeAt(oldIndex);
     nextItems.insert(insertIndex, item);
@@ -377,8 +377,8 @@ class ProfileCustomRules extends _$ProfileCustomRules with AsyncNotifierMixin {
 
   void order(int oldIndex, int newIndex) {
     final previous = List<Rule>.from(value);
-    int insertIndex = newIndex;
-    if (oldIndex < newIndex) insertIndex -= 1;
+    // onReorderItem already adjusts the target index for the removed item.
+    final insertIndex = newIndex;
     final nextItems = List<Rule>.from(previous);
     final item = nextItems.removeAt(oldIndex);
     nextItems.insert(insertIndex, item);
@@ -480,8 +480,8 @@ class ProxyGroups extends _$ProxyGroups with AsyncNotifierMixin {
 
   void order(int oldIndex, int newIndex) {
     final previous = List<ProxyGroup>.from(value);
-    int insertIndex = newIndex;
-    if (oldIndex < newIndex) insertIndex -= 1;
+    // onReorderItem already adjusts the target index for the removed item.
+    final insertIndex = newIndex;
     final nextItems = List<ProxyGroup>.from(previous);
     final item = nextItems.removeAt(oldIndex);
     nextItems.insert(insertIndex, item);

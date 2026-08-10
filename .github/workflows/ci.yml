@@ -44,10 +44,8 @@ jobs:
       - name: Code generation
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # Info-level notices (e.g. framework-deprecation hints tied to the pinned
-      # Flutter version) shouldn't fail the gate; errors and warnings still do.
       - name: Analyze
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze
 
       - name: Test (root package)
         run: flutter test

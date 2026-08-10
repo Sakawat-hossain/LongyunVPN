@@ -127,7 +127,9 @@ class _ExternalDismissibleState extends State<ExternalDismissible>
     }
 
     return SizeTransition(
-      axisAlignment: 0.5,
+      // Was axisAlignment: 0.5 (deprecated). For a vertical axis the framework
+      // migration maps it to Alignment(-1.0, axisAlignment).
+      alignment: const Alignment(-1.0, 0.5),
       sizeFactor: _resizeAnimation,
       axis: Axis.vertical,
       child: content,
