@@ -178,7 +178,7 @@ class _EditProxiesViewState extends ConsumerState<EditProxiesView>
     final isBottomSheet =
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.85
+        ? ref.read(viewSizeProvider).height * 0.85
         : double.maxFinite;
     return SizedBox(
       height: height,
@@ -404,7 +404,7 @@ class _AddProxiesViewState extends ConsumerState<_AddProxiesView>
     final isBottomSheet =
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.8
+        ? ref.read(viewSizeProvider).height * 0.8
         : double.maxFinite;
     final profileId = ProfileIdProvider.of(context)!.profileId;
     final dismissGroups = ref.watch(itemsProvider('${key}_groups'));

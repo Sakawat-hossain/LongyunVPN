@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +57,7 @@ class _SystemBackBlockState extends ConsumerState<SystemBackBlock> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      globalState.container.read(backBlockProvider.notifier).backBlock();
+      ref.read(backBlockProvider.notifier).backBlock();
     });
   }
 
@@ -66,7 +65,7 @@ class _SystemBackBlockState extends ConsumerState<SystemBackBlock> {
   void dispose() {
     super.dispose();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      globalState.container.read(backBlockProvider.notifier).unBackBlock();
+      ref.read(backBlockProvider.notifier).unBackBlock();
     });
   }
 

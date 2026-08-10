@@ -23,7 +23,6 @@ class ProvidersView extends ConsumerStatefulWidget {
 
 class _ProvidersViewState extends ConsumerState<ProvidersView> {
   Future<void> _updateProviders() async {
-    final ref = globalState.container;
     final providers = ref.read(providersProvider);
     final List<UpdatingMessage> messages = [];
     final updateProviders = providers.map<Future>((provider) async {

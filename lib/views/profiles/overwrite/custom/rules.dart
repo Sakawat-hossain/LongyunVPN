@@ -659,7 +659,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final rule = ref.watch(ruleProvider);
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.60
+        ? ref.read(viewSizeProvider).height * 0.60
         : double.maxFinite;
     return AdaptiveSheetScaffold(
       actions: [IconButtonData(icon: Icons.check, onPressed: _handleSave)],
@@ -729,7 +729,7 @@ class _RuleTypeSelectedView extends ConsumerWidget {
     final isBottomSheet =
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.70
+        ? ref.read(viewSizeProvider).height * 0.70
         : double.maxFinite;
     final currentRuleAction = ref.watch(
       ruleProvider.select((state) => state.ruleAction),
@@ -803,7 +803,7 @@ class _RuleTargetSelectedView extends ConsumerWidget {
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final profileId = ProfileIdProvider.of(context)!.profileId;
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.70
+        ? ref.read(viewSizeProvider).height * 0.70
         : double.maxFinite;
     final vm2 = ref.watch(
       customOverwriteDateProvider(profileId).select((state) {
@@ -937,7 +937,7 @@ class _RuleProviderSelectedView extends ConsumerWidget {
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final profileId = ProfileIdProvider.of(context)!.profileId;
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.70
+        ? ref.read(viewSizeProvider).height * 0.70
         : double.maxFinite;
     final ruleProviders = ref
         .watch(
@@ -1007,7 +1007,7 @@ class _SubRuleSelectedView extends ConsumerWidget {
         SheetProvider.of(context)?.type == SheetType.bottomSheet;
     final profileId = ProfileIdProvider.of(context)!.profileId;
     final height = isBottomSheet
-        ? globalState.container.read(viewSizeProvider).height * 0.70
+        ? ref.read(viewSizeProvider).height * 0.70
         : double.maxFinite;
 
     final subRules = ref

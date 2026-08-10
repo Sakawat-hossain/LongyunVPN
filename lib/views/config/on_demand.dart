@@ -46,7 +46,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
       return;
     }
     final res = await wifiSsidManager.requestPermission();
-    globalState.container.read(locationPermissionsProvider.notifier).value =
+    ref.read(locationPermissionsProvider.notifier).value =
         res;
     if (!mounted && res != WifiSsidPermission.permanentlyDenied) {
       return;
@@ -95,7 +95,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     if (newSSID == null || ssid == newSSID) {
       return;
     }
-    globalState.container.read(excludeSSIDsProvider.notifier).update((state) {
+    ref.read(excludeSSIDsProvider.notifier).update((state) {
       final newSSIDS = state.toSet();
       if (ssid != null) {
         newSSIDS.remove(ssid);
@@ -105,7 +105,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
   }
 
   void _handleReorder(int oldIndex, newIndex) {
-    globalState.container.read(excludeSSIDsProvider.notifier).update((value) {
+    ref.read(excludeSSIDsProvider.notifier).update((value) {
       final nextItems = List<String>.from(value);
       final item = nextItems.removeAt(oldIndex);
       nextItems.insert(newIndex, item);
@@ -159,7 +159,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
 
   void _handleDelete() {
     final selectedItems = ref.read(itemsProvider(key));
-    globalState.container.read(excludeSSIDsProvider.notifier).update((
+    ref.read(excludeSSIDsProvider.notifier).update((
       excludeSSIDs,
     ) {
       return excludeSSIDs

@@ -33,7 +33,7 @@ class DeveloperView extends ConsumerWidget {
           minVerticalPadding: 12,
           onTap: () {
             for (int i = 0; i < 1000; i++) {
-              globalState.container
+              ref
                   .read(logsProvider.notifier)
                   .add(
                     Log.app(
@@ -67,7 +67,7 @@ class DeveloperView extends ConsumerWidget {
             if (res != true) {
               return;
             }
-            await globalState.container
+            await ref
                 .read(storeActionProvider.notifier)
                 .handleClear();
           },
@@ -85,7 +85,7 @@ class DeveloperView extends ConsumerWidget {
           title: Text(appLocalizations.pruneCache),
           minVerticalPadding: 12,
           onTap: () async {
-            await globalState.container
+            await ref
                 .read(storeActionProvider.notifier)
                 .shakingStore();
           },

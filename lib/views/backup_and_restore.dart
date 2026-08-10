@@ -63,7 +63,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     final appLocalizations = context.appLocalizations;
     final res = await globalState.loadingRun<bool>(
       () async {
-        final path = await globalState.container
+        final path = await ref
             .read(backupActionProvider.notifier)
             .backup();
         if (path.isEmpty) {
@@ -86,7 +86,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     final res = await globalState.loadingRun<bool>(
       () async {
         await _client?.restore();
-        await globalState.container
+        await ref
             .read(backupActionProvider.notifier)
             .restore(option);
         return true;
@@ -113,7 +113,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     final appLocalizations = context.appLocalizations;
     final res = await globalState.loadingRun<bool>(
       () async {
-        final path = await globalState.container
+        final path = await ref
             .read(backupActionProvider.notifier)
             .backup();
         if (path.isEmpty) {
@@ -144,7 +144,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     await File(path).safeCopy(await appPath.backupFilePath);
     final res = await globalState.loadingRun<bool>(
       () async {
-        await globalState.container
+        await ref
             .read(backupActionProvider.notifier)
             .restore(option);
         return true;
