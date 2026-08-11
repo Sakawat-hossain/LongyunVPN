@@ -185,21 +185,46 @@ jobs:
             # a corrupt keystore on the runner.
             printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]' | base64 -d > android/app/keystore.jks
 
-            # --- Inspect the decoded keystore BEFORE signing ---
+            # --- Verify BEFORE signing, one layer at a time, so a failure says
+            # exactly which secret is wrong instead of lumping them together.
+            # Only lengths of secrets are printed, never their values.
             echo "::group::Decoded keystore inspection"
             ls -l android/app/keystore.jks
             file android/app/keystore.jks || true
             # First bytes tell the format: JKS=feedfeed, PKCS12(DER)=3082/3081/3083.
-            # ASCII letters here (e.g. 6?/2f) mean it decoded to TEXT (mis-encoded).
+            # ASCII here (e.g. 6? / 2f) means it decoded to TEXT = mis-encoded.
             head2=$(head -c2 android/app/keystore.jks | od -An -tx1 | tr -d ' \n')
-            echo "first bytes: $head2 (expect feed=JKS or 3082=PKCS12)"
-            # keytool reads both JKS and PKCS12; this is the real validity gate.
-            keytool -list -keystore android/app/keystore.jks \
-              -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" && KT_OK=1 || KT_OK=0
+            echo "first bytes : $head2 (expect 'feed' = JKS, or '3082' = PKCS12)"
+            # Lengths catch silently mangled secrets — e.g. a password typed in
+            # cmd.exe loses '^' characters, so the length comes up short.
+            echo "store pwd len: ${#STORE_PASSWORD}"
+            echo "key pwd len  : ${#KEY_PASSWORD}"
+            echo "alias        : '$KEY_ALIAS' (len ${#KEY_ALIAS})"
             echo "::endgroup::"
 
-            if [ "$KT_OK" != "1" ]; then
-              echo "::error::Decoded keystore is not readable (see inspection above). ANDROID_KEYSTORE_BASE64 is mis-encoded (double base64 / BOM / wrong file), or ANDROID_STORE_PASSWORD/ANDROID_KEY_ALIAS is wrong. Re-create the secret from the ORIGINAL keystore — do NOT regenerate the key (that breaks updates). See docs/ANDROID_SIGNING.md."
+            # Layer 1 — is it a keystore at all?
+            case "$head2" in
+              feed|3081|3082|3083) ;;
+              *)
+                echo "::error::ANDROID_KEYSTORE_BASE64 did not decode to a keystore (first bytes '$head2'; 'file' output above). The secret is mis-encoded — most often double base64-encoded, or the base64 of the wrong file. Re-create it from the ORIGINAL keystore; do NOT regenerate the key (that breaks updates for existing installs)."
+                exit 1
+                ;;
+            esac
+
+            # Layer 2 — does the STORE PASSWORD open it? (no -alias here)
+            if ! keytool -list -keystore android/app/keystore.jks \
+                 -storepass "$STORE_PASSWORD" > /tmp/ks_list.txt 2>/tmp/ks_err.txt; then
+              echo "--- keytool said ---"; cat /tmp/ks_err.txt
+              echo "::error::The keystore decoded fine, so ANDROID_KEYSTORE_BASE64 is CORRECT — but ANDROID_STORE_PASSWORD does not open it. Check that secret (see the length above; note cmd.exe eats '^' characters, and a trailing newline counts)."
+              exit 1
+            fi
+
+            # Layer 3 — does the alias exist? Print the ones that do.
+            echo "--- aliases in keystore ---"
+            grep -iE "^[^,]+, .*(PrivateKeyEntry|trustedCertEntry)" /tmp/ks_list.txt || cat /tmp/ks_list.txt
+            if ! keytool -list -keystore android/app/keystore.jks \
+                 -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+              echo "::error::Keystore opens and the store password is correct, but alias '$KEY_ALIAS' is not in it. Set ANDROID_KEY_ALIAS to one of the aliases listed above."
               exit 1
             fi
 
