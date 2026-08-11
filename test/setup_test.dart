@@ -17,11 +17,9 @@ void main() {
         verbose: false,
       );
 
-      expect(args, [
-        '--release',
-        '--dart-define-from-file=env.json',
-        '--split-per-abi',
-      ]);
+      // Bare (no '--'): these are joined into
+      // --flutter-build-args=a,b,c and flutter_distributor adds the dashes.
+      expect(args, ['dart-define-from-file=env.json', 'split-per-abi']);
     });
 
     test('adds verbose to flutter build args with -v', () {
@@ -31,10 +29,9 @@ void main() {
       );
 
       expect(args, [
-        '--release',
-        '--verbose',
-        '--dart-define-from-file=env.json',
-        '--split-per-abi',
+        'verbose',
+        'dart-define-from-file=env.json',
+        'split-per-abi',
       ]);
     });
   });

@@ -28,10 +28,18 @@ const _whitelistInfo =
     'network/IP change.';
 
 Future<void> _openWhitelist() async {
-  await launchUrl(
-    Uri.parse(_whitelistUrl),
-    mode: LaunchMode.externalApplication,
-  );
+  final uri = Uri.parse(_whitelistUrl);
+  // Keep the user inside the app: inAppBrowserView is an embedded Custom Tab
+  // (Android) / SFSafariViewController (iOS), so verification happens without
+  // leaving LongyunVPN. Desktop has no in-app view, so url_launcher falls back
+  // to the default browser there — try the in-app mode first and only fall back
+  // if the platform rejects it.
+  try {
+    if (await launchUrl(uri, mode: LaunchMode.inAppBrowserView)) return;
+  } catch (_) {
+    // fall through to the platform default below
+  }
+  await launchUrl(uri, mode: LaunchMode.platformDefault);
 }
 
 void _showWhitelistInfo(BuildContext context) {
@@ -399,7 +407,6 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
   bool _refreshing = false;
   bool _justCompleted = false;
   int _checked = 0;
-  String _query = '';
 
   @override
   void initState() {
@@ -506,14 +513,7 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
   }
 
   List<_NodeInfo> get _visibleNodes {
-    final q = _query.trim().toLowerCase();
-    final filtered = q.isEmpty
-        ? _nodes.toList()
-        : _nodes
-            .where((n) =>
-                n.name.toLowerCase().contains(q) ||
-                (_countryCode(n.name)?.toLowerCase().contains(q) ?? false))
-            .toList();
+    final filtered = _nodes.toList();
     // Sort alphabetically by country code, then by node name.
     filtered.sort((a, b) {
       final ca = _countryCode(a.name) ?? 'ZZ';
@@ -572,20 +572,6 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: TextField(
-            decoration: InputDecoration(
-              isDense: true,
-              prefixIcon: const Icon(Icons.search, size: 20),
-              hintText: l.search,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onChanged: (v) => setState(() => _query = v),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Row(
             children: [
               Expanded(
@@ -597,9 +583,8 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
               ),
               const SizedBox(width: 4),
               IconButton(
-                // Hover (desktop) / long-press (mobile) shows the full text;
-                // tapping opens the same explanation in a dialog.
-                tooltip: _whitelistInfo,
+                // No hover tooltip: the full explanation is long and covered the
+                // page on hover. Tap opens it in a dialog instead.
                 icon: const Icon(Icons.info_outline),
                 onPressed: () => _showWhitelistInfo(context),
               ),
