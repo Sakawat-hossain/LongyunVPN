@@ -119,6 +119,12 @@ jobs:
             dist/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GitHub switched the default runner Node from 20 to 24. Node 24
+          # validates TLS against its own bundled CA store, which makes the
+          # publish action fail with "self-signed certificate" on runners whose
+          # egress is TLS-inspected. Trust the OS store, where the runner's CA
+          # already lives.
+          NODE_OPTIONS: --use-system-ca
 
   android:
     name: android
@@ -269,6 +275,12 @@ jobs:
             dist/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GitHub switched the default runner Node from 20 to 24. Node 24
+          # validates TLS against its own bundled CA store, which makes the
+          # publish action fail with "self-signed certificate" on runners whose
+          # egress is TLS-inspected. Trust the OS store, where the runner's CA
+          # already lives.
+          NODE_OPTIONS: --use-system-ca
 
   macos:
     name: macos-${{ matrix.arch }}
@@ -326,6 +338,12 @@ jobs:
             dist/**/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GitHub switched the default runner Node from 20 to 24. Node 24
+          # validates TLS against its own bundled CA store, which makes the
+          # publish action fail with "self-signed certificate" on runners whose
+          # egress is TLS-inspected. Trust the OS store, where the runner's CA
+          # already lives.
+          NODE_OPTIONS: --use-system-ca
 
   linux:
     name: linux-amd64
@@ -380,6 +398,12 @@ jobs:
             dist/**/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GitHub switched the default runner Node from 20 to 24. Node 24
+          # validates TLS against its own bundled CA store, which makes the
+          # publish action fail with "self-signed certificate" on runners whose
+          # egress is TLS-inspected. Trust the OS store, where the runner's CA
+          # already lives.
+          NODE_OPTIONS: --use-system-ca
 
   # After every platform job, hash all published assets into SHA256SUMS and add
   # it to the release. `always()` so it still runs (over whatever DID upload) if
