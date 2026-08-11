@@ -343,6 +343,7 @@ enum PageLabel {
   premium,
   profiles,
   tools,
+  settings,
   logs,
   requests,
   resources,

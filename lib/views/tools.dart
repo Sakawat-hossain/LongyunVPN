@@ -32,8 +32,6 @@ class ToolsView extends ConsumerStatefulWidget {
 }
 
 class _ToolViewState extends ConsumerState<ToolsView> {
-  bool _showSettings = false;
-
   Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
       leading: navigationItem.icon,
@@ -65,46 +63,6 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       items: [const _InfoItem()],
       isFirst: true,
     );
-  }
-
-  // Settings, behind a Show/Hide toggle on the section header.
-  List<Widget> _getSettingList() {
-    final settingItems = <Widget>[
-      const _LocaleItem(),
-      const _ThemeItem(),
-      const _BackupItem(),
-      if (system.isDesktop) const _HotkeyItem(),
-      if (system.isWindows) const _LoopbackItem(),
-      if (system.isAndroid) const _AccessItem(),
-      const _ConfigItem(),
-      const _AdvancedConfigItem(),
-      const _SettingItem(),
-      if (system.isDesktop) const _SplitTunnelItem(),
-      const _DiagnosticsItem(),
-      const _LeakTestItem(),
-    ];
-    return [
-      ListHeader(
-        title: context.appLocalizations.settings,
-        actions: [
-          TextButton.icon(
-            onPressed: () => setState(() => _showSettings = !_showSettings),
-            icon: Icon(
-              _showSettings ? Icons.visibility_off : Icons.visibility,
-              size: 18,
-            ),
-            label: Text(_showSettings
-                ? context.appLocalizations.hide
-                : context.appLocalizations.show),
-          ),
-        ],
-      ),
-      if (_showSettings)
-        for (var i = 0; i < settingItems.length; i++) ...[
-          settingItems[i],
-          if (i < settingItems.length - 1) const Divider(height: 0),
-        ],
-    ];
   }
 
   // Other: the "more tools" nav entries (Resources, Logs…) + Disclaimer +
@@ -139,17 +97,53 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         (state) => VM2(state.locale, state.developerMode),
       ),
     );
-    final items = [
-      ..._getAboutList(),
-      ..._getSettingList(),
-      _buildOtherSection(vm2.b),
-    ];
+    final items = [..._getAboutList(), _buildOtherSection(vm2.b)];
     return CommonScaffold(
       title: context.appLocalizations.tools,
       body: ListView.builder(
         key: toolsStoreKey,
         itemCount: items.length,
         itemBuilder: (_, index) => items[index],
+        padding: const EdgeInsets.only(bottom: 20),
+      ),
+    );
+  }
+}
+
+/// Settings page.
+///
+/// This used to be a collapsible section inside Tools; it is now its own
+/// top-level destination. It lives in this file so it can keep using the
+/// private setting item widgets below.
+class SettingsView extends ConsumerWidget {
+  const SettingsView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = <Widget>[
+      const _LocaleItem(),
+      const _ThemeItem(),
+      const _BackupItem(),
+      if (system.isDesktop) const _HotkeyItem(),
+      if (system.isWindows) const _LoopbackItem(),
+      if (system.isAndroid) const _AccessItem(),
+      const _ConfigItem(),
+      const _AdvancedConfigItem(),
+      const _SettingItem(),
+      if (system.isDesktop) const _SplitTunnelItem(),
+      const _DiagnosticsItem(),
+      const _LeakTestItem(),
+    ];
+    return CommonScaffold(
+      title: context.appLocalizations.settings,
+      body: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (_, index) => Column(
+          children: [
+            items[index],
+            if (index < items.length - 1) const Divider(height: 0),
+          ],
+        ),
         padding: const EdgeInsets.only(bottom: 20),
       ),
     );

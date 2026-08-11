@@ -45,7 +45,8 @@ class Navigation {
         builder: (_) =>
             const RequestsView(key: GlobalObjectKey(PageLabel.requests)),
         description: 'requestsDesc',
-        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
+        // Lives inside Tools only ('more'), not in the sidebar.
+        modes: [NavigationItemMode.more],
       ),
       NavigationItem(
         icon: const Icon(Icons.ballot),
@@ -53,7 +54,8 @@ class Navigation {
         builder: (_) =>
             const ConnectionsView(key: GlobalObjectKey(PageLabel.connections)),
         description: 'connectionsDesc',
-        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
+        // Lives inside Tools only ('more'), not in the sidebar.
+        modes: [NavigationItemMode.more],
       ),
       NavigationItem(
         icon: const Icon(Icons.storage),
@@ -76,6 +78,15 @@ class Navigation {
         icon: const Icon(Icons.construction),
         label: PageLabel.tools,
         builder: (_) => const ToolsView(key: GlobalObjectKey(PageLabel.tools)),
+        modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
+      ),
+      // Settings was a collapsible section inside Tools; it is now its own
+      // top-level destination.
+      NavigationItem(
+        icon: const Icon(Icons.settings),
+        label: PageLabel.settings,
+        builder: (_) =>
+            const SettingsView(key: GlobalObjectKey(PageLabel.settings)),
         modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
       ),
     ];
