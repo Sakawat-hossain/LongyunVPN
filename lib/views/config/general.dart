@@ -53,17 +53,7 @@ class UaItem extends ConsumerWidget {
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
       delegate: OptionsDelegate<String?>(
         title: 'UA',
-        // Panels choose the subscription format from the UA. Keep a Meta-class
-        // token first ('flclash' / 'meta' are matched ahead of the shorter
-        // 'clash'), because a plain-Clash match makes the panel drop every
-        // vless/hysteria2/tuic/anytls node. ClashforWindows is kept only for
-        // panels that still gate on it, and is expected to lose those nodes.
-        options: [
-          null,
-          'flclash/v1.0.0',
-          'clash.meta/v1.19.0',
-          'ClashforWindows/0.19.23',
-        ],
+        options: [null, 'clash-verge/v2.4.2', 'ClashforWindows/0.19.23'],
         value: globalUa,
         onChanged: (value) {
           ref
