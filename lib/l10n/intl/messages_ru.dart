@@ -302,6 +302,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage(
       "Импорт из буфера обмена",
     ),
+    "close": MessageLookupByLibrary.simpleMessage("Закрыть"),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Цветовые схемы"),
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
@@ -1439,8 +1440,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Конфигурация WebDAV",
     ),
+    "whitelistInfo": MessageLookupByLibrary.simpleMessage(
+      "В целях безопасности и оптимизации сети ваш текущий IP-адрес должен быть добавлен в белый список перед доступом к серверам.\n\nПосле проверки:\n✓ Пинг и статус серверов будут отображаться корректно\n✓ Все серверы станут доступны\n✓ Скорость и стабильность соединения улучшатся\n\nЕсли IP-адрес вашей сети изменится, потребуется повторная проверка для нового адреса. Это не ошибка — проверка нужна только один раз при смене сети или IP-адреса.",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
+    ),
+    "whitelistWhyTitle": MessageLookupByLibrary.simpleMessage(
+      "Зачем нужно подтверждать IP-адрес?",
+    ),
+    "whitelistYourIp": MessageLookupByLibrary.simpleMessage(
+      "Добавить ваш IP в белый список",
     ),
     "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),

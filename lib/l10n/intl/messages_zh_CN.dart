@@ -223,6 +223,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearData": MessageLookupByLibrary.simpleMessage("清除数据"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("导出剪贴板"),
     "clipboardImport": MessageLookupByLibrary.simpleMessage("剪贴板导入"),
+    "close": MessageLookupByLibrary.simpleMessage("关闭"),
     "color": MessageLookupByLibrary.simpleMessage("颜色"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("配色方案"),
     "columns": MessageLookupByLibrary.simpleMessage("列数"),
@@ -970,7 +971,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "等待支付。支付完成后，点击下方激活。",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
+    "whitelistInfo": MessageLookupByLibrary.simpleMessage(
+      "出于安全和网络优化的考虑，在访问服务器之前，必须将您当前的 IP 地址加入白名单。\n\n验证后：\n✓ 服务器延迟/状态将正确显示\n✓ 所有服务器都可以访问\n✓ 连接速度和稳定性将得到改善\n\n如果您的网络 IP 发生变化，需要重新验证以将新的 IP 地址加入白名单。这不是错误——每次更换网络或 IP 时只需验证一次。",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
+    "whitelistWhyTitle": MessageLookupByLibrary.simpleMessage("为什么需要验证我的 IP？"),
+    "whitelistYourIp": MessageLookupByLibrary.simpleMessage("将您的 IP 加入白名单"),
     "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

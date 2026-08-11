@@ -16,16 +16,6 @@ import 'package:yaml/yaml.dart';
 /// IP whitelist verification for LongyunVPN. Users must whitelist their current
 /// public IP before servers become reachable / report status.
 const _whitelistUrl = 'https://verify.solionvpn.com/longyunvpn';
-const _whitelistInfo =
-    'For security and network optimization, your current IP address must be '
-    'added to our whitelist before accessing servers.\n\n'
-    'After verification:\n'
-    '✓ Server ping/status will be displayed correctly\n'
-    '✓ All servers will become accessible\n'
-    '✓ Connection speed and stability will improve\n\n'
-    'If your network IP changes, you need to verify again to whitelist the new '
-    'IP address. This is not an error — you only need to verify once per '
-    'network/IP change.';
 
 Future<void> _openWhitelist() async {
   final uri = Uri.parse(_whitelistUrl);
@@ -43,23 +33,24 @@ Future<void> _openWhitelist() async {
 }
 
 void _showWhitelistInfo(BuildContext context) {
+  final l = context.appLocalizations;
   showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
       icon: const Icon(Icons.verified_user_outlined),
-      title: const Text('Why do I need to verify my IP?'),
-      content: const SingleChildScrollView(child: Text(_whitelistInfo)),
+      title: Text(l.whitelistWhyTitle),
+      content: SingleChildScrollView(child: Text(l.whitelistInfo)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('Close'),
+          child: Text(l.close),
         ),
         FilledButton(
           onPressed: () {
             Navigator.of(ctx).pop();
             _openWhitelist();
           },
-          child: const Text('Whitelist Your IP'),
+          child: Text(l.whitelistYourIp),
         ),
       ],
     ),
@@ -578,7 +569,7 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
                 child: FilledButton.tonalIcon(
                   onPressed: _openWhitelist,
                   icon: const Icon(Icons.verified_user_outlined, size: 18),
-                  label: const Text('Whitelist Your IP'),
+                  label: Text(l.whitelistYourIp),
                 ),
               ),
               const SizedBox(width: 4),
@@ -661,13 +652,11 @@ class _SummaryCard extends StatelessWidget {
       refreshLabel = l.refreshStatus;
     }
 
-    return Container(
+    // Use the app's standard card (same as every dashboard widget and the node
+    // cards below) instead of a hand-rolled Container, so the radius and
+    // surface tone match the rest of the UI.
+    return CommonCard(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-        color: theme.colorScheme.surface,
-      ),
       child: Column(
         children: [
           Row(

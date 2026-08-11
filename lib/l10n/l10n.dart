@@ -5798,6 +5798,41 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Close`
+  String get close {
+    return Intl.message('Close', name: 'close', desc: '', args: []);
+  }
+
+  /// `Whitelist Your IP`
+  String get whitelistYourIp {
+    return Intl.message(
+      'Whitelist Your IP',
+      name: 'whitelistYourIp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Why do I need to verify my IP?`
+  String get whitelistWhyTitle {
+    return Intl.message(
+      'Why do I need to verify my IP?',
+      name: 'whitelistWhyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `For security and network optimization, your current IP address must be added to our whitelist before accessing servers.\n\nAfter verification:\n✓ Server ping/status will be displayed correctly\n✓ All servers will become accessible\n✓ Connection speed and stability will improve\n\nIf your network IP changes, you need to verify again to whitelist the new IP address. This is not an error — you only need to verify once per network/IP change.`
+  String get whitelistInfo {
+    return Intl.message(
+      'For security and network optimization, your current IP address must be added to our whitelist before accessing servers.\n\nAfter verification:\n✓ Server ping/status will be displayed correctly\n✓ All servers will become accessible\n✓ Connection speed and stability will improve\n\nIf your network IP changes, you need to verify again to whitelist the new IP address. This is not an error — you only need to verify once per network/IP change.',
+      name: 'whitelistInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

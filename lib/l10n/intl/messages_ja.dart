@@ -239,6 +239,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("クリップボードにエクスポート"),
     "clipboardImport": MessageLookupByLibrary.simpleMessage("クリップボードからインポート"),
+    "close": MessageLookupByLibrary.simpleMessage("閉じる"),
     "color": MessageLookupByLibrary.simpleMessage("カラー"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("カラースキーム"),
     "columns": MessageLookupByLibrary.simpleMessage("列"),
@@ -1122,7 +1123,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "支払いを待っています。支払い後、下をタップして有効化してください。",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
+    "whitelistInfo": MessageLookupByLibrary.simpleMessage(
+      "セキュリティとネットワーク最適化のため、サーバーへ接続する前に現在の IP アドレスをホワイトリストに登録する必要があります。\n\n登録後：\n✓ サーバーの Ping／状態が正しく表示されます\n✓ すべてのサーバーに接続できます\n✓ 接続速度と安定性が向上します\n\nネットワークの IP が変わった場合は、新しい IP アドレスを再度登録してください。これはエラーではありません。ネットワークまたは IP が変わるたびに一度だけ登録すれば十分です。",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
+    "whitelistWhyTitle": MessageLookupByLibrary.simpleMessage(
+      "なぜ IP の確認が必要ですか？",
+    ),
+    "whitelistYourIp": MessageLookupByLibrary.simpleMessage("IP をホワイトリストに登録"),
     "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

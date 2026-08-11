@@ -293,6 +293,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearData": MessageLookupByLibrary.simpleMessage("Clear Data"),
     "clipboardExport": MessageLookupByLibrary.simpleMessage("Export clipboard"),
     "clipboardImport": MessageLookupByLibrary.simpleMessage("Clipboard import"),
+    "close": MessageLookupByLibrary.simpleMessage("Close"),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Color schemes"),
     "columns": MessageLookupByLibrary.simpleMessage("Columns"),
@@ -1358,7 +1359,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV configuration",
     ),
+    "whitelistInfo": MessageLookupByLibrary.simpleMessage(
+      "For security and network optimization, your current IP address must be added to our whitelist before accessing servers.\n\nAfter verification:\n✓ Server ping/status will be displayed correctly\n✓ All servers will become accessible\n✓ Connection speed and stability will improve\n\nIf your network IP changes, you need to verify again to whitelist the new IP address. This is not an error — you only need to verify once per network/IP change.",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
+    "whitelistWhyTitle": MessageLookupByLibrary.simpleMessage(
+      "Why do I need to verify my IP?",
+    ),
+    "whitelistYourIp": MessageLookupByLibrary.simpleMessage(
+      "Whitelist Your IP",
+    ),
     "yearsAgo": m37,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

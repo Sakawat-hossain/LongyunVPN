@@ -41,10 +41,10 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       if (!stringListEquality.equals(prev?.a, next.a)) {
         _destroyTabController();
         final groupNames = next.a;
-        // Two tabs: the selection group and Node Status. The automatic groups
-        // (auto-select, failover, …) are hidden from the strip but still drive
-        // routing in the core. Must match the tabs rendered in build().
-        final length = groupNames.isEmpty ? 0 : 2;
+        // Node Status is the leading tab, followed by every proxy group.
+        // +1 for it; must match the tabs rendered in build().
+        final length = groupNames.isEmpty ? 0 : groupNames.length + 1;
+        // Open on Node Status.
         _updateTabController(length, 0);
       }
     }, fireImmediately: true);
@@ -109,7 +109,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                               (item) => item == groupName,
                             );
                             if (index == -1) return;
-                            _tabController?.animateTo(index);
+                            // +1: tab 0 is Node Status, groups start at 1.
+                            _tabController?.animateTo(index + 1);
                             updateCurrentGroupName(groupName);
                             Navigator.of(context).pop();
                           },
@@ -138,16 +139,15 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         groupIndex = currentIndex;
       }
       final currentGroups = getCurrentGroups();
-      // Tab 0 is the selection group, tab 1 is Node Status (no backing group).
-      // Only tab 0 maps to a group, and it is the selector — not simply
-      // currentGroups[0], which may be an automatic group.
-      if (groupIndex != 0 || currentGroups.isEmpty) {
+      // Tab 0 is Node Status, which has no backing group; groups start at 1.
+      if (groupIndex == null || groupIndex < 1) {
         return;
       }
-      final currentGroup = currentGroups.firstWhere(
-        (g) => g.type == GroupType.Selector,
-        orElse: () => currentGroups.first,
-      );
+      final realIndex = groupIndex - 1;
+      if (realIndex >= currentGroups.length) {
+        return;
+      }
+      final currentGroup = currentGroups[realIndex];
       updateCurrentGroupName(currentGroup.name);
     });
   }
@@ -188,14 +188,6 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       // Transient state while the tab controller is (re)built.
       return const SizedBox.shrink();
     }
-    // Show a single selection tab plus Node Status, instead of one tab per
-    // proxy group. The selector group is the one the user actually picks a node
-    // from; the automatic groups (url-test / fallback / load-balance) are
-    // policy, not a choice, so they stay hidden and keep working in the core.
-    final selectorGroup = groups.firstWhere(
-      (g) => g.type == GroupType.Selector,
-      orElse: () => groups.first,
-    );
     _keyMap = {};
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -225,18 +217,18 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                     overlayColor: const WidgetStatePropertyAll(
                       Colors.transparent,
                     ),
-                    // One selection tab + Node Status. The automatic groups
-                    // (auto-select, failover, …) stay hidden.
+                    // Node Status leads, then every proxy group.
                     tabs: [
-                      Tab(
-                        child: Builder(
-                          builder: (context) => EmojiText(
-                            selectorGroup.name,
-                            style: DefaultTextStyle.of(context).style,
+                      Tab(child: Text(appLocalizations.nodeStatus)),
+                      for (final group in groups)
+                        Tab(
+                          child: Builder(
+                            builder: (context) => EmojiText(
+                              group.name,
+                              style: DefaultTextStyle.of(context).style,
+                            ),
                           ),
                         ),
-                      ),
-                      Tab(child: Text(appLocalizations.nodeStatus)),
                     ],
                   ),
                   if (value) Positioned(right: 0, child: child!),
@@ -263,18 +255,17 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
           child: TabBarView(
             controller: _tabController,
             children: [
-              ProxyGroupView(
-                key: _keyMap.updateCacheValue(
-                  selectorGroup.name,
-                  () => GlobalObjectKey<_ProxyGroupViewState>(
-                    selectorGroup.name,
-                  ),
-                ),
-                group: selectorGroup,
-                columns: state.columns,
-                cardType: state.proxyCardType,
-              ),
               const NodeStatusView(),
+              for (final group in groups)
+                ProxyGroupView(
+                  key: _keyMap.updateCacheValue(
+                    group.name,
+                    () => GlobalObjectKey<_ProxyGroupViewState>(group.name),
+                  ),
+                  group: group,
+                  columns: state.columns,
+                  cardType: state.proxyCardType,
+                ),
             ],
           ),
         ),
