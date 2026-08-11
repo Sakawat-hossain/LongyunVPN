@@ -41,11 +41,12 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       if (!stringListEquality.equals(prev?.a, next.a)) {
         _destroyTabController();
         final groupNames = next.a;
-        final currentGroupName = next.b;
-        final index = groupNames.indexWhere((item) => item == currentGroupName);
-        // +1 for the trailing "Node Status" tab (only when there are groups).
-        final length = groupNames.isEmpty ? 0 : groupNames.length + 1;
-        _updateTabController(length, index);
+        // Only the Node Status tab is shown; the proxy-group tabs (auto-select,
+        // failover, etc.) are intentionally hidden for a cleaner UI. Keep the
+        // controller length at 1 whenever there are nodes, so it matches the
+        // single tab rendered in build().
+        final length = groupNames.isEmpty ? 0 : 1;
+        _updateTabController(length, 0);
       }
     }, fireImmediately: true);
   }
@@ -212,18 +213,9 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                     overlayColor: const WidgetStatePropertyAll(
                       Colors.transparent,
                     ),
+                    // Group tabs (auto-select, failover, …) are intentionally
+                    // hidden; only Node Status is shown.
                     tabs: [
-                      for (final group in groups)
-                        Tab(
-                          child: Builder(
-                            builder: (context) {
-                              return EmojiText(
-                                group.name,
-                                style: DefaultTextStyle.of(context).style,
-                              );
-                            },
-                          ),
-                        ),
                       Tab(child: Text(appLocalizations.nodeStatus)),
                     ],
                   ),
@@ -250,18 +242,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: [
-              for (final group in groups)
-                ProxyGroupView(
-                  key: _keyMap.updateCacheValue(
-                    group.name,
-                    () => GlobalObjectKey<_ProxyGroupViewState>(group.name),
-                  ),
-                  group: group,
-                  columns: state.columns,
-                  cardType: state.proxyCardType,
-                ),
-              const NodeStatusView(),
+            children: const [
+              NodeStatusView(),
             ],
           ),
         ),

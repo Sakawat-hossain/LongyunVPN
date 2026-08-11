@@ -10,7 +10,53 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yaml/yaml.dart';
+
+/// IP whitelist verification for LongyunVPN. Users must whitelist their current
+/// public IP before servers become reachable / report status.
+const _whitelistUrl = 'https://verify.solionvpn.com/longyunvpn';
+const _whitelistInfo =
+    'For security and network optimization, your current IP address must be '
+    'added to our whitelist before accessing servers.\n\n'
+    'After verification:\n'
+    '✓ Server ping/status will be displayed correctly\n'
+    '✓ All servers will become accessible\n'
+    '✓ Connection speed and stability will improve\n\n'
+    'If your network IP changes, you need to verify again to whitelist the new '
+    'IP address. This is not an error — you only need to verify once per '
+    'network/IP change.';
+
+Future<void> _openWhitelist() async {
+  await launchUrl(
+    Uri.parse(_whitelistUrl),
+    mode: LaunchMode.externalApplication,
+  );
+}
+
+void _showWhitelistInfo(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      icon: const Icon(Icons.verified_user_outlined),
+      title: const Text('Why do I need to verify my IP?'),
+      content: const SingleChildScrollView(child: Text(_whitelistInfo)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('Close'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(ctx).pop();
+            _openWhitelist();
+          },
+          child: const Text('Whitelist Your IP'),
+        ),
+      ],
+    ),
+  );
+}
 
 /// Built-in pseudo proxies that are never real server nodes.
 const _builtInProxies = {
@@ -536,6 +582,28 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
               ),
             ),
             onChanged: (v) => setState(() => _query = v),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: _openWhitelist,
+                  icon: const Icon(Icons.verified_user_outlined, size: 18),
+                  label: const Text('Whitelist Your IP'),
+                ),
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                // Hover (desktop) / long-press (mobile) shows the full text;
+                // tapping opens the same explanation in a dialog.
+                tooltip: _whitelistInfo,
+                icon: const Icon(Icons.info_outline),
+                onPressed: () => _showWhitelistInfo(context),
+              ),
+            ],
           ),
         ),
         Expanded(
