@@ -17,7 +17,11 @@ void main() {
         verbose: false,
       );
 
-      expect(args, ['dart-define-from-file=env.json', 'split-per-abi']);
+      expect(args, [
+        '--release',
+        '--dart-define-from-file=env.json',
+        '--split-per-abi',
+      ]);
     });
 
     test('adds verbose to flutter build args with -v', () {
@@ -27,9 +31,10 @@ void main() {
       );
 
       expect(args, [
-        'verbose',
-        'dart-define-from-file=env.json',
-        'split-per-abi',
+        '--release',
+        '--verbose',
+        '--dart-define-from-file=env.json',
+        '--split-per-abi',
       ]);
     });
   });

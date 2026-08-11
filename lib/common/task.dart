@@ -123,6 +123,14 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['port'] = 0;
   rawConfig['socks-port'] = 0;
   rawConfig['keep-alive-interval'] = realPatchConfig.keepAliveInterval;
+  // How long a TCP connection may sit idle before the first keep-alive probe.
+  // The core leaves this at 0 (OS default, often 2h), so an idle-but-alive
+  // connection can be silently dropped by a NAT/CGNAT/router timeout and only
+  // fails when the user next uses it — one of the ways a tunnel "feels"
+  // unstable. Probing after 15 minutes keeps NAT mappings warm without
+  // meaningful traffic. Note the core force-disables TCP keep-alive on Android
+  // to protect battery, so this only affects desktop.
+  rawConfig['keep-alive-idle'] ??= 900;
   rawConfig['mixed-port'] = realPatchConfig.mixedPort;
   rawConfig['port'] = realPatchConfig.port;
   rawConfig['socks-port'] = realPatchConfig.socksPort;
@@ -153,6 +161,14 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
   rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
   rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
+  // TUN MTU. 1500 (the default) is larger than what most tunnels can carry
+  // once the outer protocol's overhead is added, so full-size packets get
+  // fragmented or silently dropped — which surfaces as stalls and "speed goes
+  // up and down" rather than a hard failure. 1400 leaves headroom for the
+  // worst common case (WireGuard/QUIC + IPv6 + PPPoE) and is what the major
+  // clients ship. Only set when the profile doesn't specify one, so a user or
+  // subscription can still override it.
+  rawConfig['tun']['mtu'] ??= 1400;
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   if (rawConfig['sniffer']?['sniff'] != null) {
     for (final value in (rawConfig['sniffer']?['sniff'] as Map).values) {
@@ -279,6 +295,7 @@ Future<VM2<String, String>> _makeRealProfileTask(
   if (data.proxyGroups.isNotEmpty) {
     rawConfig['proxy-groups'] = data.proxyGroups;
   }
+  _applyGroupHealthCheckDefaults(rawConfig['proxy-groups']);
   // Split tunnel (desktop only): prepend PROCESS-NAME rules so the selected
   // apps are routed around, or exclusively through, the VPN. These sit at the
   // top so they win over the profile's own rules. Process matching needs the
@@ -315,6 +332,41 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
   return VM2(yaml, yaml.toMd5());
+}
+
+/// Fills in health-check defaults on automatic proxy groups.
+///
+/// The core already health-checks every group that isn't `select`/`relay`, but
+/// subscriptions frequently ship `url-test`/`fallback` groups without an
+/// `interval`, so a node that has gone bad keeps being used until something
+/// forces a re-test. That is a large part of why a tunnel "works but keeps
+/// dropping" on a flaky server.
+///
+/// Only missing keys are filled, so an explicit value from the profile always
+/// wins, and `select`/`relay` groups are left completely alone (the user's
+/// manual choice must not be second-guessed, and the core rejects health-check
+/// options there).
+void _applyGroupHealthCheckDefaults(dynamic proxyGroups) {
+  if (proxyGroups is! List) return;
+  for (final group in proxyGroups) {
+    if (group is! Map) continue;
+    final type = group['type'];
+    if (type != 'url-test' && type != 'fallback' && type != 'load-balance') {
+      continue;
+    }
+    // Re-test every 5 minutes: responsive enough to route around a node that
+    // died, cheap enough not to matter for battery or the server.
+    group['interval'] ??= 300;
+    // Don't switch away for trivial latency noise (url-test only); without a
+    // tolerance the group can flap between two similar nodes, which is itself
+    // a source of unstable throughput.
+    if (type == 'url-test') {
+      group['tolerance'] ??= 50;
+    }
+    // Keep testing in the background instead of only on demand, so a failover
+    // decision is based on fresh data.
+    group['lazy'] ??= false;
+  }
 }
 
 Future<List<String>> shakingProfileTask(
