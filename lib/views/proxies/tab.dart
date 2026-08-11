@@ -41,11 +41,10 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       if (!stringListEquality.equals(prev?.a, next.a)) {
         _destroyTabController();
         final groupNames = next.a;
-        // Only the Node Status tab is shown; the proxy-group tabs (auto-select,
-        // failover, etc.) are intentionally hidden for a cleaner UI. Keep the
-        // controller length at 1 whenever there are nodes, so it matches the
-        // single tab rendered in build().
-        final length = groupNames.isEmpty ? 0 : 1;
+        // Two tabs: the selection group and Node Status. The automatic groups
+        // (auto-select, failover, …) are hidden from the strip but still drive
+        // routing in the core. Must match the tabs rendered in build().
+        final length = groupNames.isEmpty ? 0 : 2;
         _updateTabController(length, 0);
       }
     }, fireImmediately: true);
@@ -139,11 +138,16 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         groupIndex = currentIndex;
       }
       final currentGroups = getCurrentGroups();
-      // The last tab is "Node Status", which has no backing group — ignore it.
-      if (groupIndex == null || groupIndex >= currentGroups.length) {
+      // Tab 0 is the selection group, tab 1 is Node Status (no backing group).
+      // Only tab 0 maps to a group, and it is the selector — not simply
+      // currentGroups[0], which may be an automatic group.
+      if (groupIndex != 0 || currentGroups.isEmpty) {
         return;
       }
-      final currentGroup = currentGroups[groupIndex];
+      final currentGroup = currentGroups.firstWhere(
+        (g) => g.type == GroupType.Selector,
+        orElse: () => currentGroups.first,
+      );
       updateCurrentGroupName(currentGroup.name);
     });
   }
@@ -184,6 +188,14 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       // Transient state while the tab controller is (re)built.
       return const SizedBox.shrink();
     }
+    // Show a single selection tab plus Node Status, instead of one tab per
+    // proxy group. The selector group is the one the user actually picks a node
+    // from; the automatic groups (url-test / fallback / load-balance) are
+    // policy, not a choice, so they stay hidden and keep working in the core.
+    final selectorGroup = groups.firstWhere(
+      (g) => g.type == GroupType.Selector,
+      orElse: () => groups.first,
+    );
     _keyMap = {};
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -213,9 +225,17 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                     overlayColor: const WidgetStatePropertyAll(
                       Colors.transparent,
                     ),
-                    // Group tabs (auto-select, failover, …) are intentionally
-                    // hidden; only Node Status is shown.
+                    // One selection tab + Node Status. The automatic groups
+                    // (auto-select, failover, …) stay hidden.
                     tabs: [
+                      Tab(
+                        child: Builder(
+                          builder: (context) => EmojiText(
+                            selectorGroup.name,
+                            style: DefaultTextStyle.of(context).style,
+                          ),
+                        ),
+                      ),
                       Tab(child: Text(appLocalizations.nodeStatus)),
                     ],
                   ),
@@ -242,8 +262,19 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: const [
-              NodeStatusView(),
+            children: [
+              ProxyGroupView(
+                key: _keyMap.updateCacheValue(
+                  selectorGroup.name,
+                  () => GlobalObjectKey<_ProxyGroupViewState>(
+                    selectorGroup.name,
+                  ),
+                ),
+                group: selectorGroup,
+                columns: state.columns,
+                cardType: state.proxyCardType,
+              ),
+              const NodeStatusView(),
             ],
           ),
         ),
