@@ -80,14 +80,16 @@ class Navigation {
         builder: (_) => const ToolsView(key: GlobalObjectKey(PageLabel.tools)),
         modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
       ),
-      // Settings was a collapsible section inside Tools; it is now its own
-      // top-level destination.
+      // Settings was a collapsible section inside Tools. On desktop it is now
+      // its own top-level destination; on mobile the bottom bar has no room for
+      // it, so 'more' keeps it inside Tools there (see moreToolsSelectorState:
+      // desktop+more means sidebar on desktop, inside Tools on mobile).
       NavigationItem(
         icon: const Icon(Icons.settings),
         label: PageLabel.settings,
         builder: (_) =>
             const SettingsView(key: GlobalObjectKey(PageLabel.settings)),
-        modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
+        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
     ];
   }
