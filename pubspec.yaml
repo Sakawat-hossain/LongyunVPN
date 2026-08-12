@@ -29,7 +29,7 @@ dependencies:
   launch_at_startup: ^0.5.1
   json_annotation: ^4.11.0
   file_picker: ^11.0.2
-  mobile_scanner: ^7.0.1
+  mobile_scanner: ^7.4.0
   app_links: ^7.0.0
   win32_registry: ^2.0.0
   tray_manager:
