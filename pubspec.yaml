@@ -27,7 +27,7 @@ dependencies:
   window_ext:
     path: plugins/window_ext
   launch_at_startup: ^0.5.1
-  json_annotation: ^4.11.0
+  json_annotation: ^4.12.0
   file_picker: ^11.0.2
   mobile_scanner: ^7.0.1
   app_links: ^7.0.0
@@ -77,8 +77,8 @@ dependencies:
       url: https://github.com/Sakawat-hossain/yaml_writer
       ref: 79c78a44ec9c2f5f5f97da1a65610c6fb2ead8b3
   super_sliver_list: ^0.4.1
-  drift: ^2.31.0
-  drift_flutter: ^0.2.8
+  drift: ^2.34.3
+  drift_flutter: ^0.3.1
   fractional_indexing: ^1.0.0
   reorderable_grid: ^1.0.13
   smooth_sheets: ^1.0.2
@@ -90,15 +90,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  json_serializable: ^6.8.0
+  json_serializable: ^6.14.1
   build_runner: ^2.14.1
   args: ^2.4.2
-  freezed: ^3.2.5
-  riverpod_generator: ^4.0.3
-  riverpod_lint: ^3.1.3
+  freezed: ^3.2.6-dev.1
+  riverpod_generator: ^4.0.4-dev.1
+  riverpod_lint: ^3.1.4-dev.1
 
-  drift_dev: ^2.31.0
-  intl_utils: ^2.8.14
+  drift_dev: ^2.34.0
+  intl_utils: ^2.8.15
   test: ^1.30.0
   mocktail: ^1.0.4
   flutter_launcher_icons: ^0.14.1
