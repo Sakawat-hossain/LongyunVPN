@@ -52,7 +52,16 @@ class ProfilesAction extends _$ProfilesAction {
 
   void putProfile(Profile profile) {
     ref.read(profilesProvider.notifier).put(profile);
-    if (ref.read(currentProfileIdProvider) != null) return;
+    final currentId = ref.read(currentProfileIdProvider);
+    // Adopt the new profile when nothing is selected OR when the selection
+    // points at a profile that no longer exists (deleted, or an id left behind
+    // by an earlier install). The old check only tested for null, so a dangling
+    // id meant the freshly imported subscription was never made current: the
+    // core loaded no config, the Servers page stayed empty, and importing again
+    // could not recover it.
+    final currentExists = currentId != null &&
+        ref.read(profilesProvider).any((p) => p.id == currentId);
+    if (currentExists) return;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
   }
 
