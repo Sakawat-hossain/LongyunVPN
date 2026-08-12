@@ -326,7 +326,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m3,
     "deleteTip": m4,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "ClashMetaベースのマルチプラットフォームプロキシクライアント。シンプルで使いやすく、オープンソースで広告なし。",
+      "LongyunVPN は、オンラインプライバシーを保護し、インターネット体験を向上させるため、高速で安全かつ信頼性の高い VPN サービスを提供します。最適化されたサーバーと最新のセキュリティ技術により、どこからでも安全に接続し、自由にインターネットへアクセスできます。\n\n私たちの目標は、シンプルで安定した信頼できる VPN を提供し、より良いオンライン体験のために改善を続けることです。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("宛先"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("宛先地理情報"),
@@ -365,7 +365,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("免責事項"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
-      "本ソフトウェアは学習交流や科学研究などの非営利目的でのみ使用されます。商用利用は厳禁です。いかなる商用活動も本ソフトウェアとは無関係です。",
+      "LongyunVPN は、安全でプライベート、かつ信頼性の高いインターネット接続を提供するために設計された VPN サービスです。本サービスは、プライバシー保護、安全なブラウジング、通信品質の向上など、適法な目的での利用を想定しています。\n\n利用者は、LongyunVPN の利用にあたり、自身の国または地域の法令を遵守する責任を負います。LongyunVPN は、違法行為、不正利用、法令違反を推奨も支援もしません。\n\nLongyunVPN は、利用者による本サービスの不正利用、および VPN 接続を通じて行われた行為に起因するいかなる結果についても責任を負いません。本サービスを利用することにより、利用者は利用規約に従い、責任をもって VPN を利用することに同意したものとみなされます。",
     ),
     "disconnected": MessageLookupByLibrary.simpleMessage("切断済み"),
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage("新バージョンを発見"),

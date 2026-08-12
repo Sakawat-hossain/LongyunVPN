@@ -784,10 +784,10 @@ class AppLocalizations {
     );
   }
 
-  /// `A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.`
+  /// `LongyunVPN provides fast, secure, and reliable VPN services to protect your online privacy and enhance your internet experience. With optimized servers and modern security technology, we help users connect safely and access the internet freely from anywhere.\n\nOur goal is to deliver a simple, stable, and trusted VPN solution with continuous improvements for a better online experience.`
   String get desc {
     return Intl.message(
-      'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.',
+      'LongyunVPN provides fast, secure, and reliable VPN services to protect your online privacy and enhance your internet experience. With optimized servers and modern security technology, we help users connect safely and access the internet freely from anywhere.\n\nOur goal is to deliver a simple, stable, and trusted VPN solution with continuous improvements for a better online experience.',
       name: 'desc',
       desc: '',
       args: [],
@@ -1839,10 +1839,10 @@ class AppLocalizations {
     return Intl.message('Disclaimer', name: 'disclaimer', desc: '', args: []);
   }
 
-  /// `This software is only used for non-commercial purposes such as learning exchanges and scientific research. It is strictly prohibited to use this software for commercial purposes. Any commercial activity, if any, has nothing to do with this software.`
+  /// `LongyunVPN is a VPN service designed to provide secure, private, and reliable internet access for users. This service is intended for legitimate purposes, including privacy protection, secure browsing, and improving online connectivity.\n\nUsers are responsible for complying with the laws and regulations of their own country or region while using LongyunVPN. LongyunVPN does not encourage or support any illegal activities, misuse, or violation of applicable laws.\n\nLongyunVPN is not responsible for any misuse of the service by users or any consequences resulting from activities performed through the VPN connection. By using this service, users agree to follow the terms of service and use the VPN responsibly.`
   String get disclaimerDesc {
     return Intl.message(
-      'This software is only used for non-commercial purposes such as learning exchanges and scientific research. It is strictly prohibited to use this software for commercial purposes. Any commercial activity, if any, has nothing to do with this software.',
+      'LongyunVPN is a VPN service designed to provide secure, private, and reliable internet access for users. This service is intended for legitimate purposes, including privacy protection, secure browsing, and improving online connectivity.\n\nUsers are responsible for complying with the laws and regulations of their own country or region while using LongyunVPN. LongyunVPN does not encourage or support any illegal activities, misuse, or violation of applicable laws.\n\nLongyunVPN is not responsible for any misuse of the service by users or any consequences resulting from activities performed through the VPN connection. By using this service, users agree to follow the terms of service and use the VPN responsibly.',
       name: 'disclaimerDesc',
       desc: '',
       args: [],

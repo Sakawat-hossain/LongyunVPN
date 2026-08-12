@@ -294,7 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m3,
     "deleteTip": m4,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "基于ClashMeta的多平台代理客户端，简单易用，开源无广告。",
+      "LongyunVPN 提供快速、安全、可靠的 VPN 服务，保护您的在线隐私并提升上网体验。凭借优化的服务器和现代安全技术，我们帮助用户在任何地方都能安全连接、自由访问互联网。\n\n我们的目标是提供简单、稳定、值得信赖的 VPN 解决方案，并持续改进，带来更好的上网体验。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("目标地址"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("目标地理定位"),
@@ -329,7 +329,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disableUDP": MessageLookupByLibrary.simpleMessage("禁用UDP"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("免责声明"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
-      "本软件仅供学习交流、科研等非商业性质的用途，严禁将本软件用于商业目的。如有任何商业行为，均与本软件无关。",
+      "LongyunVPN 是一项旨在为用户提供安全、私密、可靠互联网访问的 VPN 服务。本服务仅供合法用途使用，包括隐私保护、安全浏览以及改善网络连接质量。\n\n用户在使用 LongyunVPN 时，须自行遵守所在国家或地区的法律法规。LongyunVPN 不鼓励也不支持任何违法活动、滥用行为或违反适用法律的行为。\n\n对于用户滥用本服务的行为，以及通过 VPN 连接所进行活动产生的任何后果，LongyunVPN 概不负责。使用本服务即表示用户同意遵守服务条款并负责任地使用 VPN。",
     ),
     "disconnected": MessageLookupByLibrary.simpleMessage("已断开"),
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage("发现新版本"),
