@@ -329,11 +329,20 @@ class _PlanCard extends StatelessWidget {
     final isReset = selectedPeriod == xboardResetPeriod;
     final price =
         isReset ? resetPriceCents : plan.periodPrices[selectedPeriod];
+    // The plan the user owns is lifted out of the list with the brand colour:
+    // a thicker primary border and a faint primary wash, so it is obvious at a
+    // glance which plan is active. primary comes from the app's seed colour, so
+    // this tracks the logo/theme instead of hardcoding a hex value.
     return Card(
       elevation: 0,
+      color: isCurrent
+          ? theme.colorScheme.primary.withValues(alpha: 0.07)
+          : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        side: isCurrent
+            ? BorderSide(color: theme.colorScheme.primary, width: 2)
+            : BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -355,11 +364,11 @@ class _PlanCard extends StatelessWidget {
                       label: Text(context.appLocalizations.currentPlan),
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor:
-                          theme.colorScheme.primary.withValues(alpha: 0.14),
+                      // Solid brand fill so the badge reads as a state, not a tag.
+                      backgroundColor: theme.colorScheme.primary,
                       side: BorderSide.none,
                       labelStyle: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

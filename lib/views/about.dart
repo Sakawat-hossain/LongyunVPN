@@ -9,8 +9,27 @@ import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// The About page. Its body is [AboutContent], which the Tools page also
+/// renders inline so the app info is visible without opening a sub-page.
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BaseScaffold(
+      title: context.appLocalizations.about,
+      body: const AboutContent(),
+    );
+  }
+}
+
+class AboutContent extends StatelessWidget {
+  /// When false the content is laid out as a plain Column, so it can be
+  /// embedded in an existing scroll view (the Tools page) without nesting
+  /// scrollables.
+  final bool scrollable;
+
+  const AboutContent({super.key, this.scrollable = true});
 
   Future<void> _checkUpdate(BuildContext context) async {
     final data = await globalState.safeRun<Map<String, dynamic>?>(
@@ -105,12 +124,15 @@ class AboutView extends StatelessWidget {
       const SizedBox(height: 12),
       ..._buildMoreSection(context),
     ];
-    return BaseScaffold(
-      title: appLocalizations.about,
-      body: Padding(
-        padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-        child: generateListView(items),
-      ),
+    return Padding(
+      padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
+      child: scrollable
+          ? generateListView(items)
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: items,
+            ),
     );
   }
 }

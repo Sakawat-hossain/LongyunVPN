@@ -1,6 +1,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -83,24 +84,13 @@ class _SubscriptionStatusCardState
     // Surface a reset shortcut when an active plan is running low on data.
     final lowTraffic = active && hasTraffic && usedFraction >= 0.9;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.colorScheme.outlineVariant),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              statusColor.withValues(alpha: 0.10),
-              theme.colorScheme.surface.withValues(alpha: 0.0),
-            ],
-          ),
-          color: theme.colorScheme.surface,
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
+    // Same shell as every other dashboard widget (network speed, traffic, …):
+    // CommonCard, so the radius, surface tone and grid spacing all match. The
+    // status colour still comes through on the icon chip and the pill, so the
+    // card keeps its identity without a bespoke gradient/border/radius.
+    return CommonCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header: lock + Premium + status pill
@@ -221,7 +211,6 @@ class _SubscriptionStatusCardState
             ),
           ],
         ),
-      ),
     );
   }
 }

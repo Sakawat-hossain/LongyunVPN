@@ -120,15 +120,14 @@ class _ProfilesViewState extends State<ProfilesView> {
           iconSize: 26,
         ),
       ],
+      // Add lives with the other actions in the app bar rather than as a
+      // floating button, so it does not sit on top of the profile list.
+      IconButton(
+        tooltip: context.appLocalizations.addProfile,
+        onPressed: _handleShowAddExtendPage,
+        icon: const Icon(Icons.add),
+      ),
     ];
-  }
-
-  Widget _buildFAB() {
-    return CommonFloatingActionButton(
-      onPressed: _handleShowAddExtendPage,
-      icon: const Icon(Icons.add),
-      label: context.appLocalizations.addProfile,
-    );
   }
 
   @override
@@ -142,7 +141,6 @@ class _ProfilesViewState extends State<ProfilesView> {
         return CommonScaffold(
           isLoading: isLoading,
           title: appLocalizations.profiles,
-          floatingActionButton: _buildFAB(),
           actions: _buildActions(state.profiles),
           body: state.profiles.isEmpty
               ? NullStatus(
@@ -157,7 +155,7 @@ class _ProfilesViewState extends State<ProfilesView> {
                       left: 16,
                       right: 16,
                       top: 16,
-                      bottom: 88,
+                      bottom: 24,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,

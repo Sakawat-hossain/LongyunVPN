@@ -17,7 +17,12 @@ typedef ProxyGroupViewKeyMap =
     Map<String, GlobalObjectKey<_ProxyGroupViewState>>;
 
 class ProxiesTabView extends ConsumerStatefulWidget {
-  const ProxiesTabView({super.key});
+  /// Set to true while a proxy-group tab is showing and false on Node Status,
+  /// so the Servers page can hide the delay-test button there (Node Status has
+  /// its own per-node checks and a Refresh Status action).
+  final ValueNotifier<bool>? groupTabActive;
+
+  const ProxiesTabView({super.key, this.groupTabActive});
 
   static Map<String, PageStorageKey> pageListStoreMap = {};
 
@@ -140,6 +145,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       }
       final currentGroups = getCurrentGroups();
       // Tab 0 is Node Status, which has no backing group; groups start at 1.
+      widget.groupTabActive?.value = (groupIndex ?? 0) >= 1;
       if (groupIndex == null || groupIndex < 1) {
         return;
       }

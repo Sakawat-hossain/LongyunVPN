@@ -25,6 +25,9 @@ class ProxiesView extends ConsumerStatefulWidget {
 class _ProxiesViewState extends ConsumerState<ProxiesView> {
   final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
   final GlobalKey<ProxiesTabViewState> _proxiesTabKey = GlobalKey();
+  // False while the Node Status tab is showing, so the delay-test button is
+  // hidden there (it has its own Refresh Status / per-node checks).
+  final ValueNotifier<bool> _groupTabActive = ValueNotifier<bool>(false);
   bool _hasProviders = false;
   bool _isTab = false;
 
@@ -106,13 +109,19 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   }
 
   Widget? _buildFAB() {
-    return _isTab
-        ? DelayTestButton(
-            onClick: () async {
-              await _proxiesTabKey.currentState?.delayTestCurrentGroup();
-            },
-          )
-        : null;
+    if (!_isTab) return null;
+    return ValueListenableBuilder<bool>(
+      valueListenable: _groupTabActive,
+      builder: (_, isGroupTab, _) {
+        // Node Status has no group to delay-test.
+        if (!isGroupTab) return const SizedBox.shrink();
+        return DelayTestButton(
+          onClick: () async {
+            await _proxiesTabKey.currentState?.delayTestCurrentGroup();
+          },
+        );
+      },
+    );
   }
 
   void _onSearch(String value) {
@@ -153,6 +162,12 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _groupTabActive.dispose();
+    super.dispose();
   }
 
   @override
@@ -197,7 +212,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       title: context.appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {
-        ProxiesType.tab => ProxiesTabView(key: _proxiesTabKey),
+        ProxiesType.tab => ProxiesTabView(
+          key: _proxiesTabKey,
+          groupTabActive: _groupTabActive,
+        ),
         ProxiesType.list => const ProxiesListView(),
       },
     );

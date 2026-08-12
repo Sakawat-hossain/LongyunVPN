@@ -15,6 +15,10 @@ class StartButton extends ConsumerStatefulWidget {
 class _StartButtonState extends ConsumerState<StartButton>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
+  // Slow breathing halo shown only while connected, so the button reads as a
+  // live VPN switch at a glance. It is stopped when disconnected so it costs
+  // nothing while idle.
+  AnimationController? _pulseController;
   late Animation<double> _animation;
   bool isStart = false;
 
@@ -26,6 +30,10 @@ class _StartButtonState extends ConsumerState<StartButton>
       vsync: this,
       value: isStart ? 1 : 0,
       duration: const Duration(milliseconds: 200),
+    );
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
     );
     _animation = CurvedAnimation(
       parent: _controller!,
@@ -43,6 +51,8 @@ class _StartButtonState extends ConsumerState<StartButton>
   void dispose() {
     _controller?.dispose();
     _controller = null;
+    _pulseController?.dispose();
+    _pulseController = null;
     super.dispose();
   }
 
@@ -60,8 +70,12 @@ class _StartButtonState extends ConsumerState<StartButton>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (isStart && mounted) {
         _controller?.forward();
+        // Only animate the halo while connected.
+        _pulseController?.repeat(reverse: true);
       } else {
         _controller?.reverse();
+        _pulseController?.stop();
+        _pulseController?.value = 0;
       }
     });
   }
@@ -106,30 +120,62 @@ class _StartButtonState extends ConsumerState<StartButton>
                           )
                           .width +
                       16;
-            return FloatingActionButton(
-              clipBehavior: Clip.antiAlias,
-              materialTapTargetSize: MaterialTapTargetSize.padded,
-              heroTag: null,
-              onPressed: () {
-                handleSwitchStart();
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    height: 56,
-                    padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16 - 8 * _animation.value,
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: AnimatedIcon(
-                      icon: AnimatedIcons.play_pause,
-                      progress: _animation,
-                    ),
+            // Breathing halo behind the button while the tunnel is up. Uses the
+            // theme's primary colour so it reads as "protected/live" rather than
+            // as a plain play button.
+            return AnimatedBuilder(
+              animation: _pulseController!,
+              builder: (_, fab) {
+                final t = _pulseController!.value;
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: _animation.value <= 0.01
+                        ? const []
+                        : [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.28 * _animation.value * (1 - t * 0.6),
+                              ),
+                              blurRadius: 14 + 12 * t,
+                              spreadRadius: 1 + 4 * t,
+                            ),
+                          ],
                   ),
-                  SizedBox(width: textWidth * _animation.value, child: child!),
-                ],
+                  child: fab,
+                );
+              },
+              child: FloatingActionButton(
+                clipBehavior: Clip.antiAlias,
+                materialTapTargetSize: MaterialTapTargetSize.padded,
+                heroTag: null,
+                tooltip: isStart
+                    ? appLocalizations.stopVpn
+                    : appLocalizations.startVpn,
+                onPressed: () {
+                  handleSwitchStart();
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 56,
+                      padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16 - 8 * _animation.value,
+                      ),
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedIcon(
+                        icon: AnimatedIcons.play_pause,
+                        progress: _animation,
+                      ),
+                    ),
+                    SizedBox(
+                      width: textWidth * _animation.value,
+                      child: child!,
+                    ),
+                  ],
+                ),
               ),
             );
           },

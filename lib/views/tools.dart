@@ -361,16 +361,14 @@ class _DisclaimerItem extends ConsumerWidget {
   }
 }
 
+/// About shown inline on the Tools page — no tap-through, since it is just app
+/// info plus two links.
 class _InfoItem extends StatelessWidget {
   const _InfoItem();
 
   @override
   Widget build(BuildContext context) {
-    return ListItem.open(
-      leading: const Icon(Icons.info),
-      title: Text(context.appLocalizations.about),
-      delegate: const OpenDelegate(widget: AboutView()),
-    );
+    return const AboutContent(scrollable: false);
   }
 }
 
