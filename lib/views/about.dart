@@ -5,65 +5,17 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/list.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The About page. Its body is [AboutContent], which the Tools page also
-/// renders inline so the app info is visible without opening a sub-page.
-class AboutView extends StatelessWidget {
-  const AboutView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BaseScaffold(
-      title: context.appLocalizations.about,
-      body: const AboutContent(),
-    );
-  }
-}
-
+/// App identity (icon, name, version, description) shown at the top of Tools.
+///
+/// The action links that used to sit under a "More" heading inside this block
+/// now live in [AboutLinks], which Tools renders at the bottom of the page:
+/// nesting a section heading inside another section's content put two headers
+/// in a row and doubled the list padding.
 class AboutContent extends StatelessWidget {
-  /// When false the content is laid out as a plain Column, so it can be
-  /// embedded in an existing scroll view (the Tools page) without nesting
-  /// scrollables.
-  final bool scrollable;
-
-  const AboutContent({super.key, this.scrollable = true});
-
-  Future<void> _checkUpdate(BuildContext context) async {
-    final data = await globalState.safeRun<Map<String, dynamic>?>(
-      request.checkForUpdate,
-      title: context.appLocalizations.checkUpdate,
-    );
-    globalState.rootRef
-        .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: data, isUser: true);
-  }
-
-  List<Widget> _buildMoreSection(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return generateSection(
-      separated: false,
-      title: appLocalizations.more,
-      items: [
-        // The in-app update check is desktop-only — mobile updates via the app
-        // store (Google Play), which disallows self-update prompts.
-        if (!Platform.isAndroid && !Platform.isIOS)
-          ListItem(
-            title: Text(appLocalizations.checkUpdate),
-            trailing: const Icon(Icons.update),
-            onTap: () => _checkUpdate(context),
-          ),
-        ListItem(
-          title: const Text('Telegram'),
-          trailing: const Icon(Icons.launch),
-          onTap: () => globalState.openUrl('https://t.me/longyunvpn'),
-        ),
-      ],
-    );
-  }
-
+  const AboutContent({super.key});
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -121,18 +73,56 @@ class AboutContent extends StatelessWidget {
           ],
         ),
       ),
-      const SizedBox(height: 12),
-      ..._buildMoreSection(context),
     ];
-    return Padding(
-      padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-      child: scrollable
-          ? generateListView(items)
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: items,
-            ),
+    // No outer list padding here: this is embedded in the Tools list, which
+    // already supplies its own. Adding it again indented the app info out of
+    // line with every other row on the page.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: items,
+    );
+  }
+}
+
+/// Update check and community links, rendered at the bottom of Tools.
+class AboutLinks extends StatelessWidget {
+  const AboutLinks({super.key});
+
+  Future<void> _checkUpdate(BuildContext context) async {
+    final data = await globalState.safeRun<Map<String, dynamic>?>(
+      request.checkForUpdate,
+      title: context.appLocalizations.checkUpdate,
+    );
+    globalState.rootRef
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(data: data, isUser: true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    // The in-app update check is desktop-only — mobile updates via the app
+    // store (Google Play), which disallows self-update prompts.
+    final showUpdate = !Platform.isAndroid && !Platform.isIOS;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showUpdate) ...[
+          ListItem(
+            title: Text(appLocalizations.checkUpdate),
+            trailing: const Icon(Icons.update),
+            onTap: () => _checkUpdate(context),
+          ),
+          const Divider(height: 0),
+        ],
+        ListItem(
+          title: const Text('Telegram'),
+          trailing: const Icon(Icons.launch),
+          onTap: () => globalState.openUrl('https://t.me/longyunvpn'),
+        ),
+      ],
     );
   }
 }

@@ -97,7 +97,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         (state) => VM2(state.locale, state.developerMode),
       ),
     );
-    final items = [..._getAboutList(), _buildOtherSection(vm2.b)];
+    final items = [
+      ..._getAboutList(),
+      _buildOtherSection(vm2.b),
+      // Update check + community links sit at the very bottom of the page.
+      const AboutLinks(),
+    ];
     return CommonScaffold(
       title: context.appLocalizations.tools,
       body: ListView.builder(
@@ -368,7 +373,7 @@ class _InfoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AboutContent(scrollable: false);
+    return const AboutContent();
   }
 }
 
