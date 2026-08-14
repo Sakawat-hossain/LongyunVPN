@@ -45,14 +45,58 @@ class InAppBrowserView extends StatefulWidget {
   State<InAppBrowserView> createState() => _InAppBrowserViewState();
 }
 
+/// Windows-only WebView2 environment, created once and reused.
+///
+/// WebView2 otherwise puts its user data folder next to the executable, which
+/// under C:\Program Files is not writable by a standard user — the webview then
+/// fails to start at all. The plugin passes this folder straight to
+/// CreateCoreWebView2EnvironmentWithOptions, so setting it here is the
+/// supported way to move it somewhere writable.
+WebViewEnvironment? _webViewEnvironment;
+Future<void>? _webViewEnvironmentInit;
+
+Future<void> _ensureWebViewEnvironment() async {
+  if (!Platform.isWindows || _webViewEnvironment != null) return;
+  _webViewEnvironmentInit ??= () async {
+    try {
+      final dir = await appPath.webViewDataDirPath;
+      _webViewEnvironment = await WebViewEnvironment.create(
+        settings: WebViewEnvironmentSettings(userDataFolder: dir),
+      );
+    } catch (e) {
+      // Fall through to the plugin default rather than blocking the page; the
+      // webview reports its own failure if the default is unusable too.
+      commonPrint.log(
+        'webview environment init failed: $e',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }();
+  await _webViewEnvironmentInit;
+}
+
 class _InAppBrowserViewState extends State<InAppBrowserView> {
   InAppWebViewController? _controller;
   double _progress = 0;
+  bool _envReady = !Platform.isWindows;
   // Until the first page finishes, the webview is an empty rectangle — a thin
   // progress bar alone left users staring at a blank screen with no idea
   // whether anything was happening.
   bool _loading = true;
   bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // On Windows the webview can't be built until its environment exists, so
+    // hold off the first frame of it rather than letting the plugin fail with
+    // "Cannot create the InAppWebView instance!".
+    if (!_envReady) {
+      _ensureWebViewEnvironment().then((_) {
+        if (mounted) setState(() => _envReady = true);
+      });
+    }
+  }
 
   Future<void> _reload() async {
     setState(() {
@@ -106,60 +150,62 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
           Expanded(
             child: Stack(
               children: [
-                InAppWebView(
-              initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-              initialSettings: InAppWebViewSettings(
-                // Don't reuse anything cached from an earlier visit.
-                cacheEnabled: false,
-                clearCache: true,
-                javaScriptEnabled: true,
-                // Payment gateways routinely hand off to a bank or wallet page
-                // in a new window; without this those taps do nothing.
-                supportMultipleWindows: true,
-                javaScriptCanOpenWindowsAutomatically: true,
-                transparentBackground: true,
-              ),
-              onWebViewCreated: (controller) async {
-                _controller = controller;
-                await _clearBrowsingData();
-              },
-              onProgressChanged: (_, progress) {
-                if (mounted) setState(() => _progress = progress / 100);
-              },
-              onLoadStop: (_, _) {
-                if (mounted) setState(() => _loading = false);
-              },
-              onReceivedError: (_, request, error) {
-                commonPrint.log(
-                  'in-app browser error ${error.type}: ${error.description} '
-                  '(${request.url})',
-                  logLevel: LogLevel.warning,
-                );
-                // Only surface failures of the page itself; a sub-resource
-                // (an image, a tracker) failing shouldn't blank the screen.
-                if (mounted && request.isForMainFrame == true) {
-                  setState(() {
-                    _loading = false;
-                    _failed = true;
-                  });
-                }
-              },
-              // Gateways often redirect to a wallet/bank app via a custom
-              // scheme, which the webview itself can't load — hand those to the
-              // OS instead of dead-ending the payment.
-              shouldOverrideUrlLoading: (_, action) async {
-                final uri = action.request.url;
-                if (uri == null) return NavigationActionPolicy.ALLOW;
-                if (uri.scheme == 'http' || uri.scheme == 'https') {
-                  return NavigationActionPolicy.ALLOW;
-                }
-                await launchUrl(
-                  Uri.parse(uri.toString()),
-                  mode: LaunchMode.externalApplication,
-                );
-                return NavigationActionPolicy.CANCEL;
-              },
-                ),
+                if (_envReady)
+                  InAppWebView(
+                    webViewEnvironment: _webViewEnvironment,
+                    initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+                    initialSettings: InAppWebViewSettings(
+                      // Don't reuse anything cached from an earlier visit.
+                      cacheEnabled: false,
+                      clearCache: true,
+                      javaScriptEnabled: true,
+                      // Payment gateways routinely hand off to a bank or wallet page
+                      // in a new window; without this those taps do nothing.
+                      supportMultipleWindows: true,
+                      javaScriptCanOpenWindowsAutomatically: true,
+                      transparentBackground: true,
+                    ),
+                    onWebViewCreated: (controller) async {
+                      _controller = controller;
+                      await _clearBrowsingData();
+                    },
+                    onProgressChanged: (_, progress) {
+                      if (mounted) setState(() => _progress = progress / 100);
+                    },
+                    onLoadStop: (_, _) {
+                      if (mounted) setState(() => _loading = false);
+                    },
+                    onReceivedError: (_, request, error) {
+                      commonPrint.log(
+                        'in-app browser error ${error.type}: ${error.description} '
+                        '(${request.url})',
+                        logLevel: LogLevel.warning,
+                      );
+                      // Only surface failures of the page itself; a sub-resource
+                      // (an image, a tracker) failing shouldn't blank the screen.
+                      if (mounted && request.isForMainFrame == true) {
+                        setState(() {
+                          _loading = false;
+                          _failed = true;
+                        });
+                      }
+                    },
+                    // Gateways often redirect to a wallet/bank app via a custom
+                    // scheme, which the webview itself can't load — hand those to the
+                    // OS instead of dead-ending the payment.
+                    shouldOverrideUrlLoading: (_, action) async {
+                      final uri = action.request.url;
+                      if (uri == null) return NavigationActionPolicy.ALLOW;
+                      if (uri.scheme == 'http' || uri.scheme == 'https') {
+                        return NavigationActionPolicy.ALLOW;
+                      }
+                      await launchUrl(
+                        Uri.parse(uri.toString()),
+                        mode: LaunchMode.externalApplication,
+                      );
+                      return NavigationActionPolicy.CANCEL;
+                    },
+                  ),
                 // Cover the empty webview while the first page loads, so the
                 // screen explains itself instead of showing a blank rectangle.
                 if (_loading && !_failed)

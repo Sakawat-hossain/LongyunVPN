@@ -71,6 +71,14 @@ class AppPath {
     return join(mHomeDirPath, 'backup.zip');
   }
 
+  /// Where WebView2 keeps its profile on Windows. Lives in the app's own data
+  /// directory, which is always writable — unlike the executable's folder,
+  /// WebView2's default, which is read-only under C:\Program Files.
+  Future<String> get webViewDataDirPath async {
+    final mHomeDirPath = await homeDirPath;
+    return join(mHomeDirPath, 'WebView2');
+  }
+
   Future<String> get restoreDirPath async {
     final mHomeDirPath = await homeDirPath;
     return join(mHomeDirPath, 'restore');

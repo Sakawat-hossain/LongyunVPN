@@ -68,15 +68,36 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     if (error != null) return;
 
     if (payUrl != null && payUrl.isNotEmpty) {
+      // Snapshot the plan before checkout. Coming back cannot be treated as
+      // "paid": refreshStatus() reports success for ANY active subscription, so
+      // a user who already had a plan and simply pressed Back was told their
+      // purchase went through and had the profile re-imported. Only a plan that
+      // actually changed — a later expiry, or a different plan — means money
+      // moved.
+      final before = ref.read(authProvider).subscribeInfo;
+      final beforeExpiry = before?.expiredAt;
+      final beforePlan = ref.read(authProvider).userInfo?.planId;
+
       // Checkout runs inside the app. The in-app browser starts from a clean
       // cache/cookie jar so a previous (or abandoned) order can't be replayed,
       // and it exposes an "open in browser" action for gateways that need to
       // hand off to a bank or wallet app.
       await openInApp(context, url: payUrl, title: l.premium);
-      globalState.showNotifier(l.completePaymentInBrowser);
-      // Returning from checkout: re-check the account so a completed payment is
-      // reflected without the user hunting for a refresh.
-      if (mounted) await _onRefresh();
+      if (!mounted) return;
+
+      await ref.read(authProvider.notifier).refresh();
+      if (!mounted) return;
+      final auth = ref.read(authProvider);
+      final changed = auth.subscribeInfo?.expiredAt != beforeExpiry ||
+          auth.userInfo?.planId != beforePlan;
+      if (changed) {
+        await _onRefresh();
+      } else {
+        // Nothing changed on the panel — the order may still be pending, or the
+        // user backed out. Say so instead of claiming a purchase, and leave the
+        // Refresh action for when the gateway settles.
+        globalState.showNotifier(l.completePaymentInBrowser);
+      }
     } else {
       // No redirect — panel reports it already paid; verify right away.
       await _onRefresh();
