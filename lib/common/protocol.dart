@@ -23,9 +23,21 @@ class Protocol {
       '',
       '"${Platform.resolvedExecutable}" "%1"',
     );
+    // Both keys own a native HKEY and have to be closed, including when
+    // createValue throws — nothing released them before, so every registration
+    // leaked two handles for the life of the process.
     final regKey = Registry.currentUser.createKey(protocolRegKey);
-    regKey.createValue(protocolRegValue);
-    regKey.createKey(protocolCmdRegKey).createValue(protocolCmdRegValue);
+    try {
+      regKey.createValue(protocolRegValue);
+      final commandKey = regKey.createKey(protocolCmdRegKey);
+      try {
+        commandKey.createValue(protocolCmdRegValue);
+      } finally {
+        commandKey.close();
+      }
+    } finally {
+      regKey.close();
+    }
   }
 }
 

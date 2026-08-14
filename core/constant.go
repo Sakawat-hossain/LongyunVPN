@@ -34,6 +34,8 @@ type UpdateParams struct {
 	ExternalController *string            `json:"external-controller"`
 	Interface          *string            `json:"interface-name"`
 	UnifiedDelay       *bool              `json:"unified-delay"`
+	GeoAutoUpdate      *bool              `json:"geo-auto-update"`
+	GeoUpdateInterval  *int               `json:"geo-update-interval"`
 }
 
 type tunSchema struct {

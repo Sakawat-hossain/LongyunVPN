@@ -35,7 +35,12 @@ jstring jni_new_string(JNIEnv *env, const char *str) {
     const auto length = static_cast<int>(strlen(str));
     const auto array = env->NewByteArray(length);
     env->SetByteArrayRegion(array, 0, length, reinterpret_cast<const jbyte *>(str));
-    return reinterpret_cast<jstring>(env->NewObject(c_string, m_new_string, array));
+    const auto result = reinterpret_cast<jstring>(env->NewObject(c_string, m_new_string, array));
+    // The byte array is a local reference. On the polling paths this runs once
+    // a second on a long-lived attached thread, where locals are not reclaimed
+    // until the thread detaches, so the table fills up over a session.
+    env->DeleteLocalRef(array);
+    return result;
 }
 
 int jni_catch_exception(JNIEnv *env) {

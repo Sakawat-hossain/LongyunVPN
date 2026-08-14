@@ -55,6 +55,36 @@ jobs:
       - name: Test (proxy plugin)
         run: flutter test plugins/proxy/test/proxy_test.dart
 
+  # The Go wrapper had no CI coverage at all: a change that broke `go build` only
+  # surfaced during a platform release job, minutes into the matrix. Its own job
+  # so the Clash.Meta submodule checkout (large, and needed here for the
+  # `replace` directive to resolve) stays off the analyze job's critical path.
+  core:
+    name: go core check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Fetch core submodule
+        run: git submodule update --init --depth 1 core/Clash.Meta
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.5'
+          cache-dependency-path: core/go.sum
+
+      # CGO off matches the desktop build; the cgo-only files (lib.go, bride.go)
+      # are Android's and are covered by the release job's NDK build.
+      - name: Build and vet
+        working-directory: core
+        env:
+          CGO_ENABLED: 0
+        run: |
+          go build ./...
+          go vet ./...
+
   helper:
     name: rust helper check
     runs-on: ubuntu-latest

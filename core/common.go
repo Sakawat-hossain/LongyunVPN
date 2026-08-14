@@ -13,6 +13,7 @@ import (
 	"github.com/metacubex/mihomo/common/batch"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
@@ -28,12 +29,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"sync/atomic"
 )
 
 var (
 	currentConfig *config.Config
 	version       = 0
-	isRunning     = false
+	isRunning     atomic.Bool
 	runLock       sync.Mutex
 	mBatch, _     = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
 	debugError    = false
@@ -104,7 +106,7 @@ func sideUpdateExternalProvider(p cp.Provider, bytes []byte) error {
 }
 
 func updateListeners() {
-	if !isRunning {
+	if !isRunning.Load() {
 		return
 	}
 	if currentConfig == nil {
@@ -227,14 +229,48 @@ func updateConfig(params *UpdateParams) {
 
 	if params.Tun != nil {
 		general.Tun.Enable = params.Tun.Enable
-		general.Tun.AutoRoute = *params.Tun.AutoRoute
-		general.Tun.Device = *params.Tun.Device
-		general.Tun.RouteAddress = *params.Tun.RouteAddress
-		general.Tun.DNSHijack = *params.Tun.DNSHijack
-		general.Tun.Stack = *params.Tun.Stack
+		// Every field below is a pointer, and the caller only sends the ones it
+		// wants changed. Dereferencing unconditionally panicked the core (and
+		// took the VPN down with it) on any partial tun update.
+		if params.Tun.AutoRoute != nil {
+			general.Tun.AutoRoute = *params.Tun.AutoRoute
+		}
+		if params.Tun.Device != nil {
+			general.Tun.Device = *params.Tun.Device
+		}
+		if params.Tun.RouteAddress != nil {
+			general.Tun.RouteAddress = *params.Tun.RouteAddress
+		}
+		if params.Tun.DNSHijack != nil {
+			general.Tun.DNSHijack = *params.Tun.DNSHijack
+		}
+		if params.Tun.Stack != nil {
+			general.Tun.Stack = *params.Tun.Stack
+		}
+	}
+
+	if params.GeoAutoUpdate != nil {
+		updater.SetGeoAutoUpdate(*params.GeoAutoUpdate)
+	}
+	if params.GeoUpdateInterval != nil {
+		updater.SetGeoUpdateInterval(*params.GeoUpdateInterval)
 	}
 
 	updateListeners()
+	registerGeoUpdater()
+}
+
+// Starts (or restarts) the periodic GEO database refresh.
+//
+// Setting geo-auto-update in the config only stores the flag: mihomo starts the
+// updater goroutine from its standalone main(), which we never run, so nothing
+// was ever scheduled and the databases only changed when the user asked. The
+// WithCancel variant cancels a previous goroutine first, so calling it on every
+// config apply cannot pile up tickers.
+func registerGeoUpdater() {
+	if updater.GeoAutoUpdate() {
+		updater.RegisterGeoUpdaterWithCancel()
+	}
 }
 
 func applyConfig(params *SetupParams) error {
@@ -249,6 +285,7 @@ func applyConfig(params *SetupParams) error {
 	hub.ApplyConfig(currentConfig)
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
+	registerGeoUpdater()
 	// Reclaim the replaced config's memory off the hot path. This used to be a
 	// synchronous runtime.GC() before the lock, stalling every connect / proxy
 	// switch / settings change with a stop-the-world GC. Running it in a

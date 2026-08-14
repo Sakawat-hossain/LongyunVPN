@@ -10,6 +10,11 @@ installed_size: 6604
 essential: false
 icon: ./assets/images/icon.png
 
+# flutter_secure_storage_linux links libsecret; without it the app fails to
+# start on a clean system instead of just losing saved credentials.
+requires:
+  - libsecret
+
 keywords:
   - LongyunVPN
   - Clash

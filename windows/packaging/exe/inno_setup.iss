@@ -36,8 +36,46 @@ begin
   end;
 end;
 
+// Remove the Windows service registration. The app creates it with `sc create`
+// when it first needs elevation, but nothing ever removed it, so uninstalling
+// left a registered service pointing at a deleted binary — which then failed to
+// start on every boot and could block a later reinstall from recreating it.
+// `sc delete` on a service that isn't there just returns an error we ignore, so
+// this is safe to run unconditionally. The legacy FlClash name is included so an
+// upgrade from an old install cleans up too.
+procedure UnregisterHelperServices;
+var
+  Services: TArrayOfString;
+  i: Integer;
+  ResultCode: Integer;
+begin
+  Services := ['LongyunVPNHelperService', 'FlClashHelperService'];
+
+  for i := 0 to GetArrayLength(Services)-1 do
+  begin
+    Exec('sc', 'stop ' + Services[i], '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('sc', 'delete ' + Services[i], '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  end;
+end;
+
 function InitializeSetup(): Boolean;
 begin
+  KillProcesses;
+  Result := True;
+end;
+
+// Runs after the install directory is settled but before files are copied, so
+// the old service is gone and its binary unlocked by the time we overwrite it.
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  UnregisterHelperServices;
+  KillProcesses;
+  Result := '';
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  UnregisterHelperServices;
   KillProcesses;
   Result := True;
 end;

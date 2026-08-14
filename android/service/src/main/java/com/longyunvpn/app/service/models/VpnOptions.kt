@@ -3,6 +3,8 @@ package com.longyunvpn.app.service.models
 import android.os.Parcelable
 import com.longyunvpn.app.common.AccessControlMode
 import kotlinx.parcelize.Parcelize
+import java.net.Inet4Address
+import java.net.Inet6Address
 import java.net.InetAddress
 
 @Parcelize
@@ -29,54 +31,30 @@ data class VpnOptions(
 
 data class CIDR(val address: InetAddress, val prefixLength: Int)
 
-fun VpnOptions.getIpv4RouteAddress(): List<CIDR> {
-    return routeAddress.filter {
-        it.isIpv4()
-    }.map {
-        it.toCIDR()
-    }
-}
+// Each address is parsed exactly once and then sorted by the resulting type.
+// Filtering with a separate isIpv4()/isIpv6() predicate first re-parsed every
+// entry through InetAddress a second time, which is pure waste on the route
+// tables that matter — a bypass-China list runs to thousands of CIDRs and this
+// runs while the tunnel is coming up.
+fun VpnOptions.getIpv4RouteAddress(): List<CIDR> = routeAddress
+    .map(String::toCIDR)
+    .filter { it.address is Inet4Address }
 
-fun VpnOptions.getIpv6RouteAddress(): List<CIDR> {
-    return routeAddress.filter {
-        it.isIpv6()
-    }.map {
-        it.toCIDR()
-    }
-}
-
-fun String.isIpv4(): Boolean {
-    val parts = split("/")
-    if (parts.size != 2) {
-        throw IllegalArgumentException("Invalid CIDR format")
-    }
-    val address = InetAddress.getByName(parts[0])
-    return address.address.size == 4
-}
-
-fun String.isIpv6(): Boolean {
-    val parts = split("/")
-    if (parts.size != 2) {
-        throw IllegalArgumentException("Invalid CIDR format")
-    }
-    val address = InetAddress.getByName(parts[0])
-    return address.address.size == 16
-}
+fun VpnOptions.getIpv6RouteAddress(): List<CIDR> = routeAddress
+    .map(String::toCIDR)
+    .filter { it.address is Inet6Address }
 
 fun String.toCIDR(): CIDR {
     val parts = split("/")
-    if (parts.size != 2) {
-        throw IllegalArgumentException("Invalid CIDR format")
-    }
+    require(parts.size == 2) { "Invalid CIDR format: $this" }
     val ipAddress = parts[0]
-    val prefixLength =
-        parts[1].toIntOrNull() ?: throw IllegalArgumentException("Invalid prefix length")
+    val prefixLength = parts[1].toIntOrNull()
+        ?: throw IllegalArgumentException("Invalid prefix length: ${parts[1]}")
 
     val address = InetAddress.getByName(ipAddress)
-
     val maxPrefix = if (address.address.size == 4) 32 else 128
-    if (prefixLength < 0 || prefixLength > maxPrefix) {
-        throw IllegalArgumentException("Invalid prefix length for IP version")
+    require(prefixLength in 0..maxPrefix) {
+        "Invalid prefix length $prefixLength for $ipAddress"
     }
 
     return CIDR(address, prefixLength)

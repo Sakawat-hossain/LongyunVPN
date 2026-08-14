@@ -54,14 +54,18 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_follow_clash_core_Core_getTraffic(JNIEnv *env, jobject thiz,
                                            const jboolean only_statistics_proxy) {
-    return new_string(getTraffic(only_statistics_proxy));
+    // scoped_string frees the Go-allocated buffer once it has been copied into
+    // the Java string; the core no longer frees it before we read it.
+    scoped_string traffic = getTraffic(only_statistics_proxy);
+    return new_string(traffic);
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_follow_clash_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
                                                 const jboolean only_statistics_proxy) {
-    return new_string(getTotalTraffic(only_statistics_proxy));
+    scoped_string total = getTotalTraffic(only_statistics_proxy);
+    return new_string(total);
 }
 
 extern "C"

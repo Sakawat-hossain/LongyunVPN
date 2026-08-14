@@ -13,6 +13,9 @@ icon: ./assets/images/icon.png
 dependencies:
   - libayatana-appindicator3-dev
   - libkeybinder-3.0-dev
+  # flutter_secure_storage_linux links libsecret; without it the app fails to
+  # start on a clean system instead of just losing saved credentials.
+  - libsecret-1-0
 
 keywords:
   - LongyunVPN

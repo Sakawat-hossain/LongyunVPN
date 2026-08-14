@@ -201,7 +201,7 @@ func invokeAction(callback unsafe.Pointer, paramsChar *C.char) {
 //export startTUN
 func startTUN(callback unsafe.Pointer, fd C.int, stackChar, addressChar, dnsChar *C.char) bool {
 	handleStartTun(callback, int(fd), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar))
-	if !isRunning {
+	if !isRunning.Load() {
 		handleStartListener()
 	} else {
 		handleResetConnections()
@@ -218,7 +218,7 @@ func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar
 			invokeResult(callback, "init failed")
 			return
 		}
-		isRunning = true
+		isRunning.Store(true)
 		message := handleSetupConfig([]byte(setupParamsString))
 		invokeResult(callback, message)
 	}()
@@ -234,16 +234,16 @@ func setEventListener(listener unsafe.Pointer) {
 
 //export getTotalTraffic
 func getTotalTraffic(onlyStatisticsProxy bool) *C.char {
-	data := C.CString(handleGetTotalTraffic(onlyStatisticsProxy))
-	defer C.free(unsafe.Pointer(data))
-	return data
+	// Ownership transfers to the caller, which frees it via scoped_string.
+	// Freeing here released the buffer before the JNI bridge had copied it,
+	// so every poll read memory Go had already handed back.
+	return C.CString(handleGetTotalTraffic(onlyStatisticsProxy))
 }
 
 //export getTraffic
 func getTraffic(onlyStatisticsProxy bool) *C.char {
-	data := C.CString(handleGetTraffic(onlyStatisticsProxy))
-	defer C.free(unsafe.Pointer(data))
-	return data
+	// See getTotalTraffic: the caller owns and frees this string.
+	return C.CString(handleGetTraffic(onlyStatisticsProxy))
 }
 
 func sendMessage(message Message) {
@@ -261,7 +261,7 @@ func sendMessage(message Message) {
 //export stopTun
 func stopTun() {
 	handleStopTun()
-	if isRunning {
+	if isRunning.Load() {
 		handleStopListener()
 	}
 }
