@@ -44,7 +44,10 @@ void _showWhitelistInfo(BuildContext context) {
         FilledButton(
           onPressed: () {
             Navigator.of(ctx).pop();
-            _openWhitelist(ctx);
+            // Use the page's context, not the dialog's: `ctx` belongs to the
+            // route just popped, so pushing the browser through it would target
+            // a deactivated element and never open.
+            _openWhitelist(context);
           },
           child: Text(l.whitelistYourIp),
         ),
