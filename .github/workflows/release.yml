@@ -292,15 +292,17 @@ jobs:
   macos:
     name: macos-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
-    # Apple-Silicon (arm64) only. The Intel runner (macos-13) is being retired by
-    # GitHub and queues indefinitely; arm64 covers all current Macs. To also ship
-    # Intel later, add a universal build (ARCHS="arm64 x86_64") on macos-14 rather
-    # than reintroducing the scarce Intel runner.
+    # Both Mac architectures ship. macos-13 (the old Intel image) is retired and
+    # queues forever, which is why this job was arm64-only; GitHub's replacement
+    # Intel image is labelled macos-15-intel, so amd64 builds natively again and
+    # needs no cross-compilation. fail-fast is off so a problem on one
+    # architecture still lets the other publish.
     strategy:
       fail-fast: false
       matrix:
         include:
           - { os: macos-14, arch: arm64 }
+          - { os: macos-15-intel, arch: amd64 }
     steps:
       - name: Checkout
         uses: actions/checkout@v5
