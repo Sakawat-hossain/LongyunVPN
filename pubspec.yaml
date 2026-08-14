@@ -2,7 +2,7 @@ name: fl_clash
 description: LongyunVPN — a fast, secure, multi-platform VPN client powered by Longyun Core (based on Clash.Meta/mihomo).
 repository: https://github.com/Sakawat-hossain/LongyunVPN
 publish_to: 'none'
-version: 1.2.5
+version: 1.2.6
 environment:
   sdk: '>=3.8.0 <4.0.0'
 
