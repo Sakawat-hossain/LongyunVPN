@@ -130,7 +130,14 @@ Future<VM2<String, String>> _makeRealProfileTask(
   // unstable. Probing after 15 minutes keeps NAT mappings warm without
   // meaningful traffic. Note the core force-disables TCP keep-alive on Android
   // to protect battery, so this only affects desktop.
-  rawConfig['keep-alive-idle'] ??= 900;
+  // Treat 0 as "unset", not as a value. The config arrives from the core as a
+  // fully-populated Go struct, so absent keys come back as zero rather than
+  // null — `??=` therefore never fired here and the setting stayed at 0 (the OS
+  // default, often 2h). A profile that deliberately sets an idle time keeps it.
+  final idle = rawConfig['keep-alive-idle'];
+  if (idle == null || idle == 0) {
+    rawConfig['keep-alive-idle'] = 900;
+  }
   rawConfig['mixed-port'] = realPatchConfig.mixedPort;
   rawConfig['port'] = realPatchConfig.port;
   rawConfig['socks-port'] = realPatchConfig.socksPort;
@@ -168,7 +175,12 @@ Future<VM2<String, String>> _makeRealProfileTask(
   // worst common case (WireGuard/QUIC + IPv6 + PPPoE) and is what the major
   // clients ship. Only set when the profile doesn't specify one, so a user or
   // subscription can still override it.
-  rawConfig['tun']['mtu'] ??= 1400;
+  // 0 means unset here too (an MTU of 0 is not a real value), so guard against
+  // it the same way rather than relying on the key being absent.
+  final mtu = rawConfig['tun']['mtu'];
+  if (mtu == null || mtu == 0) {
+    rawConfig['tun']['mtu'] = 1400;
+  }
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   if (rawConfig['sniffer']?['sniff'] != null) {
     for (final value in (rawConfig['sniffer']?['sniff'] as Map).values) {

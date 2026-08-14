@@ -73,18 +73,20 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
                     aspectRatio: 1,
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      onPressed: () {
-                        globalState.showMessage(
-                          title: appLocalizations.tip,
-                          message: TextSpan(
-                            text: appLocalizations.detectionTip,
-                          ),
-                          cancelable: false,
-                        );
-                      },
+                      // Was an info button whose only job was to pop a dialog
+                      // saying the lookup is third-party and indicative. That
+                      // caveat now lives in this button's tooltip, freeing the
+                      // one control on the card to do something useful: run the
+                      // detection again. Useful after switching node, or when a
+                      // lookup timed out and left the card showing nothing.
+                      tooltip:
+                          '${appLocalizations.refresh}\n${appLocalizations.detectionTip}',
+                      onPressed: networkDetection.isLoading
+                          ? null
+                          : () => ref.read(checkIpNumProvider.notifier).add(),
                       icon: Icon(
                         size: 16.ap,
-                        Icons.info_outline,
+                        Icons.refresh,
                         color: context.colorScheme.onSurfaceVariant,
                       ),
                     ),
