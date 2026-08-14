@@ -212,7 +212,15 @@ Future<VM2<String, String>> _makeRealProfileTask(
     }
   }
   rawConfig['profile']['store-selected'] = false;
-  rawConfig['geox-url'] = realPatchConfig.geoXUrl.toJson();
+  rawConfig['geox-url'] = _migrateGeoXUrl(realPatchConfig.geoXUrl).toJson();
+  // Keep the geo databases current by themselves. They were only refreshed when
+  // someone opened Tools > Resources and tapped update, which in practice means
+  // never — and a stale GEOIP quietly breaks rules that depend on it (the
+  // profile's `GEOIP,CN,DIRECT` starts tunnelling Chinese traffic abroad, and
+  // the DNS fallback-filter's geoip check misjudges too). Daily is plenty: the
+  // files change slowly and each check is conditional on the hash.
+  rawConfig['geo-auto-update'] = true;
+  rawConfig['geo-update-interval'] = 24;
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
   if (rawConfig['hosts'] == null) {
     rawConfig['hosts'] = {};
@@ -332,6 +340,30 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
   return VM2(yaml, yaml.toMd5());
+}
+
+/// Moves untouched geo URLs off GitHub Releases onto the jsDelivr mirror.
+///
+/// The default used to point at github.com, which is exactly the host that is
+/// throttled or blocked for the users who most need these files. Changing the
+/// default only helps fresh installs — everyone else has the old value
+/// persisted — so rewrite it here as well.
+///
+/// Only values still equal to the old default are replaced, so a URL the user
+/// (or their profile) deliberately set is never overwritten.
+GeoXUrl _migrateGeoXUrl(GeoXUrl current) {
+  const oldPrefix =
+      'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/';
+  const newPrefix =
+      'https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/';
+  String swap(String url) =>
+      url.startsWith(oldPrefix) ? url.replaceFirst(oldPrefix, newPrefix) : url;
+  return current.copyWith(
+    mmdb: swap(current.mmdb),
+    asn: swap(current.asn),
+    geoip: swap(current.geoip),
+    geosite: swap(current.geosite),
+  );
 }
 
 /// Fills in health-check defaults on automatic proxy groups.
