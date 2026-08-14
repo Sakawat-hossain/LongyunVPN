@@ -423,6 +423,10 @@ jobs:
     if: ${{ always() && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
+      # Needed for the release-body script and CHANGELOG.md.
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Generate and upload SHA256SUMS
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -438,3 +442,17 @@ jobs:
           sha256sum * > SHA256SUMS
           echo "----- SHA256SUMS -----"; cat SHA256SUMS
           gh release upload "${GITHUB_REF_NAME}" SHA256SUMS --repo "${GITHUB_REPOSITORY}" --clobber
+
+      # Runs after every platform has uploaded, so the download table is built
+      # from the assets that actually exist. Replaces the auto-generated notes
+      # each platform job wrote as a fallback.
+      - name: Write release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash .github/scripts/build_release_body.sh \
+            "${GITHUB_REF_NAME}" assets CHANGELOG.md > release_body.md
+          echo "----- release body -----"; cat release_body.md
+          gh release edit "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --notes-file release_body.md

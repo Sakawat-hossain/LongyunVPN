@@ -1,3 +1,25 @@
+## v1.2.9
+
+- GEO databases now really do update on their own — the setting was being saved and then ignored, so they only ever changed when you asked
+- Fixed a crash that could take the VPN down when tunnel settings were changed
+- Traffic figures on the dashboard are read correctly instead of from memory that had already been released
+- Steadier connect/disconnect: the core's state flags are no longer read and written by two threads at once
+- Faster tunnel start when a large routing list is in use
+- Linux packages now declare libsecret, so the app starts on a clean system instead of failing
+- Uninstalling on Windows removes the helper service instead of leaving it behind pointing at a deleted file
+- Fixed a slow leak when registering LongyunVPN's link handler
+
+## v1.2.8
+
+- macOS on Intel is back — a DMG is published for Intel Macs alongside Apple Silicon
+- Fixed the Android build, which was failing to package
+- Starting minimised to the tray works on Linux instead of forcing the window open
+
+## v1.2.7
+
+- The in-app browser (IP whitelist, checkout) now opens on Windows instead of sitting on a spinner forever
+- Returning from checkout no longer claims you paid when you simply went back
+
 ## v1.1.5
 
 - Wi-Fi ⇄ mobile handoff: the VPN stays connected when your network switches, instead of stalling until it reconnects
