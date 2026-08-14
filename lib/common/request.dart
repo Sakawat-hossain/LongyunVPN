@@ -70,6 +70,7 @@ class Request {
     String url,
     String savePath, {
     void Function(int received, int total)? onProgress,
+    CancelToken? cancelToken,
     int retries = 3,
   }) async {
     for (var attempt = 1; attempt <= retries; attempt++) {
@@ -78,6 +79,7 @@ class Request {
           url,
           savePath,
           onReceiveProgress: onProgress,
+          cancelToken: cancelToken,
           deleteOnError: true,
           options: Options(
             headers: {'User-Agent': browserUa},
@@ -88,14 +90,21 @@ class Request {
         );
         return true;
       } catch (e) {
+        // A cancellation is a deliberate user action, not a transport failure —
+        // retrying it would ignore the user and download the file anyway.
+        final cancelled = e is DioException &&
+            e.type == DioExceptionType.cancel;
         commonPrint.log(
-          'downloadFile attempt $attempt/$retries failed: $e',
+          cancelled
+              ? 'downloadFile cancelled'
+              : 'downloadFile attempt $attempt/$retries failed: $e',
           logLevel: LogLevel.warning,
         );
         try {
           final file = File(savePath);
           if (await file.exists()) await file.delete();
         } catch (_) {}
+        if (cancelled) return false;
         if (attempt < retries) {
           await Future.delayed(const Duration(seconds: 2));
         }

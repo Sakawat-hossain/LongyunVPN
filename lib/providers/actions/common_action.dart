@@ -165,17 +165,27 @@ class CommonAction extends _$CommonAction {
     // launch (closes the TOCTOU window).
     final dir = await appPath.homeDirPath;
     final savePath = '$dir${Platform.pathSeparator}$name';
-    // downloadFile never throws — it returns false after retrying, so the user
-    // never sees a raw socket error. On any failure we fall back to opening the
-    // releases page in the browser (which can resume large downloads better).
-    final ok = await globalState.loadingRun<bool>(
-      () => request.downloadFile(url, savePath),
-      title: l.downloadingUpdate,
-      tag: null,
+    // Show real progress rather than an indeterminate spinner: the installer is
+    // tens of megabytes, and the old blocking "please wait" gave no sign of
+    // life and no way to back out. downloadFile never throws — it returns false
+    // after retrying (or immediately, if cancelled), so the user never sees a
+    // raw socket error.
+    final cancelToken = CancelToken();
+    final ok = await globalState.showCommonDialog<bool>(
+      dismissible: false,
+      child: UpdateProgressDialog(
+        url: url,
+        savePath: savePath,
+        cancelToken: cancelToken,
+      ),
     );
     if (ok != true) {
-      globalState.showNotifier(l.updateDownloadFailed);
-      _openReleasesPage();
+      // Cancelling is a deliberate choice — don't nag with an error or push the
+      // user to the browser; just leave them where they were.
+      if (!cancelToken.isCancelled) {
+        globalState.showNotifier(l.updateDownloadFailed);
+        _openReleasesPage();
+      }
       return;
     }
     // Never execute an unverified binary. GitHub publishes a server-side SHA256
