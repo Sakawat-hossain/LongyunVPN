@@ -22,8 +22,22 @@ class CoreLib extends CoreHandlerInterface {
       return 'core is connected';
     }
     final res = await service?.init();
-    if (res?.isEmpty != true) {
-      return res ?? '';
+    // An empty string means success. Anything else — including null, which is
+    // what a missing/unbound service channel yields — is a failure. The old
+    // condition returned `res ?? ''` for null, i.e. an EMPTY string, which every
+    // caller reads as success: connectCore then flipped the status to
+    // "connected" while the completer was never completed and the core was
+    // never actually initialised. Every later call then timed out silently and
+    // the proxy groups stayed empty, so the Servers page showed nothing with no
+    // error anywhere.
+    if (res == null) {
+      const message = 'core service unavailable';
+      commonPrint.log('preload failed: $message', logLevel: LogLevel.error);
+      return message;
+    }
+    if (res.isNotEmpty) {
+      commonPrint.log('preload failed: $res', logLevel: LogLevel.error);
+      return res;
     }
     _connectedCompleter.complete(true);
     final syncRes = await service?.syncState(
@@ -72,10 +86,26 @@ class CoreLib extends CoreHandlerInterface {
     Duration? timeout,
   }) async {
     final id = '${method.name}#${utils.id}';
+    // A null here means the call to the Android service timed out or the
+    // service isn't bound. That used to be swallowed silently, so a failed
+    // setupConfig/getProxies looked identical to "there are simply no proxies"
+    // — the Servers page stayed empty and nothing was logged. Keep returning
+    // null (callers handle it) but make the failure visible.
+    if (service == null) {
+      commonPrint.log(
+        'core invoke ${method.name}: service unavailable',
+        logLevel: LogLevel.error,
+      );
+      return null;
+    }
     final result = await service
         ?.invokeAction(Action(id: id, method: method, data: data))
         .withTimeout(onTimeout: () => null);
     if (result == null) {
+      commonPrint.log(
+        'core invoke ${method.name}: no result (timed out)',
+        logLevel: LogLevel.error,
+      );
       return null;
     }
     return parasResult<T>(result);
