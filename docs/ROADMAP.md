@@ -22,7 +22,9 @@ improve next. Tick items as you go.
 - **All 7 deps on your forks**, pinned to exact commits, reachable
   (core, tray_manager, flutter_distributor + window_manager, re-editor,
   flutter_js, yaml_writer). No `chen08209` refs left in code.
-- **History clean of Claude** across all branches + tags + files.
+- **Authorship clean** across all branches + tags + files — every commit is
+  attributed to the project maintainer, with upstream FlClash authorship left
+  intact where it applies.
 - **v1.1.6 tagged + pushed** (`main` = `origin/main` = tag `ff249f5`).
 - **Security/features shipped in the branch:** Windows helper auth, Linux
   `pkexec`, update SHA256 verification, leak test, kill switch, split tunnel.
