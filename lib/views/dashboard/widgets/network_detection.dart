@@ -14,6 +14,10 @@ class NetworkDetection extends ConsumerStatefulWidget {
 }
 
 class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
+  /// Your public IP identifies you, so it stays hidden until asked for —
+  /// handy when screen-sharing or sending a screenshot.
+  bool _ipVisible = false;
+
   String _countryCodeToEmoji(String countryCode) {
     final String code = countryCode.toUpperCase();
     if (code.length != 2) {
@@ -40,7 +44,12 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
     return SizedBox(
       height: getWidgetHeight(1),
       child: CommonCard(
-        onPressed: () {},
+        // The card describes where your traffic is coming out, so tapping it
+        // goes to the servers page — the place you'd act on that. The eye
+        // button stops the tap from bubbling, so toggling doesn't navigate.
+        onPressed: () => ref
+            .read(currentPageLabelProvider.notifier)
+            .toPage(PageLabel.proxies),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -73,20 +82,20 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
                     aspectRatio: 1,
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      // Was an info button whose only job was to pop a dialog
-                      // saying the lookup is third-party and indicative. That
-                      // caveat now lives in this button's tooltip, freeing the
-                      // one control on the card to do something useful: run the
-                      // detection again. Useful after switching node, or when a
-                      // lookup timed out and left the card showing nothing.
+                      // Show/hide the public IP. Replaces an info button whose
+                      // only job was to pop a dialog saying the lookup is
+                      // third-party and indicative — that caveat is now this
+                      // button's tooltip.
                       tooltip:
-                          '${appLocalizations.refresh}\n${appLocalizations.detectionTip}',
-                      onPressed: networkDetection.isLoading
+                          '${_ipVisible ? appLocalizations.hide : appLocalizations.show}\n${appLocalizations.detectionTip}',
+                      onPressed: ipInfo == null
                           ? null
-                          : () => ref.read(checkIpNumProvider.notifier).add(),
+                          : () => setState(() => _ipVisible = !_ipVisible),
                       icon: Icon(
                         size: 16.ap,
-                        Icons.refresh,
+                        _ipVisible
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
                         color: context.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -102,7 +111,11 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
                   child: ipInfo != null
                       ? TooltipText(
                           text: Text(
-                            ipInfo.ip,
+                            // Same character count when masked, so the row
+                            // doesn't resize as it's toggled.
+                            _ipVisible
+                                ? ipInfo.ip
+                                : '•' * ipInfo.ip.length,
                             style: context.textTheme.bodyMedium?.toLight
                                 .adjustSize(1),
                             maxLines: 1,

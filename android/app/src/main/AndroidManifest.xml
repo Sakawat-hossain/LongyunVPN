@@ -14,24 +14,39 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!--
+      Per-app split tunnelling needs to list the apps the user can pick from.
+      On API 30+ that requires package visibility, and the blunt instrument for
+      it is QUERY_ALL_PACKAGES — which Play treats as sensitive and gates behind
+      a declaration, with rejection if it isn't justified.
+
+      Declaring the launcher intent instead makes every app the user can
+      actually launch visible, which is exactly the set worth showing in an app
+      picker, and needs no declaration. The trade-off is that apps with no
+      launcher activity (pure background services) no longer appear in the list.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
 
     <application
         android:name=".Application"
         android:banner="@mipmap/ic_banner"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="LongyunVPN">
+        android:label="@string/LongyunVPN">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -61,7 +76,7 @@
 
                 <data android:scheme="clash" />
                 <data android:scheme="clashmeta" />
-                <data android:scheme="flclash" />
+                <data android:scheme="longyunvpn" />
 
                 <data android:host="install-config" />
             </intent-filter>
@@ -90,7 +105,7 @@
             android:name=".TileService"
             android:exported="true"
             android:icon="@drawable/ic_tile"
-            android:label="LongyunVPN"
+            android:label="@string/LongyunVPN"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
