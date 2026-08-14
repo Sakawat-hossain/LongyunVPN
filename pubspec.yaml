@@ -73,7 +73,7 @@ dependencies:
       url: https://github.com/Sakawat-hossain/flutter_js
       ref: c0e10a5dab0e22cd616ec92ae71471d76369cbfe
   flutter_svg: ^2.1.0
-  flutter_cache_manager: ^3.4.1
+  flutter_cache_manager: ^3.4.2
   crypto: ^3.0.3
   yaml_writer:
     git:
