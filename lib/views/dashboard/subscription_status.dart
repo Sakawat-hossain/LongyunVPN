@@ -84,13 +84,27 @@ class _SubscriptionStatusCardState
     // Surface a reset shortcut when an active plan is running low on data.
     final lowTraffic = active && hasTraffic && usedFraction >= 0.9;
 
-    // Same shell as every other dashboard widget (network speed, traffic, …):
-    // CommonCard, so the radius, surface tone and grid spacing all match. The
-    // status colour still comes through on the icon chip and the pill, so the
-    // card keeps its identity without a bespoke gradient/border/radius.
+    // CommonCard keeps the radius, surface tone and grid spacing identical to
+    // every other dashboard widget, and the status-tinted wash inside it gives
+    // the card its own identity: it fades the current state's colour in from
+    // the top-left, so an expiring or inactive plan is readable before you read
+    // a single word.
     return CommonCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
+      padding: EdgeInsets.zero,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              statusColor.withValues(alpha: 0.10),
+              statusColor.withValues(alpha: 0.0),
+            ],
+          ),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header: lock + Premium + status pill
@@ -211,6 +225,7 @@ class _SubscriptionStatusCardState
             ),
           ],
         ),
+      ),
     );
   }
 }

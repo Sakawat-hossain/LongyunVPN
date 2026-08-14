@@ -342,16 +342,28 @@ class _PlanCard extends StatelessWidget {
     // this tracks the logo/theme instead of hardcoding a hex value.
     return Card(
       elevation: 0,
-      color: isCurrent
-          ? theme.colorScheme.primary.withValues(alpha: 0.07)
-          : null,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: isCurrent
             ? BorderSide(color: theme.colorScheme.primary, width: 2)
             : BorderSide(color: theme.colorScheme.outlineVariant),
       ),
-      child: Padding(
+      child: Container(
+        // Same diagonal wash as the dashboard subscription card, so the plan
+        // you own is marked the same way in both places.
+        decoration: isCurrent
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary.withValues(alpha: 0.14),
+                    theme.colorScheme.primary.withValues(alpha: 0.0),
+                  ],
+                ),
+              )
+            : null,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
