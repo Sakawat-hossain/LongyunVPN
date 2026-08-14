@@ -587,6 +587,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "开启后，将只统计代理流量",
     ),
+    "openInBrowser": MessageLookupByLibrary.simpleMessage("在浏览器中打开"),
     "openSettings": MessageLookupByLibrary.simpleMessage("打开设置"),
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
@@ -697,6 +698,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "refreshStatus": MessageLookupByLibrary.simpleMessage("刷新状态"),
     "refreshSubscriptionHint": MessageLookupByLibrary.simpleMessage("请刷新您的订阅。"),
     "refreshing": MessageLookupByLibrary.simpleMessage("正在刷新…"),
+    "reload": MessageLookupByLibrary.simpleMessage("重新加载"),
     "remote": MessageLookupByLibrary.simpleMessage("远程"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到WebDAV"),
     "remoteDestination": MessageLookupByLibrary.simpleMessage("远程目标"),

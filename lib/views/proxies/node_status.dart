@@ -10,26 +10,22 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fl_clash/views/in_app_browser.dart';
 import 'package:yaml/yaml.dart';
 
 /// IP whitelist verification for LongyunVPN. Users must whitelist their current
 /// public IP before servers become reachable / report status.
 const _whitelistUrl = 'https://verify.solionvpn.com/longyunvpn';
 
-Future<void> _openWhitelist() async {
-  final uri = Uri.parse(_whitelistUrl);
-  // Keep the user inside the app: inAppBrowserView is an embedded Custom Tab
-  // (Android) / SFSafariViewController (iOS), so verification happens without
-  // leaving LongyunVPN. Desktop has no in-app view, so url_launcher falls back
-  // to the default browser there — try the in-app mode first and only fall back
-  // if the platform rejects it.
-  try {
-    if (await launchUrl(uri, mode: LaunchMode.inAppBrowserView)) return;
-  } catch (_) {
-    // fall through to the platform default below
-  }
-  await launchUrl(uri, mode: LaunchMode.platformDefault);
+/// Opens the IP-verification page inside the app. The in-app browser clears
+/// cache/cookies first, so the page always reflects the caller's current IP
+/// rather than a cached result from a previous visit.
+Future<void> _openWhitelist(BuildContext context) async {
+  await openInApp(
+    context,
+    url: _whitelistUrl,
+    title: context.appLocalizations.whitelistYourIp,
+  );
 }
 
 void _showWhitelistInfo(BuildContext context) {
@@ -48,7 +44,7 @@ void _showWhitelistInfo(BuildContext context) {
         FilledButton(
           onPressed: () {
             Navigator.of(ctx).pop();
-            _openWhitelist();
+            _openWhitelist(ctx);
           },
           child: Text(l.whitelistYourIp),
         ),
@@ -567,7 +563,7 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
             children: [
               Expanded(
                 child: FilledButton.tonalIcon(
-                  onPressed: _openWhitelist,
+                  onPressed: () => _openWhitelist(context),
                   icon: const Icon(Icons.verified_user_outlined, size: 18),
                   label: Text(l.whitelistYourIp),
                 ),

@@ -1,4 +1,5 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum AuthStatus { unknown, loggedOut, loggedIn }
@@ -64,25 +65,64 @@ class AuthNotifier extends Notifier<AuthState> {
       return;
     }
     xboardApi.setToken(token);
-    try {
-      // Independent panel calls — fetch in parallel to halve cold-start
-      // session-restore latency (the app is blocked on AuthStatus.unknown
-      // until both return).
-      final (userInfo, subscribeInfo) = await (
-        xboardApi.getUserInfo(),
-        xboardApi.getSubscribe(),
-      ).wait;
-      state = AuthState(
-        status: AuthStatus.loggedIn,
-        email: userInfo.email,
-        userInfo: userInfo,
-        subscribeInfo: subscribeInfo,
-      );
-    } catch (_) {
+    // Restoring the session must survive a flaky or not-yet-ready network. On
+    // a cold start (especially on mobile, or right after boot) the first call
+    // often fails simply because connectivity isn't up yet, so retry briefly
+    // before drawing any conclusion about the token.
+    Object? lastError;
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        // Independent panel calls — fetch in parallel to halve cold-start
+        // session-restore latency (the app is blocked on AuthStatus.unknown
+        // until both return).
+        final (userInfo, subscribeInfo) = await (
+          xboardApi.getUserInfo(),
+          xboardApi.getSubscribe(),
+        ).wait;
+        state = AuthState(
+          status: AuthStatus.loggedIn,
+          email: userInfo.email,
+          userInfo: userInfo,
+          subscribeInfo: subscribeInfo,
+        );
+        return;
+      } catch (e) {
+        lastError = e;
+        if (_isAuthFailure(e)) break; // token really is dead — stop retrying
+        if (attempt < 2) {
+          await Future.delayed(Duration(milliseconds: 400 * (attempt + 1)));
+        }
+      }
+    }
+
+    // Only destroy the saved token when the panel actually rejected it. The old
+    // code cleared it on *any* error, so one failed request — no connectivity
+    // at launch, a timeout, a 5xx — silently logged the user out and forced
+    // them to type their credentials again. Keeping the token means the next
+    // launch (or refresh) restores the session by itself.
+    if (_isAuthFailure(lastError)) {
       await preferences.clearXboardToken();
       xboardApi.setToken(null);
-      state = const AuthState(status: AuthStatus.loggedOut);
+    } else {
+      commonPrint.log(
+        'session restore failed, keeping token: $lastError',
+        logLevel: LogLevel.warning,
+      );
     }
+    state = const AuthState(status: AuthStatus.loggedOut);
+  }
+
+  /// True only when the panel answered and rejected the token (401/403), as
+  /// opposed to the request never getting through.
+  static bool _isAuthFailure(Object? error) {
+    final wrapped = error is ParallelWaitError ? error.errors : error;
+    if (wrapped is XboardApiException) return wrapped.isAuthFailure;
+    if (wrapped is Iterable) {
+      return wrapped.any(
+        (e) => e is XboardApiException && e.isAuthFailure,
+      );
+    }
+    return false;
   }
 
   Future<bool> login(String email, String password) async {

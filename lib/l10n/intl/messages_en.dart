@@ -819,6 +819,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "When turned on, only statistics proxy traffic",
     ),
+    "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in browser"),
     "openSettings": MessageLookupByLibrary.simpleMessage("Open settings"),
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
@@ -975,6 +976,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please refresh your subscription.",
     ),
     "refreshing": MessageLookupByLibrary.simpleMessage("Refreshing…"),
+    "reload": MessageLookupByLibrary.simpleMessage("Reload"),
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to WebDAV",

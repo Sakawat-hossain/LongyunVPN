@@ -9,7 +9,23 @@ import 'constant.dart';
 class XboardApiException implements Exception {
   final String message;
 
-  XboardApiException(this.message);
+  /// HTTP status when the panel actually answered; null when the request never
+  /// reached it (DNS failure, timeout, socket error, TLS failure).
+  final int? statusCode;
+
+  /// True when there was no response at all, i.e. a transport-level failure
+  /// rather than a rejection by the panel. Callers use this to avoid treating
+  /// "the network is down" as "the session is invalid".
+  final bool isNetworkError;
+
+  XboardApiException(
+    this.message, {
+    this.statusCode,
+    this.isNetworkError = false,
+  });
+
+  /// The panel rejected our credentials/token — the session really is dead.
+  bool get isAuthFailure => statusCode == 401 || statusCode == 403;
 
   @override
   String toString() => message;
@@ -250,6 +266,19 @@ class XboardApi {
     _token = token;
   }
 
+  /// Wraps a raw error, preserving whether it was a panel rejection (has a
+  /// status code) or a transport failure (no response at all).
+  XboardApiException _toApiException(Object error) {
+    if (error is DioException) {
+      return XboardApiException(
+        _extractErrorMessage(error),
+        statusCode: error.response?.statusCode,
+        isNetworkError: error.response == null,
+      );
+    }
+    return XboardApiException(_extractErrorMessage(error));
+  }
+
   String _extractErrorMessage(Object error) {
     if (error is DioException) {
       final data = error.response?.data;
@@ -284,7 +313,7 @@ class XboardApi {
       return authData;
     } catch (e) {
       if (e is XboardApiException) rethrow;
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -307,7 +336,7 @@ class XboardApi {
         },
       );
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -317,7 +346,7 @@ class XboardApi {
       final data = response.data['data'] as Map<String, dynamic>;
       return XboardCommConfig.fromJson(data);
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -328,7 +357,7 @@ class XboardApi {
         data: {'email': email},
       );
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -338,7 +367,7 @@ class XboardApi {
       final data = response.data['data'] as Map<String, dynamic>;
       return XboardUserInfo.fromJson(data);
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -348,7 +377,7 @@ class XboardApi {
       final data = response.data['data'] as Map<String, dynamic>;
       return XboardSubscribeInfo.fromJson(data);
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -364,7 +393,7 @@ class XboardApi {
           .map(XboardPlan.fromJson)
           .toList();
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -379,7 +408,7 @@ class XboardApi {
           .map(XboardPaymentMethod.fromJson)
           .toList();
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -405,7 +434,7 @@ class XboardApi {
       throw XboardApiException('Unexpected order response.');
     } catch (e) {
       if (e is XboardApiException) rethrow;
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -427,7 +456,7 @@ class XboardApi {
       // redirect — nothing to open.
       return null;
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 
@@ -443,7 +472,7 @@ class XboardApi {
       if (data is num) return data.toInt();
       return -1;
     } catch (e) {
-      throw XboardApiException(_extractErrorMessage(e));
+      throw _toApiException(e);
     }
   }
 }

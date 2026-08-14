@@ -858,6 +858,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "При включении будет учитываться только трафик прокси",
     ),
+    "openInBrowser": MessageLookupByLibrary.simpleMessage("Открыть в браузере"),
     "openSettings": MessageLookupByLibrary.simpleMessage("Открыть настройки"),
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
@@ -1024,6 +1025,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, обновите подписку.",
     ),
     "refreshing": MessageLookupByLibrary.simpleMessage("Обновление…"),
+    "reload": MessageLookupByLibrary.simpleMessage("Обновить"),
     "remote": MessageLookupByLibrary.simpleMessage("Удаленный"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование локальных данных на WebDAV",

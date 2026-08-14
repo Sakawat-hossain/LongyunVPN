@@ -5,7 +5,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fl_clash/views/in_app_browser.dart';
 
 class PremiumView extends ConsumerStatefulWidget {
   const PremiumView({super.key});
@@ -68,8 +68,15 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     if (error != null) return;
 
     if (payUrl != null && payUrl.isNotEmpty) {
-      await launchUrl(Uri.parse(payUrl), mode: LaunchMode.externalApplication);
+      // Checkout runs inside the app. The in-app browser starts from a clean
+      // cache/cookie jar so a previous (or abandoned) order can't be replayed,
+      // and it exposes an "open in browser" action for gateways that need to
+      // hand off to a bank or wallet app.
+      await openInApp(context, url: payUrl, title: l.premium);
       globalState.showNotifier(l.completePaymentInBrowser);
+      // Returning from checkout: re-check the account so a completed payment is
+      // reflected without the user hunting for a refresh.
+      if (mounted) await _onRefresh();
     } else {
       // No redirect — panel reports it already paid; verify right away.
       await _onRefresh();

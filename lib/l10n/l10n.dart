@@ -5833,6 +5833,21 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Reload`
+  String get reload {
+    return Intl.message('Reload', name: 'reload', desc: '', args: []);
+  }
+
+  /// `Open in browser`
+  String get openInBrowser {
+    return Intl.message(
+      'Open in browser',
+      name: 'openInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
