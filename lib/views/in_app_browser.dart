@@ -48,6 +48,21 @@ class InAppBrowserView extends StatefulWidget {
 class _InAppBrowserViewState extends State<InAppBrowserView> {
   InAppWebViewController? _controller;
   double _progress = 0;
+  // Until the first page finishes, the webview is an empty rectangle — a thin
+  // progress bar alone left users staring at a blank screen with no idea
+  // whether anything was happening.
+  bool _loading = true;
+  bool _failed = false;
+
+  Future<void> _reload() async {
+    setState(() {
+      _loading = true;
+      _failed = false;
+      _progress = 0;
+    });
+    await _clearBrowsingData();
+    await _controller?.reload();
+  }
 
   /// Wipes anything a previous visit left behind. Runs before the first load so
   /// the page can't answer from cache — an IP-verification or checkout page has
@@ -73,10 +88,7 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
       actions: [
         IconButton(
           tooltip: l.reload,
-          onPressed: () async {
-            await _clearBrowsingData();
-            await _controller?.reload();
-          },
+          onPressed: _reload,
           icon: const Icon(Icons.refresh),
         ),
         IconButton(
@@ -90,9 +102,11 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
       ],
       body: Column(
         children: [
-          if (_progress < 1) LinearProgressIndicator(value: _progress),
+          if (_loading) LinearProgressIndicator(value: _progress),
           Expanded(
-            child: InAppWebView(
+            child: Stack(
+              children: [
+                InAppWebView(
               initialUrlRequest: URLRequest(url: WebUri(widget.url)),
               initialSettings: InAppWebViewSettings(
                 // Don't reuse anything cached from an earlier visit.
@@ -112,12 +126,23 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
               onProgressChanged: (_, progress) {
                 if (mounted) setState(() => _progress = progress / 100);
               },
+              onLoadStop: (_, _) {
+                if (mounted) setState(() => _loading = false);
+              },
               onReceivedError: (_, request, error) {
                 commonPrint.log(
                   'in-app browser error ${error.type}: ${error.description} '
                   '(${request.url})',
                   logLevel: LogLevel.warning,
                 );
+                // Only surface failures of the page itself; a sub-resource
+                // (an image, a tracker) failing shouldn't blank the screen.
+                if (mounted && request.isForMainFrame == true) {
+                  setState(() {
+                    _loading = false;
+                    _failed = true;
+                  });
+                }
               },
               // Gateways often redirect to a wallet/bank app via a custom
               // scheme, which the webview itself can't load — hand those to the
@@ -134,6 +159,63 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
                 );
                 return NavigationActionPolicy.CANCEL;
               },
+                ),
+                // Cover the empty webview while the first page loads, so the
+                // screen explains itself instead of showing a blank rectangle.
+                if (_loading && !_failed)
+                  ColoredBox(
+                    color: context.colorScheme.surface,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(l.loading, style: context.textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (_failed)
+                  ColoredBox(
+                    color: context.colorScheme.surface,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.wifi_off,
+                              size: 44,
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              l.networkException,
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 20),
+                            FilledButton.tonalIcon(
+                              onPressed: _reload,
+                              icon: const Icon(Icons.refresh, size: 18),
+                              label: Text(l.retry),
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => launchUrl(
+                                Uri.parse(widget.url),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              child: Text(l.openInBrowser),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
