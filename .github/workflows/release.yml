@@ -47,6 +47,13 @@ jobs:
       - name: Enable git long paths
         run: git config --global core.longpaths true
 
+      # flutter_inappwebview_windows shells out to the NuGet CLI at build time
+      # to fetch its native dependencies (WebView2, WIL, nlohmann.json). The
+      # amd64 runner image ships it, but the arm64 image is not guaranteed to,
+      # and a missing nuget fails the build with a bare NUGET-NOTFOUND.
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:

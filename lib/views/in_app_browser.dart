@@ -4,24 +4,27 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+
+/// True on the platforms that have an embedded browser implementation.
+/// Linux has none, so it keeps using the system browser.
+bool get _hasInAppBrowser =>
+    Platform.isAndroid || Platform.isIOS || Platform.isMacOS ||
+    Platform.isWindows;
 
 /// Opens [url] inside the app.
 ///
-/// Android/iOS get a real in-app WebView ([InAppBrowserView]). Desktop has no
-/// webview_flutter implementation, so it falls back to the system browser —
-/// callers do not need to branch on platform themselves.
-///
-/// The page is always loaded fresh: cache, cookies and local storage are
-/// cleared before navigating, so a verification or checkout page can never show
-/// a stale result from a previous visit.
+/// The page is always loaded fresh: cache, cookies and web storage are cleared
+/// before navigating, so a verification or checkout page can never show a stale
+/// result from a previous visit. Falls back to the system browser where no
+/// embedded implementation exists, so callers never branch on platform.
 Future<void> openInApp(
   BuildContext context, {
   required String url,
   required String title,
 }) async {
-  if (!Platform.isAndroid && !Platform.isIOS) {
+  if (!_hasInAppBrowser) {
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     return;
   }
@@ -43,65 +46,41 @@ class InAppBrowserView extends StatefulWidget {
 }
 
 class _InAppBrowserViewState extends State<InAppBrowserView> {
-  late final WebViewController _controller;
-  bool _loading = true;
+  InAppWebViewController? _controller;
+  double _progress = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) {
-            if (mounted) setState(() => _loading = true);
-          },
-          onPageFinished: (_) {
-            if (mounted) setState(() => _loading = false);
-          },
-          onWebResourceError: (error) {
-            if (mounted) setState(() => _loading = false);
-            commonPrint.log(
-              'in-app browser error ${error.errorCode}: ${error.description}',
-              logLevel: LogLevel.warning,
-            );
-          },
-        ),
-      );
-    _startFresh();
-  }
-
-  /// Wipes anything cached from a previous visit, then loads the page.
-  Future<void> _startFresh() async {
+  /// Wipes anything a previous visit left behind. Runs before the first load so
+  /// the page can't answer from cache — an IP-verification or checkout page has
+  /// to reflect the request happening right now.
+  Future<void> _clearBrowsingData() async {
     try {
-      await WebViewCookieManager().clearCookies();
-      await _controller.clearCache();
-      await _controller.clearLocalStorage();
+      await InAppWebViewController.clearAllCache();
+      await CookieManager.instance().deleteAllCookies();
     } catch (e) {
       // Never block the page on cleanup failing.
-      commonPrint.log('in-app browser clear failed: $e',
-          logLevel: LogLevel.warning);
+      commonPrint.log(
+        'in-app browser clear failed: $e',
+        logLevel: LogLevel.warning,
+      );
     }
-    if (!mounted) return;
-    await _controller.loadRequest(Uri.parse(widget.url));
-  }
-
-  Future<void> _reload() async {
-    await _startFresh();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.appLocalizations;
     return CommonScaffold(
       title: widget.title,
       actions: [
         IconButton(
-          tooltip: context.appLocalizations.reload,
-          onPressed: _reload,
+          tooltip: l.reload,
+          onPressed: () async {
+            await _clearBrowsingData();
+            await _controller?.reload();
+          },
           icon: const Icon(Icons.refresh),
         ),
         IconButton(
-          tooltip: context.appLocalizations.openInBrowser,
+          tooltip: l.openInBrowser,
           onPressed: () => launchUrl(
             Uri.parse(widget.url),
             mode: LaunchMode.externalApplication,
@@ -109,10 +88,54 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
           icon: const Icon(Icons.open_in_new),
         ),
       ],
-      body: Stack(
+      body: Column(
         children: [
-          WebViewWidget(controller: _controller),
-          if (_loading) const LinearProgressIndicator(),
+          if (_progress < 1) LinearProgressIndicator(value: _progress),
+          Expanded(
+            child: InAppWebView(
+              initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+              initialSettings: InAppWebViewSettings(
+                // Don't reuse anything cached from an earlier visit.
+                cacheEnabled: false,
+                clearCache: true,
+                javaScriptEnabled: true,
+                // Payment gateways routinely hand off to a bank or wallet page
+                // in a new window; without this those taps do nothing.
+                supportMultipleWindows: true,
+                javaScriptCanOpenWindowsAutomatically: true,
+                transparentBackground: true,
+              ),
+              onWebViewCreated: (controller) async {
+                _controller = controller;
+                await _clearBrowsingData();
+              },
+              onProgressChanged: (_, progress) {
+                if (mounted) setState(() => _progress = progress / 100);
+              },
+              onReceivedError: (_, request, error) {
+                commonPrint.log(
+                  'in-app browser error ${error.type}: ${error.description} '
+                  '(${request.url})',
+                  logLevel: LogLevel.warning,
+                );
+              },
+              // Gateways often redirect to a wallet/bank app via a custom
+              // scheme, which the webview itself can't load — hand those to the
+              // OS instead of dead-ending the payment.
+              shouldOverrideUrlLoading: (_, action) async {
+                final uri = action.request.url;
+                if (uri == null) return NavigationActionPolicy.ALLOW;
+                if (uri.scheme == 'http' || uri.scheme == 'https') {
+                  return NavigationActionPolicy.ALLOW;
+                }
+                await launchUrl(
+                  Uri.parse(uri.toString()),
+                  mode: LaunchMode.externalApplication,
+                );
+                return NavigationActionPolicy.CANCEL;
+              },
+            ),
+          ),
         ],
       ),
     );

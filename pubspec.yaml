@@ -40,9 +40,9 @@ dependencies:
   animations: ^2.1.1
   package_info_plus: ^9.0.0
   url_launcher: ^6.3.2
-  # In-app browser for the IP-whitelist and payment pages (mobile only; desktop
-  # has no webview_flutter implementation and falls back to url_launcher).
-  webview_flutter: ^4.10.0
+  # In-app browser for the IP-whitelist and payment pages. Covers Android, iOS,
+  # macOS and Windows, so desktop no longer falls back to the system browser.
+  flutter_inappwebview: ^6.1.5
   yaml: ^3.1.0
   freezed_annotation: ^3.1.0
   image_picker: ^1.2.0
