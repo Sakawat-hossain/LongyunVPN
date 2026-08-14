@@ -1051,6 +1051,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "На текущей странице есть изменения. Вы уверены, что хотите сбросить?",
     ),
+    "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage(
+      "Сбросить ссылку подписки",
+    ),
+    "resetSubscribeUrlSuccess": MessageLookupByLibrary.simpleMessage(
+      "Ссылка подписки сброшена и импортирована заново",
+    ),
+    "resetSubscribeUrlTip": MessageLookupByLibrary.simpleMessage(
+      "Будут созданы новая ссылка подписки и новые учётные данные узлов. Другие устройства перестанут подключаться, пока вы не импортируете на них новую ссылку. Продолжить?",
+    ),
     "resetTip": MessageLookupByLibrary.simpleMessage(
       "Убедитесь, что хотите сбросить",
     ),

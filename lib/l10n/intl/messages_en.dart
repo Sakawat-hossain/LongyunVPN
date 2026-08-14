@@ -1002,6 +1002,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "The current page has changes. Are you sure you want to reset?",
     ),
+    "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage(
+      "Reset subscription URL",
+    ),
+    "resetSubscribeUrlSuccess": MessageLookupByLibrary.simpleMessage(
+      "Subscription URL reset and re-imported",
+    ),
+    "resetSubscribeUrlTip": MessageLookupByLibrary.simpleMessage(
+      "This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?",
+    ),
     "resetTip": MessageLookupByLibrary.simpleMessage("Make sure to reset"),
     "resetTraffic": MessageLookupByLibrary.simpleMessage("Reset traffic"),
     "resources": MessageLookupByLibrary.simpleMessage("Resources"),

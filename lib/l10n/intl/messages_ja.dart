@@ -830,6 +830,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "現在のページに変更があります。リセットしてもよろしいですか？",
     ),
+    "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプション URL をリセット",
+    ),
+    "resetSubscribeUrlSuccess": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプション URL をリセットし、再取得しました",
+    ),
+    "resetSubscribeUrlTip": MessageLookupByLibrary.simpleMessage(
+      "新しいサブスクリプションリンクとノード認証情報が生成されます。他の端末では、新しいリンクを取り込むまで接続できなくなります。続行しますか？",
+    ),
     "resetTip": MessageLookupByLibrary.simpleMessage("リセットを確定"),
     "resetTraffic": MessageLookupByLibrary.simpleMessage("通信量をリセット"),
     "resources": MessageLookupByLibrary.simpleMessage("リソース"),

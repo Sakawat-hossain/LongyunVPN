@@ -5848,6 +5848,36 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Reset subscription URL`
+  String get resetSubscribeUrl {
+    return Intl.message(
+      'Reset subscription URL',
+      name: 'resetSubscribeUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?`
+  String get resetSubscribeUrlTip {
+    return Intl.message(
+      'This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?',
+      name: 'resetSubscribeUrlTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription URL reset and re-imported`
+  String get resetSubscribeUrlSuccess {
+    return Intl.message(
+      'Subscription URL reset and re-imported',
+      name: 'resetSubscribeUrlSuccess',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

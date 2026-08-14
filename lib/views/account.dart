@@ -1,6 +1,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +42,8 @@ class AccountSummary extends ConsumerStatefulWidget {
 }
 
 class _AccountSummaryState extends ConsumerState<AccountSummary> {
+  bool _resetting = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +51,33 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
       if (!mounted) return;
       ref.read(authProvider.notifier).refresh();
     });
+  }
+
+  /// Regenerates the subscription URL on the panel, then re-imports it here.
+  ///
+  /// Confirmed first, because the panel also regenerates the account uuid — and
+  /// that uuid is the credential every node authenticates with, so this device
+  /// is only repaired by the re-import below; any *other* device keeps the old
+  /// credentials and stops connecting until it re-imports too.
+  Future<void> _handleResetSubscribeUrl() async {
+    final l = context.appLocalizations;
+    final confirmed = await globalState.showMessage(
+      title: l.resetSubscribeUrl,
+      message: TextSpan(text: l.resetSubscribeUrlTip),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _resetting = true);
+    try {
+      final url = await ref.read(authProvider.notifier).resetSubscribeUrl();
+      if (!mounted) return;
+      // Re-import so this device keeps working with the new credentials.
+      await ref.read(profilesActionProvider.notifier).addProfileFormURL(url);
+      if (mounted) globalState.showNotifier(l.resetSubscribeUrlSuccess);
+    } catch (e) {
+      if (mounted) globalState.showNotifier(e.toString());
+    } finally {
+      if (mounted) setState(() => _resetting = false);
+    }
   }
 
   static String _fmtBytes(num bytes) {
@@ -211,6 +241,17 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
               .toPage(PageLabel.premium),
           icon: const Icon(Icons.bolt, size: 20),
           label: Text(active ? l.renewUpgrade : l.getAPlan),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: _resetting ? null : _handleResetSubscribeUrl,
+          icon: _resetting
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.link_off, size: 20),
+          label: Text(l.resetSubscribeUrl),
         ),
         const SizedBox(height: 10),
         OutlinedButton.icon(

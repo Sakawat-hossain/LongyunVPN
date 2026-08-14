@@ -716,6 +716,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "当前页面存在更改，确定重置吗？",
     ),
+    "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage("重置订阅链接"),
+    "resetSubscribeUrlSuccess": MessageLookupByLibrary.simpleMessage(
+      "订阅链接已重置并重新导入",
+    ),
+    "resetSubscribeUrlTip": MessageLookupByLibrary.simpleMessage(
+      "将生成新的订阅链接和新的节点凭据。在其他设备上导入新链接之前，这些设备将无法连接。是否继续？",
+    ),
     "resetTip": MessageLookupByLibrary.simpleMessage("确定要重置吗?"),
     "resetTraffic": MessageLookupByLibrary.simpleMessage("重置流量"),
     "resources": MessageLookupByLibrary.simpleMessage("资源"),

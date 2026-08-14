@@ -191,6 +191,19 @@ class AuthNotifier extends Notifier<AuthState> {
       commonPrint.log('account refresh failed: $e');
     }
   }
+
+  /// Regenerates the account's subscription URL on the panel and refreshes the
+  /// local session so [AuthState.subscribeInfo] carries the new URL.
+  ///
+  /// Destructive account-wide — see [XboardApi.resetSubscribeUrl]. Returns the
+  /// new URL so the caller can re-import the profile; throws on failure.
+  Future<String> resetSubscribeUrl() async {
+    final url = await xboardApi.resetSubscribeUrl();
+    // Pull the panel's own view back down rather than trusting the returned
+    // string alone, so plan/traffic stay consistent with the new credentials.
+    await refresh();
+    return url;
+  }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(

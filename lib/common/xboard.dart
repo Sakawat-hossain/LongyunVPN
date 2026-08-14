@@ -381,6 +381,25 @@ class XboardApi {
     }
   }
 
+  /// Regenerates the account's subscription credentials and returns the new
+  /// subscribe URL.
+  ///
+  /// This is destructive account-wide: the panel regenerates both the
+  /// subscription token *and* the account uuid, and that uuid is the password /
+  /// uuid every node in the config authenticates with. So the old link stops
+  /// working **and** every device that still holds the old credentials loses
+  /// connectivity until it re-imports.
+  Future<String> resetSubscribeUrl() async {
+    try {
+      final response = await _dio.get('/user/resetSecurity');
+      final data = response.data['data'];
+      if (data is String && data.isNotEmpty) return data;
+      throw XboardApiException('Reset did not return a subscription URL.');
+    } catch (e) {
+      throw _toApiException(e);
+    }
+  }
+
   /// Public plan list — works without auth (`/guest/plan/fetch`). Returns all
   /// plans (including the caller's possibly-unsellable current plan, needed for
   /// the traffic-reset option); callers filter sellable plans for display.

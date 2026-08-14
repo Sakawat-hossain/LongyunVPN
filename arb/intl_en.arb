@@ -734,5 +734,8 @@
   "whitelistWhyTitle": "Why do I need to verify my IP?",
   "whitelistInfo": "For security and network optimization, your current IP address must be added to our whitelist before accessing servers.\n\nAfter verification:\n✓ Server ping/status will be displayed correctly\n✓ All servers will become accessible\n✓ Connection speed and stability will improve\n\nIf your network IP changes, you need to verify again to whitelist the new IP address. This is not an error — you only need to verify once per network/IP change.",
   "reload": "Reload",
-  "openInBrowser": "Open in browser"
+  "openInBrowser": "Open in browser",
+  "resetSubscribeUrl": "Reset subscription URL",
+  "resetSubscribeUrlTip": "This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?",
+  "resetSubscribeUrlSuccess": "Subscription URL reset and re-imported"
 }
