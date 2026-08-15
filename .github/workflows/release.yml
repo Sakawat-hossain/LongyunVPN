@@ -431,7 +431,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p assets && cd assets
+          # Outside the workspace on purpose: the repo has its own assets/
+          # directory, and downloading into it would both break `sha256sum *`
+          # on the subdirectories and hash the app's bundled assets.
+          mkdir -p "${RUNNER_TEMP}/release-assets" && cd "${RUNNER_TEMP}/release-assets"
           # Download every asset currently attached to the release.
           gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --pattern '*' --clobber
           # Don't hash a previous checksums file into the new one.
@@ -451,7 +454,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bash .github/scripts/build_release_body.sh \
-            "${GITHUB_REF_NAME}" assets CHANGELOG.md > release_body.md
+            "${GITHUB_REF_NAME}" "${RUNNER_TEMP}/release-assets" CHANGELOG.md > release_body.md
           echo "----- release body -----"; cat release_body.md
           gh release edit "${GITHUB_REF_NAME}" \
             --repo "${GITHUB_REPOSITORY}" \
