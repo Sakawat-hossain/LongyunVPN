@@ -65,6 +65,19 @@ class XboardSubscribeInfo {
   final int? expiredAt;
   final Map<String, dynamic>? plan;
 
+  /// The account's live device allowance, which the panel returns at the top
+  /// level of getSubscribe. This is the number actually enforced and it can
+  /// differ from the plan template's default, so it is read separately rather
+  /// than dug out of [plan] — which is also absent from some responses, and
+  /// then the device row had nothing to show at all.
+  final int? deviceLimit;
+
+  /// Day of the month the traffic counter resets, and the timestamp of the
+  /// next reset. Both are per-account and change as the subscription runs, so
+  /// they have to come from the live response to stay correct.
+  final int? resetDay;
+  final int? nextResetAt;
+
   XboardSubscribeInfo({
     required this.subscribeUrl,
     this.u,
@@ -72,7 +85,19 @@ class XboardSubscribeInfo {
     this.transferEnable,
     this.expiredAt,
     this.plan,
+    this.deviceLimit,
+    this.resetDay,
+    this.nextResetAt,
   });
+
+  /// Device allowance to display: the live value when the panel sent one,
+  /// otherwise the plan's default.
+  int? get effectiveDeviceLimit {
+    if (deviceLimit != null) return deviceLimit;
+    final fromPlan = plan?['device_limit'];
+    if (fromPlan is num) return fromPlan.toInt();
+    return int.tryParse('${fromPlan ?? ''}');
+  }
 
   factory XboardSubscribeInfo.fromJson(Map<String, dynamic> json) {
     return XboardSubscribeInfo(
@@ -82,6 +107,9 @@ class XboardSubscribeInfo {
       transferEnable: json['transfer_enable'] as num?,
       expiredAt: json['expired_at'] as int?,
       plan: json['plan'] as Map<String, dynamic>?,
+      deviceLimit: (json['device_limit'] as num?)?.toInt(),
+      resetDay: (json['reset_day'] as num?)?.toInt(),
+      nextResetAt: (json['next_reset_at'] as num?)?.toInt(),
     );
   }
 }

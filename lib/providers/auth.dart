@@ -28,8 +28,19 @@ class AuthState {
     final info = userInfo;
     if (info == null || info.planId == null) return false;
     final expiredAt = info.expiredAt;
-    if (expiredAt == null) return true;
-    return expiredAt * 1000 > DateTime.now().millisecondsSinceEpoch;
+    // A dated plan is authoritative either way: the panel set that date, so
+    // trust it without second-guessing the allowance (some panels express
+    // "unlimited" as a zero transfer_enable).
+    if (expiredAt != null) {
+      return expiredAt * 1000 > DateTime.now().millisecondsSinceEpoch;
+    }
+    // No expiry is ambiguous. It means a lifetime plan, but it is also the
+    // state of an account that was assigned a plan id without ever paying for
+    // it — starting checkout is enough to get one. Treating that as Premium
+    // handed out access for free, and the subscription it then imported had no
+    // nodes in it, which is why the server list came up empty. A genuine
+    // lifetime plan carries a data allowance; an unpaid one does not.
+    return info.transferEnable > 0;
   }
 
   AuthState copyWith({

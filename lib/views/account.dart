@@ -111,7 +111,7 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
         : (Colors.green, l.statusActive);
 
     final planName = sub?.plan?['name']?.toString() ?? '—';
-    final deviceLimit = sub?.plan?['device_limit'];
+    final deviceLimit = sub?.effectiveDeviceLimit;
     final total = sub?.transferEnable ?? user.transferEnable;
     final used = (sub?.u ?? 0) + (sub?.d ?? 0);
     final remaining = (total - used).clamp(0, total);
@@ -278,19 +278,49 @@ class _InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Fixed proportions rather than label + Spacer + value. With a Spacer each
+    // row's value began wherever its own label happened to end, so the values
+    // never lined up down the page, and an unconstrained label overflowed
+    // instead of eliding once translated — German and Russian labels are
+    // markedly longer than the English ones these widths were eyeballed on.
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+          Padding(
+            // Keeps the icon on the first text line when the value wraps.
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(
+              icon,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(width: 12),
-          Text(label, style: theme.textTheme.bodyMedium),
-          const Spacer(),
-          Flexible(
-            child: Text(value,
-                textAlign: TextAlign.right,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600)),
+          Expanded(
+            flex: 4,
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 5,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),

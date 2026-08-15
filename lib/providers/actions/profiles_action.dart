@@ -83,6 +83,23 @@ class ProfilesAction extends _$ProfilesAction {
       ref.read(profilesProvider.notifier).put(profile);
       final newProfile = await profile.update();
       ref.read(profilesProvider.notifier).put(newProfile);
+      // Re-pull the account alongside the config. Refreshing used to fetch the
+      // subscription file and nothing else, so plan, expiry, traffic counters
+      // and the device allowance kept showing whatever was cached from sign-in
+      // — a renewal or a device-limit change was invisible until the next
+      // launch. Only for the profile that is the account's own subscription,
+      // and never fatal: a failed account refresh must not fail the import.
+      final subscribeUrl = ref.read(authProvider).subscribeInfo?.subscribeUrl;
+      if (subscribeUrl != null && subscribeUrl == newProfile.url) {
+        try {
+          await ref.read(authProvider.notifier).refresh();
+        } catch (e) {
+          commonPrint.log(
+            'profile refresh: account sync failed: $e',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }
       if (profile.id == ref.read(currentProfileIdProvider)) {
         ref
             .read(setupActionProvider.notifier)

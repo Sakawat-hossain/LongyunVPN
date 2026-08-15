@@ -5849,6 +5849,41 @@ class AppLocalizations {
     );
   }
 
+  /// `Open in LongyunVPN`
+  String get openInApp {
+    return Intl.message(
+      'Open in LongyunVPN',
+      name: 'openInApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View the page without leaving the app`
+  String get openInAppTip {
+    return Intl.message(
+      'View the page without leaving the app',
+      name: 'openInAppTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use your default browser and its saved logins`
+  String get openInBrowserTip {
+    return Intl.message(
+      'Use your default browser and its saved logins',
+      name: 'openInBrowserTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open page`
+  String get openPage {
+    return Intl.message('Open page', name: 'openPage', desc: '', args: []);
+  }
+
   /// `Reset subscription URL`
   String get resetSubscribeUrl {
     return Intl.message(

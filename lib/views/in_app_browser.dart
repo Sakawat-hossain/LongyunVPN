@@ -29,11 +29,182 @@ Future<void> openInApp(
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     return;
   }
+  final choice = await showSheet<_OpenTarget>(
+    context: context,
+    builder: (_) => _OpenTargetSheet(title: title),
+    props: const SheetProps(isScrollControlled: true),
+  );
+  // Dismissed without choosing — do nothing rather than guessing.
+  if (choice == null) return;
+  if (choice == _OpenTarget.browser) {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    return;
+  }
+  if (!context.mounted) return;
   await Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => InAppBrowserView(url: url, title: title),
     ),
   );
+}
+
+enum _OpenTarget { inApp, browser }
+
+/// Asks where to open a page. Uses [showSheet], so it is a bottom sheet on
+/// phones and a side sheet on desktop without the caller caring which.
+class _OpenTargetSheet extends StatelessWidget {
+  final String title;
+
+  const _OpenTargetSheet({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 32,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(l.openPage, style: context.textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _OpenTargetTile(
+              index: 0,
+              icon: Icons.shield_outlined,
+              iconColor: colorScheme.onPrimaryContainer,
+              iconBackground: colorScheme.primaryContainer,
+              label: l.openInApp,
+              description: l.openInAppTip,
+              onTap: () => Navigator.of(context).pop(_OpenTarget.inApp),
+            ),
+            const SizedBox(height: 10),
+            _OpenTargetTile(
+              index: 1,
+              icon: Icons.open_in_new_rounded,
+              iconColor: colorScheme.onSecondaryContainer,
+              iconBackground: colorScheme.secondaryContainer,
+              label: l.openInBrowser,
+              description: l.openInBrowserTip,
+              onTap: () => Navigator.of(context).pop(_OpenTarget.browser),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One option row. [index] staggers the entrance so the two rows settle in
+/// sequence rather than snapping in together.
+class _OpenTargetTile extends StatelessWidget {
+  final int index;
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+  final String label;
+  final String description;
+  final VoidCallback onTap;
+
+  const _OpenTargetTile({
+    required this.index,
+    required this.icon,
+    required this.iconColor,
+    required this.iconBackground,
+    required this.label,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 220 + index * 70),
+      curve: Curves.easeOutCubic,
+      builder: (_, value, child) => Opacity(
+        opacity: value.clamp(0, 1),
+        child: Transform.translate(
+          offset: Offset(0, 12 * (1 - value)),
+          child: child,
+        ),
+      ),
+      child: Material(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 22, color: iconColor),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        style: context.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        description,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class InAppBrowserView extends StatefulWidget {

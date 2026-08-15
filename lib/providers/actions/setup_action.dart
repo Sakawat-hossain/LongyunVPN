@@ -311,7 +311,15 @@ class SetupAction extends _$SetupAction {
     );
     final yamlString = vm2.a;
     final yamlMd5 = vm2.b;
-    if (yamlMd5 == globalState.lastConfigMd5 && force == false) return;
+    if (yamlMd5 == globalState.lastConfigMd5 && force == false) {
+      // The config is byte-identical, so there is nothing to hand the core —
+      // but the caller still asked for a refresh. Returning here skipped
+      // onUpdated, which is what reloads the proxy groups, so once the server
+      // list had come up empty no amount of pulling to refresh could ever
+      // repopulate it: the md5 matched every time and the reload never ran.
+      await onUpdated?.call();
+      return;
+    }
     await globalState.loadingRun(
       () async {
         final configFilePath = await appPath.configFilePath;
