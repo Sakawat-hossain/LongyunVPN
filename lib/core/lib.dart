@@ -98,9 +98,19 @@ class CoreLib extends CoreHandlerInterface {
       );
       return null;
     }
+    // The timeout argument used to be accepted and then dropped, so every call
+    // fell back to withTimeout's three-minute default. Adding a subscription
+    // goes through here (validateConfig) behind a modal spinner, so a core that
+    // was slow to answer looked exactly like a profile that never loads — three
+    // minutes is indistinguishable from forever to someone watching it. Honour
+    // the caller's value, and default to something a person will actually wait
+    // through.
     final result = await service
         ?.invokeAction(Action(id: id, method: method, data: data))
-        .withTimeout(onTimeout: () => null);
+        .withTimeout(
+          timeout: timeout ?? const Duration(seconds: 60),
+          onTimeout: () => null,
+        );
     if (result == null) {
       commonPrint.log(
         'core invoke ${method.name}: no result (timed out)',

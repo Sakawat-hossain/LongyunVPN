@@ -1,3 +1,10 @@
+## v1.3.1
+
+- Tapping a link on Android and iOS now asks whether to open it inside LongyunVPN or in your browser, instead of forcing the built-in viewer
+- Fixed in-app pages never finishing loading: the browser was clearing its cookies mid-load, which signed you out of the page and could stall it outright
+- Removed the loading screen that could cover a page that had actually loaded
+- Fixed adding a subscription hanging on Android: a call into the core could wait three minutes before giving up
+
 ## v1.3.0
 
 - Fixed adding a subscription hanging on "loading" forever after signing in — network requests had no time limit, so a stalled connection never gave up. They now fail with a message you can retry instead

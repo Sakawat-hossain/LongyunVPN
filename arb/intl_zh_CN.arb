@@ -735,6 +735,9 @@
   "whitelistInfo": "出于安全和网络优化的考虑，在访问服务器之前，必须将您当前的 IP 地址加入白名单。\n\n验证后：\n✓ 服务器延迟/状态将正确显示\n✓ 所有服务器都可以访问\n✓ 连接速度和稳定性将得到改善\n\n如果您的网络 IP 发生变化，需要重新验证以将新的 IP 地址加入白名单。这不是错误——每次更换网络或 IP 时只需验证一次。",
   "reload": "重新加载",
   "openInBrowser": "在浏览器中打开",
+  "openInApp": "在应用内打开",
+  "openPage": "打开页面",
+  "openPageTip": "在 LongyunVPN 内打开此页面，还是在浏览器中打开？",
   "resetSubscribeUrl": "重置订阅链接",
   "resetSubscribeUrlTip": "将生成新的订阅链接和新的节点凭据。在其他设备上导入新链接之前，这些设备将无法连接。是否继续？",
   "resetSubscribeUrlSuccess": "订阅链接已重置并重新导入"

@@ -671,7 +671,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとプロキシトラフィックのみ統計",
     ),
+    "openInApp": MessageLookupByLibrary.simpleMessage("アプリ内で開く"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("ブラウザで開く"),
+    "openPage": MessageLookupByLibrary.simpleMessage("ページを開く"),
+    "openPageTip": MessageLookupByLibrary.simpleMessage(
+      "このページを LongyunVPN 内で開きますか、それともブラウザで開きますか？",
+    ),
     "openSettings": MessageLookupByLibrary.simpleMessage("設定を開く"),
     "optional": MessageLookupByLibrary.simpleMessage("オプション"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),

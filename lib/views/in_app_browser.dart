@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -28,6 +29,27 @@ Future<void> openInApp(
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     return;
   }
+  // On phones, ask instead of forcing the embedded viewer. Payment and
+  // verification pages hand off to bank apps, wallets and identity providers
+  // that a plain webview cannot always follow, and the real browser already has
+  // the user's sessions. Offering the choice means a page that misbehaves
+  // in-app is never a dead end.
+  if (Platform.isAndroid || Platform.isIOS) {
+    final l = context.appLocalizations;
+    final useInApp = await globalState.showMessage(
+      title: l.openPage,
+      message: TextSpan(text: l.openPageTip),
+      confirmText: l.openInApp,
+      cancelText: l.openInBrowser,
+    );
+    // Dismissed without choosing — do nothing rather than guessing.
+    if (useInApp == null) return;
+    if (!useInApp) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      return;
+    }
+  }
+  if (!context.mounted) return;
   await Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => InAppBrowserView(url: url, title: title),
@@ -142,13 +164,16 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
     await _controller?.reload();
   }
 
-  /// Wipes anything a previous visit left behind. Runs before the first load so
-  /// the page can't answer from cache — an IP-verification or checkout page has
-  /// to reflect the request happening right now.
+  /// Drops cached responses so a verification or checkout page reflects the
+  /// request happening right now rather than a previous visit.
+  ///
+  /// Cookies are deliberately left alone. Deleting them all took the panel
+  /// session with them, so the page loaded logged-out and could not do its job;
+  /// the webview is also configured with cacheEnabled false and clearCache
+  /// true, which already covers the staleness this was meant to prevent.
   Future<void> _clearBrowsingData() async {
     try {
       await InAppWebViewController.clearAllCache();
-      await CookieManager.instance().deleteAllCookies();
     } catch (e) {
       // Never block the page on cleanup failing.
       commonPrint.log(
@@ -199,9 +224,12 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
                       javaScriptCanOpenWindowsAutomatically: true,
                       transparentBackground: true,
                     ),
-                    onWebViewCreated: (controller) async {
+                    onWebViewCreated: (controller) {
+                      // Just keep the controller. Clearing here ran against a
+                      // load that initialUrlRequest had already started, which
+                      // could abort it — the page then never reached
+                      // onLoadStop and sat on the spinner indefinitely.
                       _controller = controller;
-                      await _clearBrowsingData();
                     },
                     onProgressChanged: (_, progress) {
                       if (mounted) setState(() => _progress = progress / 100);
@@ -240,22 +268,12 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
                       return NavigationActionPolicy.CANCEL;
                     },
                   ),
-                // Cover the empty webview while the first page loads, so the
-                // screen explains itself instead of showing a blank rectangle.
-                if (_loading && !_failed)
-                  ColoredBox(
-                    color: context.colorScheme.surface,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: 16),
-                          Text(l.loading, style: context.textTheme.bodyMedium),
-                        ],
-                      ),
-                    ),
-                  ),
+                // No full-screen cover while loading. An opaque box over the
+                // webview meant that any page which never fires onLoadStop —
+                // a long redirect chain, a checkout page holding a connection
+                // open — left the user staring at a spinner with the working
+                // page hidden underneath and unreachable. The progress bar
+                // above reports loading without being able to trap anyone.
                 if (_failed)
                   ColoredBox(
                     color: context.colorScheme.surface,
