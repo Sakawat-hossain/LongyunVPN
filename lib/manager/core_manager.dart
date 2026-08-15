@@ -100,6 +100,15 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   Future<void> onCrash(String message) async {
     if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+      // Android delivers a service disconnect through this same path. Bailing
+      // out whenever the status was already anything but connected meant the
+      // very first drop marked us disconnected and every later one did
+      // nothing — no shutdown, no reconnect scheduled — so a core that went
+      // away once stayed away for the rest of the session. Keep trying to get
+      // back, as long as the user still wants to be connected.
+      if (ref.read(isStartProvider) && !ref.read(suspendProvider)) {
+        ref.read(coreActionProvider.notifier).scheduleReconnect();
+      }
       return;
     }
     ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;

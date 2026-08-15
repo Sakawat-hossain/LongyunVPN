@@ -1,3 +1,11 @@
+## v1.3.4
+
+- Fixed the core showing as disconnected on Android. A successful "already connected" result was being reported through the error channel, so the app marked a working core dead — every request after that went nowhere, which is why the server list was empty and adding a profile crawled
+- A core that drops now keeps trying to reconnect, instead of giving up for the rest of the session after the first drop
+- GEO databases no longer auto-download on Android, where the bulk refresh ran inside the memory-limited core process. Refresh them from Tools > Resources instead; desktop is unchanged
+- Servers named in Chinese or starting with a flag emoji show up again — the node list was discarding anything without a traffic multiplier or a Latin country code
+- Redesigned the "Whitelist your IP" and "Continue to payment" buttons
+
 ## v1.3.3
 
 - Premium is no longer granted to accounts that never paid for it. Opening checkout was enough for the panel to attach a plan, and the app read that as a lifetime subscription — which also imported a subscription with no servers in it

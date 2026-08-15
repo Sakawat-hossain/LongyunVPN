@@ -18,6 +18,7 @@ export 'icon.dart';
 export 'inherited.dart';
 export 'input.dart';
 export 'keep_scope.dart';
+export 'link_button.dart';
 export 'line_chart.dart';
 export 'list.dart';
 export 'loading.dart';

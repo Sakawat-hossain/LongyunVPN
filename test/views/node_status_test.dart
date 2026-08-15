@@ -22,9 +22,16 @@ void main() {
       expect(isRealServerNode('Subscribe here'), isFalse);
     });
 
-    test('rejects entries with neither a multiplier nor a country prefix', () {
-      expect(isRealServerNode('12345'), isFalse);
-      expect(isRealServerNode('a'), isFalse);
+    test('keeps nodes named without a multiplier or a Latin country code', () {
+      // The filter used to require one or the other, so every one of these
+      // was thrown away and panels that name nodes this way showed an empty
+      // server list. A name is a server unless it is recognisably an info row.
+      expect(isRealServerNode('香港01'), isTrue);
+      expect(isRealServerNode('🇭🇰 香港 01'), isTrue);
+      expect(isRealServerNode('日本 IEPL 专线'), isTrue);
+      expect(isRealServerNode('新加坡A'), isTrue);
+      expect(isRealServerNode('🇺🇸 洛杉矶 GIA'), isTrue);
+      expect(isRealServerNode('台湾 中华电信'), isTrue);
     });
   });
 }

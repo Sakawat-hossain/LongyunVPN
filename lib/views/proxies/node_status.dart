@@ -114,9 +114,17 @@ bool isRealServerNode(String name) {
   for (final marker in infoMarkers) {
     if (lower.contains(marker.toLowerCase())) return false;
   }
-  final hasMultiplier = RegExp(r'[xX]\d').hasMatch(name);
-  final hasCountryPrefix = RegExp(r'^\s*[A-Za-z]{2,3}\b').hasMatch(name);
-  return hasMultiplier || hasCountryPrefix;
+  // Anything that isn't a recognised info entry is a server.
+  //
+  // This used to also *require* a traffic multiplier or a leading Latin
+  // country code, which is only how some panels name things. A node called
+  // 香港01, 日本 IEPL 专线, or 🇭🇰 香港 01 has neither — the name starts with a
+  // CJK character or a flag emoji — so every one of them was discarded as a
+  // pseudo-entry and the list came up empty on panels that name nodes that
+  // way. Dropping only what we positively recognise as an info row is the
+  // right way round: a stray info entry showing up is a cosmetic problem,
+  // whereas hiding every server is not.
+  return true;
 }
 
 /// Converts an ISO country code to its flag emoji (regional indicators).
@@ -568,13 +576,13 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
           child: Row(
             children: [
               Expanded(
-                child: FilledButton.tonalIcon(
+                child: LinkActionButton(
+                  icon: Icons.verified_user_rounded,
+                  label: l.whitelistYourIp,
                   onPressed: () => _openWhitelist(context),
-                  icon: const Icon(Icons.verified_user_outlined, size: 18),
-                  label: Text(l.whitelistYourIp),
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               IconButton(
                 // No hover tooltip: the full explanation is long and covered the
                 // page on hover. Tap opens it in a dialog instead.

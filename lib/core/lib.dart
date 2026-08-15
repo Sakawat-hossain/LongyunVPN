@@ -19,7 +19,16 @@ class CoreLib extends CoreHandlerInterface {
   @override
   Future<String> preload() async {
     if (_connectedCompleter.isCompleted) {
-      return 'core is connected';
+      // Already connected, which is success. This used to return the string
+      // 'core is connected', but the contract here is that an empty string
+      // means success and anything else is an error message — so connectCore
+      // read it as a failure, set the status to disconnected on a core that was
+      // working, and popped 'core is connected' up as if it were an error.
+      // From there every call went to a core the app believed was dead: proxy
+      // groups came back empty and the Servers page showed "No Nodes
+      // Available". The desktop implementation returns '' here, which is why
+      // this only ever bit Android.
+      return '';
     }
     final res = await service?.init();
     // An empty string means success. Anything else — including null, which is

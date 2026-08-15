@@ -231,8 +231,17 @@ Future<VM2<String, String>> _makeRealProfileTask(
   // profile's `GEOIP,CN,DIRECT` starts tunnelling Chinese traffic abroad, and
   // the DNS fallback-filter's geoip check misjudges too). Daily is plenty: the
   // files change slowly and each check is conditional on the hash.
-  rawConfig['geo-auto-update'] = true;
-  rawConfig['geo-update-interval'] = 24;
+  //
+  // Desktop only. On Android the core lives in a separate, memory-constrained
+  // :remote process, and the updater kicks off an immediate bulk download of
+  // geoip/geosite/ASN/mmdb — tens of megabytes — as soon as it decides the
+  // files are a day old, on every config apply. That is a lot to ask of the
+  // process that also has to answer the app, and losing it takes the proxy
+  // list with it. Phones can refresh from Tools > Resources on demand.
+  if (!system.isAndroid) {
+    rawConfig['geo-auto-update'] = true;
+    rawConfig['geo-update-interval'] = 24;
+  }
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
   if (rawConfig['hosts'] == null) {
     rawConfig['hosts'] = {};
