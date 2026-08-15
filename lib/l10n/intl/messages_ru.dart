@@ -859,14 +859,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "При включении будет учитываться только трафик прокси",
     ),
     "openInApp": MessageLookupByLibrary.simpleMessage("Открыть в LongyunVPN"),
-    "openInAppTip": MessageLookupByLibrary.simpleMessage(
-      "Просмотр страницы без выхода из приложения",
-    ),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("Открыть в браузере"),
-    "openInBrowserTip": MessageLookupByLibrary.simpleMessage(
-      "Использовать браузер по умолчанию и сохранённые в нём входы",
-    ),
-    "openPage": MessageLookupByLibrary.simpleMessage("Открыть страницу"),
     "openSettings": MessageLookupByLibrary.simpleMessage("Открыть настройки"),
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),

@@ -736,9 +736,6 @@
   "reload": "Reload",
   "openInBrowser": "Open in browser",
   "openInApp": "Open in LongyunVPN",
-  "openInAppTip": "View the page without leaving the app",
-  "openInBrowserTip": "Use your default browser and its saved logins",
-  "openPage": "Open page",
   "resetSubscribeUrl": "Reset subscription URL",
   "resetSubscribeUrlTip": "This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?",
   "resetSubscribeUrlSuccess": "Subscription URL reset and re-imported"

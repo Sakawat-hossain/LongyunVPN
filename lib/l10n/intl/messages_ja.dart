@@ -672,12 +672,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効化するとプロキシトラフィックのみ統計",
     ),
     "openInApp": MessageLookupByLibrary.simpleMessage("LongyunVPN で開く"),
-    "openInAppTip": MessageLookupByLibrary.simpleMessage("アプリを離れずにページを表示します"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("ブラウザで開く"),
-    "openInBrowserTip": MessageLookupByLibrary.simpleMessage(
-      "既定のブラウザと保存済みのログイン情報を使用します",
-    ),
-    "openPage": MessageLookupByLibrary.simpleMessage("ページを開く"),
     "openSettings": MessageLookupByLibrary.simpleMessage("設定を開く"),
     "optional": MessageLookupByLibrary.simpleMessage("オプション"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),

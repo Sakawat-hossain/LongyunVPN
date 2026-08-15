@@ -154,17 +154,20 @@ class _NoSubscriptionViewState extends ConsumerState<NoSubscriptionView> {
   Future<void> _refresh() async {
     if (_refreshing) return;
     setState(() => _refreshing = true);
+    // Read everything off ref before awaiting anything. Importing a profile
+    // switches to the dashboard, so by the time the download returns this
+    // widget can already be gone — and ref throws once it is deactivated,
+    // which turned a successful refresh into a crash. The notifiers are
+    // keepAlive, so holding them across the await is safe.
+    final profilesAction = ref.read(profilesActionProvider.notifier);
+    final authNotifier = ref.read(authProvider.notifier);
+    final profile = widget.noNodes ? ref.read(currentProfileProvider) : null;
     try {
-      if (widget.noNodes) {
+      if (profile != null) {
         // Re-download the active subscription so freshly-purchased nodes appear.
-        final profile = ref.read(currentProfileProvider);
-        if (profile != null) {
-          await ref
-              .read(profilesActionProvider.notifier)
-              .updateProfile(profile, showLoading: true);
-        }
+        await profilesAction.updateProfile(profile, showLoading: true);
       }
-      await ref.read(authProvider.notifier).refresh();
+      await authNotifier.refresh();
     } finally {
       if (mounted) setState(() => _refreshing = false);
     }

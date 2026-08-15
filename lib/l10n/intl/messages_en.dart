@@ -820,14 +820,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "When turned on, only statistics proxy traffic",
     ),
     "openInApp": MessageLookupByLibrary.simpleMessage("Open in LongyunVPN"),
-    "openInAppTip": MessageLookupByLibrary.simpleMessage(
-      "View the page without leaving the app",
-    ),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in browser"),
-    "openInBrowserTip": MessageLookupByLibrary.simpleMessage(
-      "Use your default browser and its saved logins",
-    ),
-    "openPage": MessageLookupByLibrary.simpleMessage("Open page"),
     "openSettings": MessageLookupByLibrary.simpleMessage("Open settings"),
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),

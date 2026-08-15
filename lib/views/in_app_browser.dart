@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
@@ -29,10 +30,10 @@ Future<void> openInApp(
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     return;
   }
-  final choice = await showSheet<_OpenTarget>(
+  final choice = await showDialog<_OpenTarget>(
     context: context,
-    builder: (_) => _OpenTargetSheet(title: title),
-    props: const SheetProps(isScrollControlled: true),
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    builder: (_) => const _OpenTargetDialog(),
   );
   // Dismissed without choosing — do nothing rather than guessing.
   if (choice == null) return;
@@ -50,153 +51,51 @@ Future<void> openInApp(
 
 enum _OpenTarget { inApp, browser }
 
-/// Asks where to open a page. Uses [showSheet], so it is a bottom sheet on
-/// phones and a side sheet on desktop without the caller caring which.
-class _OpenTargetSheet extends StatelessWidget {
-  final String title;
-
-  const _OpenTargetSheet({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 32,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(l.openPage, style: context.textTheme.titleLarge),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _OpenTargetTile(
-              index: 0,
-              icon: Icons.shield_outlined,
-              iconColor: colorScheme.onPrimaryContainer,
-              iconBackground: colorScheme.primaryContainer,
-              label: l.openInApp,
-              description: l.openInAppTip,
-              onTap: () => Navigator.of(context).pop(_OpenTarget.inApp),
-            ),
-            const SizedBox(height: 10),
-            _OpenTargetTile(
-              index: 1,
-              icon: Icons.open_in_new_rounded,
-              iconColor: colorScheme.onSecondaryContainer,
-              iconBackground: colorScheme.secondaryContainer,
-              label: l.openInBrowser,
-              description: l.openInBrowserTip,
-              onTap: () => Navigator.of(context).pop(_OpenTarget.browser),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// One option row. [index] staggers the entrance so the two rows settle in
-/// sequence rather than snapping in together.
-class _OpenTargetTile extends StatelessWidget {
-  final int index;
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBackground;
-  final String label;
-  final String description;
-  final VoidCallback onTap;
-
-  const _OpenTargetTile({
-    required this.index,
-    required this.icon,
-    required this.iconColor,
-    required this.iconBackground,
-    required this.label,
-    required this.description,
-    required this.onTap,
-  });
+/// Centred chooser for where to open a page.
+///
+/// Deliberately minimal: no heading, no descriptions, just the two choices side
+/// by side. The dialog surface itself is transparent — the cards are the only
+/// thing painted, over a blur — so it reads as two floating options rather than
+/// a panel with content in it.
+class _OpenTargetDialog extends StatelessWidget {
+  const _OpenTargetDialog();
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: Duration(milliseconds: 220 + index * 70),
-      curve: Curves.easeOutCubic,
-      builder: (_, value, child) => Opacity(
-        opacity: value.clamp(0, 1),
-        child: Transform.translate(
-          offset: Offset(0, 12 * (1 - value)),
-          child: child,
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutBack,
+        builder: (_, value, child) => Transform.scale(
+          scale: 0.94 + 0.06 * value.clamp(0.0, 1.0),
+          child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
         ),
-      ),
-      child: Material(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: IntrinsicHeight(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: iconBackground,
-                    borderRadius: BorderRadius.circular(12),
+                Expanded(
+                  child: _OpenTargetCard(
+                    icon: Icons.shield_rounded,
+                    label: context.appLocalizations.openInApp,
+                    onTap: () =>
+                        Navigator.of(context).pop(_OpenTarget.inApp),
                   ),
-                  child: Icon(icon, size: 22, color: iconColor),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        label,
-                        style: context.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        description,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                  child: _OpenTargetCard(
+                    icon: Icons.language_rounded,
+                    label: context.appLocalizations.openInBrowser,
+                    onTap: () =>
+                        Navigator.of(context).pop(_OpenTarget.browser),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
@@ -206,6 +105,64 @@ class _OpenTargetTile extends StatelessWidget {
     );
   }
 }
+
+/// One of the two choices. Frosted rather than solid so the page stays faintly
+/// visible behind it and the dialog keeps its transparent feel.
+class _OpenTargetCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _OpenTargetCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Material(
+          color: colorScheme.surface.withValues(alpha: 0.72),
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 30, color: colorScheme.primary),
+                  const SizedBox(height: 12),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class InAppBrowserView extends StatefulWidget {
   final String url;

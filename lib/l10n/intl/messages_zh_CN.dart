@@ -588,12 +588,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "开启后，将只统计代理流量",
     ),
     "openInApp": MessageLookupByLibrary.simpleMessage("在 LongyunVPN 中打开"),
-    "openInAppTip": MessageLookupByLibrary.simpleMessage("无需离开应用即可查看页面"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("在浏览器中打开"),
-    "openInBrowserTip": MessageLookupByLibrary.simpleMessage(
-      "使用默认浏览器及其已保存的登录信息",
-    ),
-    "openPage": MessageLookupByLibrary.simpleMessage("打开页面"),
     "openSettings": MessageLookupByLibrary.simpleMessage("打开设置"),
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),

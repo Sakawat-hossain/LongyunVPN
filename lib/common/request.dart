@@ -14,6 +14,10 @@ import 'package:flutter/foundation.dart';
 class Request {
   late final Dio dio;
   late final Dio _clashDio;
+
+  /// Same settings as [_clashDio] but never routed through the local proxy.
+  /// Used only as a fallback when that proxy refuses the connection.
+  late final Dio _directDio;
   String? userAgent;
 
   // Dio defaults every timeout to null, which means "wait forever". That is
@@ -55,6 +59,36 @@ class Request {
         return client;
       },
     );
+    _directDio = Dio(
+      BaseOptions(
+        connectTimeout: _connectTimeout,
+        receiveTimeout: _receiveTimeout,
+        sendTimeout: _sendTimeout,
+      ),
+    );
+    _directDio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.findProxy = (_) {
+          client.userAgent = globalState.ua;
+          return 'DIRECT';
+        };
+        return client;
+      },
+    );
+  }
+
+  /// True when the failure is the local proxy refusing the connection, rather
+  /// than the remote host being unreachable. Only that case is worth retrying
+  /// direct — a genuinely offline device should still report being offline.
+  static bool isLocalProxyRefused(DioException e) => _isLocalProxyRefused(e);
+
+  static bool _isLocalProxyRefused(DioException e) {
+    if (e.type != DioExceptionType.connectionError) return false;
+    final error = e.error;
+    if (error is! SocketException) return false;
+    final host = error.address?.host ?? '';
+    return host == localhost || host == '127.0.0.1' || host == '::1';
   }
 
   /// Exposed so a test can assert these clients are actually bounded; an
@@ -66,12 +100,30 @@ class Request {
   BaseOptions get dioOptions => dio.options;
 
   Future<Response<Uint8List>> getFileResponseForUrl(String url) async {
+    final options = Options(responseType: ResponseType.bytes);
     try {
-      return await _clashDio.get<Uint8List>(
-        url,
-        options: Options(responseType: ResponseType.bytes),
-      );
-    } catch (e) {
+      return await _clashDio.get<Uint8List>(url, options: options);
+    } catch (error) {
+      // Once the app considers itself started, every request here is sent to
+      // localhost:<mixedPort>. The core is not always listening on it yet — no
+      // config loaded, or the listener still coming up — and the socket is then
+      // refused outright. That is fatal at exactly the wrong moment: fetching
+      // the very first subscription, which is what has to succeed before the
+      // core has anything to serve. Retry without the proxy rather than fail
+      // the import; the happy path is untouched, and a device that is simply
+      // offline still reports being offline because the retry fails too.
+      var e = error;
+      if (e is DioException && _isLocalProxyRefused(e)) {
+        commonPrint.log(
+          'subscription fetch refused by local proxy, retrying direct',
+          logLevel: LogLevel.warning,
+        );
+        try {
+          return await _directDio.get<Uint8List>(url, options: options);
+        } catch (retryError) {
+          e = retryError;
+        }
+      }
       commonPrint.log('getFileResponseForUrl error ${e.toString()}');
       if (e is DioException) {
         if (e.type == DioExceptionType.unknown) {
@@ -86,7 +138,7 @@ class Request {
           // the user instead of something they can act on.
           throw currentAppLocalizations.timeout;
         }
-        rethrow;
+        throw e;
       }
       throw currentAppLocalizations.unknownNetworkError;
     }

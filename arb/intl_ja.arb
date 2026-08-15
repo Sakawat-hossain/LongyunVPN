@@ -736,9 +736,6 @@
   "reload": "再読み込み",
   "openInBrowser": "ブラウザで開く",
   "openInApp": "LongyunVPN で開く",
-  "openInAppTip": "アプリを離れずにページを表示します",
-  "openInBrowserTip": "既定のブラウザと保存済みのログイン情報を使用します",
-  "openPage": "ページを開く",
   "resetSubscribeUrl": "サブスクリプション URL をリセット",
   "resetSubscribeUrlTip": "新しいサブスクリプションリンクとノード認証情報が生成されます。他の端末では、新しいリンクを取り込むまで接続できなくなります。続行しますか？",
   "resetSubscribeUrlSuccess": "サブスクリプション URL をリセットし、再取得しました"

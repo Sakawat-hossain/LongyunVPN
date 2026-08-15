@@ -736,9 +736,6 @@
   "reload": "重新加载",
   "openInBrowser": "在浏览器中打开",
   "openInApp": "在 LongyunVPN 中打开",
-  "openInAppTip": "无需离开应用即可查看页面",
-  "openInBrowserTip": "使用默认浏览器及其已保存的登录信息",
-  "openPage": "打开页面",
   "resetSubscribeUrl": "重置订阅链接",
   "resetSubscribeUrlTip": "将生成新的订阅链接和新的节点凭据。在其他设备上导入新链接之前，这些设备将无法连接。是否继续？",
   "resetSubscribeUrlSuccess": "订阅链接已重置并重新导入"

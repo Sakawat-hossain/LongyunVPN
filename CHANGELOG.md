@@ -1,11 +1,13 @@
-## v1.4.0
+## v1.3.3
 
 - Premium is no longer granted to accounts that never paid for it. Opening checkout was enough for the panel to attach a plan, and the app read that as a lifetime subscription — which also imported a subscription with no servers in it
 - The server list can be recovered by refreshing. When the configuration had not changed, refreshing skipped the reload entirely, so an empty list stayed empty no matter how many times you pulled to refresh
 - Refreshing a profile now re-syncs the account too: plan, expiry, traffic and device allowance, instead of only the config file
 - The device allowance shown is your account's real one, not the plan default, and it still appears when the panel omits plan details
-- Tapping "Whitelist your IP" or checkout opens a bottom sheet to choose between opening in LongyunVPN or your browser
+- Tapping "Whitelist your IP" or checkout opens a compact centred chooser: open in LongyunVPN, or open in your browser
 - Tidier account details: labels and values line up in proper columns and no longer overflow in other languages
+- Fixed a crash when refreshing from the "no servers" screen
+- Adding a subscription no longer fails when the app routes it through its own proxy before the core is listening — it now retries directly
 
 ## v1.3.2
 
