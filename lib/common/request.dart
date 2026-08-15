@@ -16,9 +16,35 @@ class Request {
   late final Dio _clashDio;
   String? userAgent;
 
+  // Dio defaults every timeout to null, which means "wait forever". That is
+  // what made adding a subscription hang: the fetch sat behind a modal spinner
+  // with no timeout, no error and no way out whenever the connection stalled
+  // rather than failing outright — common on mobile networks, and on any
+  // request routed through the local proxy before the core is serving.
+  // Generous enough for a large subscription over slow mobile data, but
+  // bounded so a stall always becomes a visible error.
+  static const _connectTimeout = Duration(seconds: 15);
+  static const _receiveTimeout = Duration(seconds: 60);
+  static const _sendTimeout = Duration(seconds: 30);
+
   Request() {
-    dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
-    _clashDio = Dio();
+    dio = Dio(
+      BaseOptions(
+        headers: {'User-Agent': browserUa},
+        connectTimeout: _connectTimeout,
+        receiveTimeout: _receiveTimeout,
+        sendTimeout: _sendTimeout,
+      ),
+    );
+    // downloadFile passes its own longer per-request timeouts, which override
+    // these, so large installer downloads are unaffected.
+    _clashDio = Dio(
+      BaseOptions(
+        connectTimeout: _connectTimeout,
+        receiveTimeout: _receiveTimeout,
+        sendTimeout: _sendTimeout,
+      ),
+    );
     _clashDio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
@@ -30,6 +56,14 @@ class Request {
       },
     );
   }
+
+  /// Exposed so a test can assert these clients are actually bounded; an
+  /// unbounded one is invisible until a request stalls in front of a user.
+  @visibleForTesting
+  BaseOptions get clashDioOptions => _clashDio.options;
+
+  @visibleForTesting
+  BaseOptions get dioOptions => dio.options;
 
   Future<Response<Uint8List>> getFileResponseForUrl(String url) async {
     try {
@@ -44,6 +78,13 @@ class Request {
           throw currentAppLocalizations.unknownNetworkError;
         } else if (e.type == DioExceptionType.badResponse) {
           throw currentAppLocalizations.networkException;
+        } else if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.sendTimeout) {
+          // Reachable only now that timeouts are set; rethrowing the raw
+          // DioException here would put a stack-trace-ish string in front of
+          // the user instead of something they can act on.
+          throw currentAppLocalizations.timeout;
         }
         rethrow;
       }

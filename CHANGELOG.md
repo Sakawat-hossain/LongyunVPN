@@ -1,3 +1,10 @@
+## v1.3.0
+
+- Fixed adding a subscription hanging on "loading" forever after signing in — network requests had no time limit, so a stalled connection never gave up. They now fail with a message you can retry instead
+- Reopening the app right after closing it no longer flashes a window and quits, sometimes several times before starting
+- In-app pages (IP whitelist, checkout) now report a clear error and offer your normal browser when they can't open, instead of showing an endless spinner
+- The Windows installer warns if the Edge WebView2 component it needs is missing
+
 ## v1.2.9
 
 - GEO databases now really do update on their own — the setting was being saved and then ignored, so they only ever changed when you asked
