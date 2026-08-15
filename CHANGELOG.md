@@ -1,6 +1,9 @@
+## v1.3.2
+
+- Payment and checkout links open directly again on Android and iOS, with no extra prompt in the way
+
 ## v1.3.1
 
-- Tapping a link on Android and iOS now asks whether to open it inside LongyunVPN or in your browser, instead of forcing the built-in viewer
 - Fixed in-app pages never finishing loading: the browser was clearing its cookies mid-load, which signed you out of the page and could stall it outright
 - Removed the loading screen that could cover a page that had actually loaded
 - Fixed adding a subscription hanging on Android: a call into the core could wait three minutes before giving up

@@ -5849,26 +5849,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Open in app`
-  String get openInApp {
-    return Intl.message('Open in app', name: 'openInApp', desc: '', args: []);
-  }
-
-  /// `Open page`
-  String get openPage {
-    return Intl.message('Open page', name: 'openPage', desc: '', args: []);
-  }
-
-  /// `Open this page inside LongyunVPN, or in your browser?`
-  String get openPageTip {
-    return Intl.message(
-      'Open this page inside LongyunVPN, or in your browser?',
-      name: 'openPageTip',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Reset subscription URL`
   String get resetSubscribeUrl {
     return Intl.message(

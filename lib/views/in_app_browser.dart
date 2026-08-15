@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -16,10 +15,11 @@ bool get _hasInAppBrowser =>
 
 /// Opens [url] inside the app.
 ///
-/// The page is always loaded fresh: cache, cookies and web storage are cleared
-/// before navigating, so a verification or checkout page can never show a stale
-/// result from a previous visit. Falls back to the system browser where no
-/// embedded implementation exists, so callers never branch on platform.
+/// The page is always loaded fresh: cached responses are dropped so a
+/// verification or checkout page cannot show a stale result from a previous
+/// visit. Cookies are kept — clearing them signed the user out of the very page
+/// being opened. Falls back to the system browser where no embedded
+/// implementation exists, so callers never branch on platform.
 Future<void> openInApp(
   BuildContext context, {
   required String url,
@@ -29,27 +29,6 @@ Future<void> openInApp(
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     return;
   }
-  // On phones, ask instead of forcing the embedded viewer. Payment and
-  // verification pages hand off to bank apps, wallets and identity providers
-  // that a plain webview cannot always follow, and the real browser already has
-  // the user's sessions. Offering the choice means a page that misbehaves
-  // in-app is never a dead end.
-  if (Platform.isAndroid || Platform.isIOS) {
-    final l = context.appLocalizations;
-    final useInApp = await globalState.showMessage(
-      title: l.openPage,
-      message: TextSpan(text: l.openPageTip),
-      confirmText: l.openInApp,
-      cancelText: l.openInBrowser,
-    );
-    // Dismissed without choosing — do nothing rather than guessing.
-    if (useInApp == null) return;
-    if (!useInApp) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-      return;
-    }
-  }
-  if (!context.mounted) return;
   await Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => InAppBrowserView(url: url, title: title),
