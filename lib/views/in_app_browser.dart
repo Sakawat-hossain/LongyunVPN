@@ -55,6 +55,13 @@ class InAppBrowserView extends StatefulWidget {
 WebViewEnvironment? _webViewEnvironment;
 Future<void>? _webViewEnvironmentInit;
 
+/// Set when the environment could not be created at all — almost always a
+/// missing WebView2 Runtime. Building an InAppWebView anyway throws
+/// "Cannot create the InAppWebView instance!" from inside platform-view
+/// creation, which surfaces as a broken screen rather than something the user
+/// can act on, so this lets the page offer the system browser instead.
+bool _webViewEnvironmentFailed = false;
+
 Future<void> _ensureWebViewEnvironment() async {
   if (!Platform.isWindows || _webViewEnvironment != null) return;
   _webViewEnvironmentInit ??= () async {
@@ -63,9 +70,9 @@ Future<void> _ensureWebViewEnvironment() async {
       _webViewEnvironment = await WebViewEnvironment.create(
         settings: WebViewEnvironmentSettings(userDataFolder: dir),
       );
+      _webViewEnvironmentFailed = false;
     } catch (e) {
-      // Fall through to the plugin default rather than blocking the page; the
-      // webview reports its own failure if the default is unusable too.
+      _webViewEnvironmentFailed = true;
       commonPrint.log(
         'webview environment init failed: $e',
         logLevel: LogLevel.warning,
@@ -93,7 +100,17 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
     // "Cannot create the InAppWebView instance!".
     if (!_envReady) {
       _ensureWebViewEnvironment().then((_) {
-        if (mounted) setState(() => _envReady = true);
+        if (!mounted) return;
+        setState(() {
+          _envReady = true;
+          // No environment means no webview. Go straight to the error state,
+          // which offers a retry and a system-browser fallback, instead of
+          // rendering a widget that cannot initialise.
+          if (_webViewEnvironmentFailed) {
+            _failed = true;
+            _loading = false;
+          }
+        });
       });
     }
   }
@@ -104,6 +121,23 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
       _failed = false;
       _progress = 0;
     });
+    // If the environment never came up there is no controller to reload, and
+    // retrying would just spin forever. Try to build it again first — the user
+    // may have installed the runtime since.
+    if (_webViewEnvironmentFailed) {
+      _webViewEnvironmentInit = null;
+      await _ensureWebViewEnvironment();
+      if (!mounted) return;
+      if (_webViewEnvironmentFailed) {
+        setState(() {
+          _failed = true;
+          _loading = false;
+        });
+        return;
+      }
+      setState(() {});
+      return;
+    }
     await _clearBrowsingData();
     await _controller?.reload();
   }

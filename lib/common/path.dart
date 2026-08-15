@@ -71,10 +71,25 @@ class AppPath {
     return join(mHomeDirPath, 'backup.zip');
   }
 
-  /// Where WebView2 keeps its profile on Windows. Lives in the app's own data
-  /// directory, which is always writable — unlike the executable's folder,
-  /// WebView2's default, which is read-only under C:\Program Files.
+  /// Where WebView2 keeps its profile on Windows. Somewhere writable is
+  /// required: its default sits next to the executable, which is read-only
+  /// under C:\Program Files.
+  ///
+  /// The Windows runner picks the folder and exports it before the engine
+  /// starts, so read that back rather than deriving a second path here. A
+  /// process only ever gets one WebView2 user data folder, so a webview created
+  /// without an explicit environment (which falls back to the variable) and one
+  /// created with this path have to agree — when they disagreed, whichever came
+  /// second failed to initialise.
   Future<String> get webViewDataDirPath async {
+    final exported = Platform.environment['WEBVIEW2_USER_DATA_FOLDER'];
+    if (exported != null && exported.isNotEmpty) {
+      return exported;
+    }
+    final localAppData = Platform.environment['LOCALAPPDATA'];
+    if (localAppData != null && localAppData.isNotEmpty) {
+      return join(localAppData, 'LongyunVPN', 'WebView2');
+    }
     final mHomeDirPath = await homeDirPath;
     return join(mHomeDirPath, 'WebView2');
   }

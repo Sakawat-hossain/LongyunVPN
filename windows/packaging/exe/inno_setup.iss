@@ -58,9 +58,36 @@ begin
   end;
 end;
 
+// The in-app browser (IP whitelist, checkout) is WebView2, which needs the
+// Evergreen Runtime. Windows 11 ships it; plenty of Windows 10, LTSC and
+// freshly imaged machines do not, and there the browser cannot start at all.
+// Detect it from the registry (per-machine and per-user, plus the WOW6432
+// view), so we can tell the user up front instead of letting them discover it
+// when a payment page refuses to open.
+function WebView2Installed(): Boolean;
+var
+  Value: String;
+begin
+  Result :=
+    (RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Value) and (Value <> '')) or
+    (RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Value) and (Value <> '')) or
+    (RegQueryStringValue(HKCU, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Value) and (Value <> ''));
+end;
+
 function InitializeSetup(): Boolean;
 begin
   KillProcesses;
+  if not WebView2Installed() then
+  begin
+    // A warning, not a blocker: everything except the in-app browser works
+    // without it, so refusing to install would be worse than proceeding.
+    MsgBox('Microsoft Edge WebView2 Runtime was not found.' #13#10 #13#10
+         + 'LongyunVPN uses it for in-app pages such as the IP whitelist and '
+         + 'checkout. Those pages will not open until it is installed.' #13#10 #13#10
+         + 'You can install it from:' #13#10
+         + 'https://developer.microsoft.com/microsoft-edge/webview2/',
+         mbInformation, MB_OK);
+  end;
   Result := True;
 end;
 
