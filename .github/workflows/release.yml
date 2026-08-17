@@ -274,14 +274,27 @@ jobs:
       - name: Verify JNI symbols match the Kotlin package
         shell: bash
         run: |
-          apk=$(ls dist/**/*arm64-v8a*.apk dist/*arm64-v8a*.apk 2>/dev/null | head -1)
-          if [ -z "$apk" ]; then echo "::error::no arm64-v8a APK found"; exit 1; fi
+          # Every lookup below is guarded: this step runs under `bash -e`, so a
+          # find/grep that legitimately matches nothing would otherwise abort
+          # the step before it could report what it actually saw.
+          apk=$(find dist -name '*arm64-v8a*.apk' -type f 2>/dev/null | head -1 || true)
+          if [ -z "$apk" ]; then
+            echo "::error::no arm64-v8a APK found under dist/"
+            find dist -name '*.apk' -type f 2>/dev/null || true
+            exit 1
+          fi
           echo "checking $apk"
           work=$(mktemp -d)
-          unzip -o -q "$apk" "lib/arm64-v8a/libcore.so" -d "$work"
-          symbols=$(grep -ao "Java_com_[A-Za-z0-9_]*_Core_[A-Za-z0-9_]*" \
-            "$work/lib/arm64-v8a/libcore.so" | sort -u)
+          unzip -o -q "$apk" "lib/arm64-v8a/libcore.so" -d "$work" || true
+          so="$work/lib/arm64-v8a/libcore.so"
+          if [ ! -f "$so" ]; then
+            echo "::error::libcore.so missing from $apk"; exit 1
+          fi
+          symbols=$(grep -ao "Java_com_[A-Za-z0-9_]*_Core_[A-Za-z0-9_]*" "$so" \
+            | sort -u || true)
+          echo "--- JNI symbols found in libcore.so ---"
           echo "$symbols"
+          echo "---------------------------------------"
           if [ -z "$symbols" ]; then
             echo "::error::libcore.so exports no Java_*_Core_* symbols"; exit 1
           fi
