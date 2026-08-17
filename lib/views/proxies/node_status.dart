@@ -576,13 +576,13 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
           child: Row(
             children: [
               Expanded(
-                child: LinkActionButton(
-                  icon: Icons.verified_user_rounded,
-                  label: l.whitelistYourIp,
+                child: FilledButton.tonalIcon(
                   onPressed: () => _openWhitelist(context),
+                  icon: const Icon(Icons.verified_user_outlined, size: 18),
+                  label: Text(l.whitelistYourIp),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               IconButton(
                 // No hover tooltip: the full explanation is long and covered the
                 // page on hover. Tap opens it in a dialog instead.

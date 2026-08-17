@@ -27,12 +27,16 @@ class CommonScaffold extends StatefulWidget {
   final OnKeywordsUpdateCallback? onKeywordsUpdate;
   final bool? resizeToAvoidBottomInset;
 
+  /// Overrides [title] when a page needs more than a plain string.
+  final Widget? titleWidget;
+
   const CommonScaffold({
     super.key,
     this.appBar,
     required this.body,
     this.backgroundColor,
     this.title,
+    this.titleWidget,
     this.actions,
     this.centerTitle,
     this.editState,
@@ -211,9 +215,14 @@ class CommonScaffoldState extends State<CommonScaffold> {
             },
             decoration: InputDecoration(hintText: appLocalizations.search),
           )
+        : !_isEdit && widget.titleWidget != null
+        // A page can supply its own title widget when a plain string won't do.
+        // Edit and search modes still take over, so the count and the field are
+        // never hidden behind it.
+        ? widget.titleWidget!
         : Text(
             !_isEdit
-                ? widget.title!
+                ? widget.title ?? ''
                 : appLocalizations.selectedCountTitle(
                     '${_appBarState.value.editState?.editCount ?? 0}',
                   ),
@@ -302,7 +311,9 @@ class CommonScaffoldState extends State<CommonScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.appBar != null || widget.title != null);
+    assert(
+      widget.appBar != null || widget.title != null || widget.titleWidget != null,
+    );
     final backActionProvider = CommonScaffoldBackActionProvider.of(context);
     final body = SafeArea(
       child: Column(

@@ -168,19 +168,17 @@ Future<VM2<String, String>> _makeRealProfileTask(
   rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
   rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
   rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
-  // TUN MTU. 1500 (the default) is larger than what most tunnels can carry
-  // once the outer protocol's overhead is added, so full-size packets get
-  // fragmented or silently dropped — which surfaces as stalls and "speed goes
-  // up and down" rather than a hard failure. 1400 leaves headroom for the
-  // worst common case (WireGuard/QUIC + IPv6 + PPPoE) and is what the major
-  // clients ship. Only set when the profile doesn't specify one, so a user or
-  // subscription can still override it.
-  // 0 means unset here too (an MTU of 0 is not a real value), so guard against
-  // it the same way rather than relying on the key being absent.
-  final mtu = rawConfig['tun']['mtu'];
-  if (mtu == null || mtu == 0) {
-    rawConfig['tun']['mtu'] = 1400;
-  }
+  // TUN MTU is left to the core, which uses 9000.
+  //
+  // This used to be pinned to 1400 on the reasoning that 1500 exceeds what a
+  // tunnel can carry once outer-protocol overhead is added. That reasoning
+  // applies to the *physical* path, not to the TUN device: the MTU here is only
+  // the size the OS hands the tunnel, and the core re-packetises to the real
+  // path MTU afterwards. A large TUN MTU is what makes throughput good, because
+  // the same traffic crosses the interface in roughly six times fewer packets —
+  // which is exactly why the core defaults to 9000. Forcing 1400 was measurable
+  // as "it used to be fast, now it isn't". A profile that sets its own mtu is
+  // still respected, because nothing here overwrites it.
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   if (rawConfig['sniffer']?['sniff'] != null) {
     for (final value in (rawConfig['sniffer']?['sniff'] as Map).values) {
@@ -416,9 +414,16 @@ void _applyGroupHealthCheckDefaults(dynamic proxyGroups) {
     if (type == 'url-test') {
       group['tolerance'] ??= 50;
     }
-    // Keep testing in the background instead of only on demand, so a failover
-    // decision is based on fresh data.
-    group['lazy'] ??= false;
+    // `lazy` is left at the core's default (true), which only health-checks a
+    // group while it is actually in use.
+    //
+    // Forcing it to false meant every automatic group probed every one of its
+    // nodes on every interval, in the background, forever. On a subscription
+    // with dozens of nodes across several groups that is a burst of connections
+    // every few minutes competing with the user's own traffic — it showed up as
+    // a tunnel that was connected but periodically slow or stalled. Fresh
+    // failover data is not worth that; the interval above already re-tests the
+    // group being used.
   }
 }
 

@@ -264,6 +264,34 @@ jobs:
       - name: Build APK (arm64-v8a)
         run: dart setup.dart android --arch arm64 --env stable -v
 
+      # JNI binds native methods by symbol name, so libcore.so must export
+      # Java_<package>_Core_* matching the Kotlin class exactly. Renaming the
+      # package during the rebrand without renaming the C++ left every native
+      # method unresolvable and the core unreachable, and nothing failed the
+      # build — the APK was produced, signed and published, and only misbehaved
+      # once installed. Read the symbols back out of the artifact so that can't
+      # happen quietly again.
+      - name: Verify JNI symbols match the Kotlin package
+        shell: bash
+        run: |
+          apk=$(ls dist/**/*arm64-v8a*.apk dist/*arm64-v8a*.apk 2>/dev/null | head -1)
+          if [ -z "$apk" ]; then echo "::error::no arm64-v8a APK found"; exit 1; fi
+          echo "checking $apk"
+          work=$(mktemp -d)
+          unzip -o -q "$apk" "lib/arm64-v8a/libcore.so" -d "$work"
+          symbols=$(grep -ao "Java_com_[A-Za-z0-9_]*_Core_[A-Za-z0-9_]*" \
+            "$work/lib/arm64-v8a/libcore.so" | sort -u)
+          echo "$symbols"
+          if [ -z "$symbols" ]; then
+            echo "::error::libcore.so exports no Java_*_Core_* symbols"; exit 1
+          fi
+          if grep -qv "^Java_com_longyunvpn_app_core_Core_" <<<"$symbols"; then
+            echo "::error::libcore.so exports JNI symbols for the wrong package —"
+            echo "::error::they must match com.longyunvpn.app.core.Core"
+            exit 1
+          fi
+          echo "OK: all JNI symbols match com.longyunvpn.app.core.Core"
+
       - name: Build APK (armeabi-v7a)
         run: dart setup.dart android --arch arm --env stable -v
 

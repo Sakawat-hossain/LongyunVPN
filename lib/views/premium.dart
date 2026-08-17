@@ -589,9 +589,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: LinkActionButton(
-                icon: Icons.lock_rounded,
-                label: context.appLocalizations.continueToPayment,
+              child: FilledButton(
                 onPressed: () => Navigator.of(context).pop(
                   _CheckoutResult(
                     method: _method,
@@ -600,6 +598,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
                         : _couponController.text.trim(),
                   ),
                 ),
+                child: Text(context.appLocalizations.continueToPayment),
               ),
             ),
           ],

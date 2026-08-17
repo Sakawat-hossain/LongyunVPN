@@ -1,3 +1,11 @@
+## v1.3.5
+
+- Android now actually works. The rebrand renamed the app's Kotlin packages but not the matching native code, so none of the core's native methods could be found at runtime — the core process died on startup and everything downstream of it failed: no servers, adding a profile crawling, the dashboard reporting the core disconnected
+- Windows speed restored. The tunnel was pinned to a small packet size, which put roughly six times more packets on the wire than needed
+- Fixed periodic stalls while connected: every automatic server group was re-testing every one of its servers in the background every few minutes, competing with your own traffic
+- The "open in" chooser is centred, with the LongyunVPN icon and a proper full-screen blur behind it
+- The Dashboard greets you with LongyunVPN before settling to Dashboard
+
 ## v1.3.4
 
 - Fixed the core showing as disconnected on Android. A successful "already connected" result was being reported through the error channel, so the app marked a working core dead — every request after that went nowhere, which is why the server list was empty and adding a profile crawled

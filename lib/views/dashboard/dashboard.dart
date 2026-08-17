@@ -10,6 +10,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'widgets/dashboard_title.dart';
 import 'widgets/start_button.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
@@ -250,7 +251,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     });
     return _buildIsEdit(
       (isEdit) => CommonScaffold(
+        // Plain title kept as the fallback the edit/search modes fall back to.
         title: context.appLocalizations.dashboard,
+        titleWidget: const DashboardTitle(),
         actions: _buildActions(isEdit),
         floatingActionButton: const StartButton(),
         body: Align(

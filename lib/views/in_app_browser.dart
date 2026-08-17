@@ -30,10 +30,36 @@ Future<void> openInApp(
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     return;
   }
-  final choice = await showDialog<_OpenTarget>(
+  // showGeneralDialog rather than showDialog: the blur belongs to the whole
+  // screen behind the chooser, not to each card. Blurring inside the cards only
+  // frosted the strip of page directly under them, which left a hard edge where
+  // the sharp background resumed and made the pair look pasted on.
+  final choice = await showGeneralDialog<_OpenTarget>(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.45),
-    builder: (_) => const _OpenTargetDialog(),
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.transparent,
+    transitionDuration: const Duration(milliseconds: 220),
+    pageBuilder: (_, _, _) => const _OpenTargetDialog(),
+    transitionBuilder: (_, animation, _, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: 14 * curved.value,
+            sigmaY: 14 * curved.value,
+          ),
+          child: ColoredBox(
+            color: Colors.black.withValues(alpha: 0.42 * curved.value),
+            child: child,
+          ),
+        ),
+      );
+    },
   );
   // Dismissed without choosing — do nothing rather than guessing.
   if (choice == null) return;
@@ -62,42 +88,51 @@ class _OpenTargetDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 240),
-        curve: Curves.easeOutBack,
-        builder: (_, value, child) => Transform.scale(
-          scale: 0.94 + 0.06 * value.clamp(0.0, 1.0),
-          child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _OpenTargetCard(
-                    icon: Icons.shield_rounded,
-                    label: context.appLocalizations.openInApp,
-                    onTap: () =>
-                        Navigator.of(context).pop(_OpenTarget.inApp),
+    // Fills the screen so the blur behind it does too, with the cards centred
+    // inside. Tapping the empty space dismisses, same as a barrier.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.of(context).pop(),
+      child: SafeArea(
+        child: Center(
+          child: GestureDetector(
+            // Swallow taps on the cards themselves so choosing doesn't also
+            // trigger the dismiss above.
+            onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: _OpenTargetCard(
+                          // The app's own mark, not a stand-in shield — this is
+                          // the option that keeps you inside LongyunVPN, so it
+                          // should look like LongyunVPN.
+                          image: 'assets/images/icon.png',
+                          label: context.appLocalizations.openInApp,
+                          accent: true,
+                          onTap: () =>
+                              Navigator.of(context).pop(_OpenTarget.inApp),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: _OpenTargetCard(
+                          icon: Icons.language_rounded,
+                          label: context.appLocalizations.openInBrowser,
+                          accent: false,
+                          onTap: () =>
+                              Navigator.of(context).pop(_OpenTarget.browser),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: _OpenTargetCard(
-                    icon: Icons.language_rounded,
-                    label: context.appLocalizations.openInBrowser,
-                    onTap: () =>
-                        Navigator.of(context).pop(_OpenTarget.browser),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -106,51 +141,131 @@ class _OpenTargetDialog extends StatelessWidget {
   }
 }
 
-/// One of the two choices. Frosted rather than solid so the page stays faintly
-/// visible behind it and the dialog keeps its transparent feel.
-class _OpenTargetCard extends StatelessWidget {
-  final IconData icon;
+/// One of the two choices.
+///
+/// The icon sits in a tinted, softly-lit disc rather than floating loose above
+/// the label, which is what made the two cards read as flat dark rectangles.
+/// [accent] marks the recommended option so the pair has a clear primary
+/// without needing a second colour: it gets the theme's primary tint, the other
+/// a neutral one.
+class _OpenTargetCard extends StatefulWidget {
+  /// Either an [icon] or an [image] asset path — the in-app option uses the
+  /// app's own mark, the browser option a glyph.
+  final IconData? icon;
+  final String? image;
   final String label;
+  final bool accent;
   final VoidCallback onTap;
 
   const _OpenTargetCard({
-    required this.icon,
+    this.icon,
+    this.image,
     required this.label,
+    required this.accent,
     required this.onTap,
-  });
+  }) : assert(icon != null || image != null);
+
+  @override
+  State<_OpenTargetCard> createState() => _OpenTargetCardState();
+}
+
+class _OpenTargetCardState extends State<_OpenTargetCard> {
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed == value) return;
+    setState(() => _pressed = value);
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+    final tint = widget.accent ? colorScheme.primary : colorScheme.tertiary;
+    return AnimatedScale(
+      scale: _pressed ? 0.96 : 1,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          // A wash of the card's tint over the surface, brightest at the top
+          // where the icon sits, so it has some depth of its own instead of
+          // reading as a flat panel. Opaque: the screen behind the chooser is
+          // already blurred, and letting the page show through here as well
+          // made the labels hard to read.
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.alphaBlend(tint.withValues(alpha: 0.16), colorScheme.surface),
+              colorScheme.surface,
+            ],
+          ),
+          border: Border.all(
+            color: tint.withValues(alpha: _pressed ? 0.55 : 0.3),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 22,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
         child: Material(
-          color: colorScheme.surface.withValues(alpha: 0.72),
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(22),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
-            onTap: onTap,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 12),
+            onTap: widget.onTap,
+            onTapDown: (_) => _setPressed(true),
+            onTapUp: (_) => _setPressed(false),
+            onTapCancel: () => _setPressed(false),
+            splashColor: tint.withValues(alpha: 0.12),
+            highlightColor: tint.withValues(alpha: 0.06),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 14),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 30, color: colorScheme.primary),
-                  const SizedBox(height: 12),
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: tint.withValues(alpha: 0.16),
+                      border: Border.all(color: tint.withValues(alpha: 0.3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: tint.withValues(alpha: 0.22),
+                          blurRadius: 16,
+                          spreadRadius: -2,
+                        ),
+                      ],
+                    ),
+                    child: widget.image != null
+                        ? Padding(
+                            // The mark has no built-in padding, so inset it to
+                            // sit like the glyph on the other card.
+                            padding: const EdgeInsets.all(11),
+                            child: Image.asset(
+                              widget.image!,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.medium,
+                            ),
+                          )
+                        : Icon(widget.icon, size: 27, color: tint),
+                  ),
+                  const SizedBox(height: 14),
                   Text(
-                    label,
+                    widget.label,
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.labelLarge?.copyWith(
+                    style: context.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
+                      letterSpacing: 0.1,
                     ),
                   ),
                 ],
@@ -162,7 +277,6 @@ class _OpenTargetCard extends StatelessWidget {
     );
   }
 }
-
 
 class InAppBrowserView extends StatefulWidget {
   final String url;
