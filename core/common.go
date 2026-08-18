@@ -302,6 +302,29 @@ func UnmarshalJson(data []byte, v any) error {
 	return err
 }
 
+// Runs fn in a goroutine that cannot take the process down with it.
+//
+// A panic in any goroutine ends the whole program in Go — there is no
+// per-goroutine boundary. On Android that program is the separate :remote
+// process the app talks to, so a single bad lookup in a background task made
+// the core vanish with nothing to explain it, and the app just saw a dead core.
+// handleAction already recovers on its own goroutine; everything spawned beyond
+// it was unprotected. The callback a panicking task owed its caller still goes
+// unanswered, but the caller times out against a core that is alive instead of
+// one that is gone.
+func safeGo(name string, fn func()) {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				buf := make([]byte, 4096)
+				n := runtime.Stack(buf, false)
+				logError("panic in %s: %v\n%s", name, r, buf[:n])
+			}
+		}()
+		fn()
+	}()
+}
+
 func logError(format string, args ...interface{}) {
 	log.Errorln(format, args...)
 	if debugError {

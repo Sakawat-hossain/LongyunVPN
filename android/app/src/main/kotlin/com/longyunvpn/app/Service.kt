@@ -13,6 +13,7 @@ import com.longyunvpn.app.service.IVoidInterface
 import com.longyunvpn.app.service.RemoteService
 import com.longyunvpn.app.service.models.NotificationParams
 import com.longyunvpn.app.service.models.VpnOptions
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -100,7 +101,10 @@ object Service {
     suspend fun setEventListener(
         cb: ((result: String?) -> Unit)?
     ): Result<Unit> {
-        val results = HashMap<String, MutableList<ByteArray>>()
+        // Binder delivers callbacks on a thread pool, and events for different
+        // ids can land concurrently, so this map is touched from several
+        // threads at once — a plain HashMap can corrupt or spin on resize here.
+        val results = ConcurrentHashMap<String, MutableList<ByteArray>>()
         return delegate.useService {
             it.setEventListener(
                 when (cb != null) {
@@ -108,14 +112,21 @@ object Service {
                         override fun onEvent(
                             id: String, data: ByteArray?, isSuccess: Boolean, ack: IAckInterface?
                         ) {
-                            if (results[id] == null) {
-                                results[id] = mutableListOf()
+                            // computeIfAbsent, not a get-then-put: the latter is
+                            // two operations and two threads can both see the
+                            // key missing, so one event's chunks get dropped on
+                            // the floor when the second list replaces the first.
+                            val chunks = results.computeIfAbsent(id) {
+                                mutableListOf()
                             }
-                            results[id]?.add(data ?: byteArrayOf())
+                            chunks.add(data ?: byteArrayOf())
                             ack?.onAck()
                             if (isSuccess) {
-                                cb(results[id]?.formatString())
+                                // Remove first, then format what we removed —
+                                // reading through the map after removing risks
+                                // handing back null for an event we did receive.
                                 results.remove(id)
+                                cb(chunks.formatString())
                             }
                         }
                     }

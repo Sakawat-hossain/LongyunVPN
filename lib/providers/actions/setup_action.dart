@@ -112,7 +112,14 @@ class SetupAction extends _$SetupAction {
               await _handleStart();
             },
           );
-        } catch (_) {
+        } catch (e) {
+          // Resetting the run time is right, but throwing the reason away left
+          // a failed connect with nothing behind it — not even a line in the
+          // in-app log to say what went wrong.
+          commonPrint.log(
+            'start failed while applying profile: $e',
+            logLevel: LogLevel.error,
+          );
           ref.read(runTimeProvider.notifier).value = null;
         }
       }

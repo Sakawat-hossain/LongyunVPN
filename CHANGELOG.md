@@ -1,3 +1,15 @@
+## v1.3.6
+
+- Fixed the VPN silently refusing to start when the per-app list contained an app you had since uninstalled — one stale entry aborted the whole connection with no message
+- Fixed the notification not being posted when the VPN starts with the screen off (boot auto-connect, Always-on VPN), which could get the service killed by the system
+- Declining the VPN permission prompt no longer leaves the app waiting forever, and the prompt result is no longer lost if you rotate the screen
+- The core no longer dies outright when a background task hits an unexpected error; it logs and carries on
+- Fixed a crash that could occur while resolving which app a connection belongs to
+- Fixed the app list showing every app twice when opened in two places at once
+- Fixed the WebDAV backup indicator showing a stale result while re-checking a server
+- Steadier communication with the core on Android under load
+- Updated 55 dependencies, including the HTTP layer and network-change detection
+
 ## v1.3.5
 
 - Android now actually works. The rebrand renamed the app's Kotlin packages but not the matching native code, so none of the core's native methods could be found at runtime — the core process died on startup and everything downstream of it failed: no servers, adding a profile crawling, the dashboard reporting the core disconnected

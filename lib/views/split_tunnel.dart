@@ -196,6 +196,9 @@ class SplitTunnelView extends ConsumerWidget {
         ],
       ),
     );
+    // The dialog owns this controller and nothing else references it once the
+    // route is gone, so release it here rather than leaking one per open.
+    controller.dispose();
     final name = value?.trim() ?? '';
     if (name.isEmpty || current.contains(name)) return;
     _setList(ref, [...current, name]);

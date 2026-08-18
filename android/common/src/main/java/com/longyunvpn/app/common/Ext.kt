@@ -220,6 +220,12 @@ val Long.formatBytes: String
 fun String.chunkedForAidl(charset: Charset = Charsets.UTF_8): List<ByteArray> {
     val allBytes = toByteArray(charset)
     val total = allBytes.size
+    // An empty payload still needs one chunk. Callers send these in a loop and
+    // mark the last one as the completion flag, so returning nothing meant the
+    // loop never ran, the callback never fired, and the waiting Flutter method
+    // call simply never completed — a hang until whatever timeout was above it,
+    // rather than an empty result delivered promptly.
+    if (total == 0) return listOf(ByteArray(0))
     val maxBytes = when {
         total <= 100 * 1024 -> total
         total <= 1024 * 1024 -> 64 * 1024

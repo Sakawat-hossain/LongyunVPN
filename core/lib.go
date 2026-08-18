@@ -152,11 +152,11 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string)
 }
 
 func handleUpdateDns(value string) {
-	go func() {
+	safeGo("updateDns", func() {
 		log.Infoln("[DNS] updateDns %s", value)
 		dns.UpdateSystemDNS(strings.Split(value, ","))
 		dns.FlushCacheWithDefaultResolver()
-	}()
+	})
 }
 
 func (result ActionResult) send() {
@@ -211,7 +211,7 @@ func startTUN(callback unsafe.Pointer, fd C.int, stackChar, addressChar, dnsChar
 
 //export quickSetup
 func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar *C.char) {
-	go func() {
+	safeGo("quickSetup", func() {
 		initParamsString := takeCString(initParamsChar)
 		setupParamsString := takeCString(setupParamsChar)
 		if !handleInitClash(initParamsString) {
@@ -221,7 +221,7 @@ func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar
 		isRunning.Store(true)
 		message := handleSetupConfig([]byte(setupParamsString))
 		invokeResult(callback, message)
-	}()
+	})
 }
 
 //export setEventListener

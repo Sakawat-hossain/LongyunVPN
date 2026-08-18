@@ -1,6 +1,7 @@
 package com.longyunvpn.app.service
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.ProxyInfo
 import android.os.Binder
@@ -23,6 +24,7 @@ import com.longyunvpn.app.service.modules.SuspendModule
 import com.longyunvpn.app.service.modules.moduleLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import java.util.concurrent.ConcurrentHashMap
 import java.net.InetSocketAddress
 import android.net.VpnService as SystemVpnService
 
@@ -51,7 +53,10 @@ class VpnService : SystemVpnService(), IBaseService,
     private val connectivity by lazy {
         getSystemService<ConnectivityManager>()
     }
-    private val uidPageNameMap = mutableMapOf<Int, String>()
+    // Read and written from the core's threads via JNI, once per connection, so
+    // a plain HashMap here is a data race — concurrent writes can corrupt it or
+    // spin during a resize.
+    private val uidPageNameMap = ConcurrentHashMap<Int, String>()
 
     private fun resolverProcess(
         protocol: Int,
@@ -67,10 +72,13 @@ class VpnService : SystemVpnService(), IBaseService,
         if (nextUid == -1) {
             return ""
         }
-        if (!uidPageNameMap.containsKey(nextUid)) {
-            uidPageNameMap[nextUid] = this.packageManager?.getPackagesForUid(nextUid)?.first() ?: ""
+        // firstOrNull, not first: getPackagesForUid returns an empty array for a
+        // uid with no packages mapped to it (shared and system uids do this),
+        // and first() throws NoSuchElementException there — inside a callback
+        // the core invokes for every connection.
+        return uidPageNameMap.getOrPut(nextUid) {
+            this.packageManager?.getPackagesForUid(nextUid)?.firstOrNull() ?: ""
         }
-        return uidPageNameMap[nextUid] ?: ""
     }
 
     val VpnOptions.address
@@ -189,16 +197,32 @@ class VpnService : SystemVpnService(), IBaseService,
             setMtu(9000)
             options.accessControlProps.let { accessControl ->
                 if (accessControl.enable) {
+                    // Both of these throw NameNotFoundException for a package
+                    // that is no longer installed, and start() catches
+                    // everything and calls stop() — so a single stale entry in
+                    // the app list silently killed the whole tunnel with no
+                    // message. Lists outlive installs, and dropping
+                    // QUERY_ALL_PACKAGES narrowed what the picker can even show,
+                    // so stale entries are expected. Skip them individually
+                    // instead of failing the connection.
                     when (accessControl.mode) {
                         AccessControlMode.ACCEPT_SELECTED -> {
                             (accessControl.acceptList + packageName).forEach {
-                                addAllowedApplication(it)
+                                try {
+                                    addAllowedApplication(it)
+                                } catch (_: PackageManager.NameNotFoundException) {
+                                    GlobalState.log("Access control: skipping uninstalled $it")
+                                }
                             }
                         }
 
                         AccessControlMode.REJECT_SELECTED -> {
                             (accessControl.rejectList - packageName).forEach {
-                                addDisallowedApplication(it)
+                                try {
+                                    addDisallowedApplication(it)
+                                } catch (_: PackageManager.NameNotFoundException) {
+                                    GlobalState.log("Access control: skipping uninstalled $it")
+                                }
                             }
                         }
                     }

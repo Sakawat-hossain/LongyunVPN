@@ -40,7 +40,11 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     if (rawProps == rawLastProps) {
       return;
     } else {
-      _isCompleter.value == null;
+      // Reset to "checking" while the new server is pinged. This was `==`, so
+      // it compared and threw the result away — the indicator kept showing the
+      // previous server's result, including a stale green tick for one that had
+      // since stopped answering.
+      _isCompleter.value = null;
       final res = await _client?.ping() ?? false;
       if (mounted) {
         _isCompleter.value = res;

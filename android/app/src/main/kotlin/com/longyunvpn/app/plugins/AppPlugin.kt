@@ -276,6 +276,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
 
+    // getPackages and getChinaPackageNames each run in their own coroutine and
+    // both populate this cache, so without the lock two concurrent calls can
+    // both find it empty, both enumerate, and both append — leaving every app
+    // in the list twice.
+    @Synchronized
     private fun getPackages(): List<Package> {
         val packageManager = GlobalState.application.packageManager
         if (packages.isNotEmpty()) return packages
@@ -286,7 +291,12 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 Package(
                     packageName = it.packageName,
                     label = it.applicationInfo?.loadLabel(packageManager).toString(),
-                    system = (it.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM)) != 0,
+                    // Compare against 0 explicitly. `Int? != 0` is true when the
+                    // flags are null, which labelled an app whose
+                    // applicationInfo is missing as a system app and hid it from
+                    // the picker.
+                    system = ((it.applicationInfo?.flags ?: 0)
+                        and ApplicationInfo.FLAG_SYSTEM) != 0,
                     lastUpdateTime = it.lastUpdateTime,
                     internet = it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
                 )
@@ -447,7 +457,12 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        activityRef = WeakReference(binding.activity)
+        // Re-register, don't just re-capture the activity. A configuration
+        // change (rotation, theme switch, locale change) hands over a brand new
+        // binding, and the listeners added to the old one are gone with it — so
+        // without this the VPN-permission result never came back after a
+        // rotation and connecting silently did nothing.
+        onAttachedToActivity(binding)
     }
 
     override fun onDetachedFromActivity() {
@@ -459,6 +474,15 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         if (requestCode == VPN_PERMISSION_REQUEST_CODE) {
             if (resultCode == FlutterActivity.RESULT_OK) {
                 invokeVpnPrepareCallback()
+            } else {
+                // Declining the VPN consent dialog used to fall through here
+                // and do nothing at all: the pending callback was neither
+                // invoked nor cleared, so the connect attempt waited forever
+                // with nothing on screen to say it had been refused. Drop it so
+                // the request ends, and so it can't fire against a later
+                // attempt.
+                GlobalState.log("VPN permission denied by user")
+                vpnPrepareCallback = null
             }
         }
         return true

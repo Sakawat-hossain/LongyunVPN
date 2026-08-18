@@ -139,7 +139,7 @@ func handleGetProxies() ProxiesData {
 
 func handleChangeProxy(data string, fn func(string string)) {
 	runLock.Lock()
-	go func() {
+	safeGo("changeProxy", func() {
 		defer runLock.Unlock()
 		var params = &ChangeProxyParams{}
 		err := json.Unmarshal([]byte(data), params)
@@ -173,7 +173,7 @@ func handleChangeProxy(data string, fn func(string string)) {
 
 		fn("")
 		return
-	}()
+	})
 }
 
 func handleGetTraffic(onlyStatisticsProxy bool) string {
@@ -363,7 +363,7 @@ func handleGetExternalProvider(externalProviderName string) string {
 }
 
 func handleUpdateGeoData(geoType string, geoName string, fn func(value string)) {
-	go func() {
+	safeGo("updateGeoData", func() {
 		path := constant.Path.Resolve(geoName)
 		switch geoType {
 		case "MMDB":
@@ -392,11 +392,11 @@ func handleUpdateGeoData(geoType string, geoName string, fn func(value string)) 
 			}
 		}
 		fn("")
-	}()
+	})
 }
 
 func handleUpdateExternalProvider(providerName string, fn func(value string)) {
-	go func() {
+	safeGo("updateExternalProvider", func() {
 		externalProvider, exist := externalProviders[providerName]
 		if !exist {
 			fn("external provider is not exist")
@@ -408,11 +408,11 @@ func handleUpdateExternalProvider(providerName string, fn func(value string)) {
 			return
 		}
 		fn("")
-	}()
+	})
 }
 
 func handleSideLoadExternalProvider(providerName string, data []byte, fn func(value string)) {
-	go func() {
+	safeGo("sideLoadExternalProvider", func() {
 		runLock.Lock()
 		defer runLock.Unlock()
 		externalProvider, exist := externalProviders[providerName]
@@ -426,7 +426,7 @@ func handleSideLoadExternalProvider(providerName string, data []byte, fn func(va
 			return
 		}
 		fn("")
-	}()
+	})
 }
 
 func handleSuspend(suspended bool) bool {
@@ -444,7 +444,7 @@ func handleStartLog() {
 		logSubscriber = nil
 	}
 	logSubscriber = log.Subscribe()
-	go func() {
+	safeGo("logSubscriber", func() {
 		for logData := range logSubscriber {
 			if logData.LogLevel < log.Level() {
 				continue
@@ -455,7 +455,7 @@ func handleStartLog() {
 			}
 			sendMessage(*message)
 		}
-	}()
+	})
 }
 
 func handleStopLog() {
@@ -466,7 +466,7 @@ func handleStopLog() {
 }
 
 func handleGetCountryCode(ip string, fn func(value string)) {
-	go func() {
+	safeGo("getCountryCode", func() {
 		runLock.Lock()
 		defer runLock.Unlock()
 		codes := mmdb.IPInstance().LookupCode(net.ParseIP(ip))
@@ -475,13 +475,13 @@ func handleGetCountryCode(ip string, fn func(value string)) {
 			return
 		}
 		fn(codes[0])
-	}()
+	})
 }
 
 func handleGetMemory(fn func(value string)) {
-	go func() {
+	safeGo("getMemory", func() {
 		fn(strconv.FormatUint(statistic.DefaultManager.Memory(), 10))
-	}()
+	})
 }
 
 func handleGetConfig(path string) (*config.RawConfig, error) {
@@ -511,7 +511,7 @@ func handleUpdateConfig(bytes []byte) string {
 }
 
 func handleDelFile(path string, result ActionResult) {
-	go func() {
+	safeGo("deleteFile", func() {
 		fileInfo, err := os.Stat(path)
 		if err != nil {
 			if !os.IsNotExist(err) {
@@ -534,7 +534,7 @@ func handleDelFile(path string, result ActionResult) {
 			}
 		}
 		result.success("")
-	}()
+	})
 }
 
 func handleSetupConfig(bytes []byte) string {

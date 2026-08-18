@@ -47,6 +47,17 @@ class NotificationModule(private val service: Service) : Module() {
     private val scope = CoroutineScope(Dispatchers.Default)
 
     override fun onInstall() {
+        // Post a notification immediately, before anything can filter.
+        //
+        // This used to sit *after* the collect below, where it was unreachable —
+        // collect on an endless flow never returns. That mattered because the
+        // flow only emits while the screen is on, so starting with the screen
+        // off (boot auto-connect, Always-on VPN) meant update() never ran,
+        // startForeground() was never called, and the system killed the service
+        // for missing its five-second deadline.
+        update(
+            (State.notificationParamsFlow.value ?: NotificationParams()).extended
+        )
         scope.launch {
             val screenFlow = service.receiveBroadcastFlow {
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -66,12 +77,6 @@ class NotificationModule(private val service: Service) : Module() {
                 .collect { (params, _) ->
                     update(params!!)
                 }
-
-            State.notificationParamsFlow.value?.let {
-                update(it.extended)
-            } ?: run {
-                update(NotificationParams().extended)
-            }
         }
     }
 
