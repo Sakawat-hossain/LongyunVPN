@@ -381,28 +381,14 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
       setState(() {});
       return;
     }
-    await _clearBrowsingData();
+    // Reload only. clearAllCache() here wiped the cache out from under a
+    // load that was already starting, which on Android can leave the webview
+    // surface blank. It was redundant anyway: cacheEnabled false and
+    // clearCache true in the settings above already guarantee nothing is
+    // served from an earlier visit.
     await _controller?.reload();
   }
 
-  /// Drops cached responses so a verification or checkout page reflects the
-  /// request happening right now rather than a previous visit.
-  ///
-  /// Cookies are deliberately left alone. Deleting them all took the panel
-  /// session with them, so the page loaded logged-out and could not do its job;
-  /// the webview is also configured with cacheEnabled false and clearCache
-  /// true, which already covers the staleness this was meant to prevent.
-  Future<void> _clearBrowsingData() async {
-    try {
-      await InAppWebViewController.clearAllCache();
-    } catch (e) {
-      // Never block the page on cleanup failing.
-      commonPrint.log(
-        'in-app browser clear failed: $e',
-        logLevel: LogLevel.warning,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -443,7 +429,13 @@ class _InAppBrowserViewState extends State<InAppBrowserView> {
                       // in a new window; without this those taps do nothing.
                       supportMultipleWindows: true,
                       javaScriptCanOpenWindowsAutomatically: true,
-                      transparentBackground: true,
+                      // Deliberately NOT transparentBackground. With a
+                      // transparent surface the webview paints nothing of its
+                      // own, so any moment the page is not painting — during a
+                      // reload, or a redirect after verifying — the dark
+                      // scaffold shows straight through and reads as a black
+                      // screen. Letting the webview own its background costs
+                      // nothing visually and removes that whole failure mode.
                     ),
                     onWebViewCreated: (controller) {
                       // Just keep the controller. Clearing here ran against a

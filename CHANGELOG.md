@@ -1,3 +1,8 @@
+## v1.3.7
+
+- Fixed the black screen after verifying your IP and reloading the in-app page
+- macOS builds are published again
+
 ## v1.3.6
 
 - Fixed the VPN silently refusing to start when the per-app list contained an app you had since uninstalled — one stale entry aborted the whole connection with no message
