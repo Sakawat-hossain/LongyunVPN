@@ -52,7 +52,7 @@ jobs:
       # amd64 runner image ships it, but the arm64 image is not guaranteed to,
       # and a missing nuget fails the build with a bare NUGET-NOTFOUND.
       - name: Setup NuGet
-        uses: nuget/setup-nuget@v2
+        uses: nuget/setup-nuget@v4
 
       - name: Setup Go
         uses: actions/setup-go@v5
