@@ -15,9 +15,13 @@ class Preferences {
   // keystore (Keychain / DPAPI-backed Credential Locker / Android Keystore /
   // libsecret) rather than plaintext SharedPreferences.
   static const _xboardTokenKey = 'xboardToken';
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  // No AndroidOptions: the EncryptedSharedPreferences backend we used to ask
+  // for is gone. Google deprecated Jetpack Security, so flutter_secure_storage
+  // 10 replaced it with its own ciphers (AES-GCM, RSA-OAEP-SHA256), ignores the
+  // old flag, and migrates existing entries to the new format the first time
+  // they are read — so tokens written by earlier builds survive the upgrade and
+  // nobody is silently logged out.
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   Future<bool> get isInit async =>
       await sharedPreferencesCompleter.future != null;
