@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:longyunvpn/common/cache.dart';
 import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/database/database.dart';
+import 'package:longyunvpn/plugins/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
@@ -120,6 +121,116 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
             return widget.defaultWidget;
           },
         );
+      },
+    );
+  }
+}
+
+/// An installed app's launcher icon, resolved through [App]'s icon cache.
+///
+/// Stateful on purpose. The obvious spelling — a `FutureBuilder` fed from
+/// `build()` — creates a fresh Future on every rebuild, which both re-crosses
+/// the method channel and resets the builder to its empty state. The lists that
+/// show these icons rebuild about once a second, so that was a channel call per
+/// visible row per second, and a blink each time. Holding the resolved provider
+/// in State keeps it across rebuilds; a warm cache paints on the first frame.
+class PackageIcon extends StatefulWidget {
+  final String packageName;
+  final double size;
+
+  /// Stands in for the global [app], which is null off Android and so would
+  /// make this widget untestable on the host.
+  final App? source;
+
+  const PackageIcon({
+    super.key,
+    required this.packageName,
+    required this.size,
+    @visibleForTesting this.source,
+  });
+
+  @override
+  State<PackageIcon> createState() => _PackageIconState();
+}
+
+class _PackageIconState extends State<PackageIcon> {
+  ImageProvider? _icon;
+
+  /// Guards against a stale async load painting over a newer one after the row
+  /// has been recycled onto a different package.
+  int _generation = 0;
+
+  /// One retry per package, so a genuinely unreadable icon cannot loop.
+  bool _retried = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant PackageIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.packageName != widget.packageName) {
+      _retried = false;
+      _load();
+    }
+  }
+
+  void _load() {
+    final generation = ++_generation;
+    final packageName = widget.packageName;
+    final currentApp = widget.source ?? app;
+    if (currentApp == null || packageName.isEmpty) {
+      _icon = null;
+      return;
+    }
+    if (currentApp.hasPackageIcon(packageName)) {
+      _icon = currentApp.cachedPackageIcon(packageName);
+      return;
+    }
+    _icon = null;
+    currentApp.getPackageIcon(packageName).then((icon) {
+      if (!mounted || generation != _generation || icon == null) {
+        return;
+      }
+      setState(() {
+        _icon = icon;
+      });
+    });
+  }
+
+  /// The file behind a cached icon went away — the package was updated, or the
+  /// native side aged the icon out. Drop the entry and resolve once more.
+  void _handleLoadError() {
+    if (_retried) return;
+    _retried = true;
+    // errorBuilder runs during build, where setState is illegal. A microtask
+    // runs as soon as the frame's synchronous work finishes, which is early
+    // enough to retry within the same frame budget and late enough to be out of
+    // the build phase.
+    scheduleMicrotask(() {
+      if (!mounted) return;
+      (widget.source ?? app)?.evictPackageIcon(widget.packageName);
+      setState(_load);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = _icon;
+    if (icon == null) {
+      return SizedBox(width: widget.size, height: widget.size);
+    }
+    return Image(
+      image: icon,
+      gaplessPlayback: true,
+      width: widget.size,
+      height: widget.size,
+      errorBuilder: (_, _, _) {
+        _handleLoadError();
+        return SizedBox(width: widget.size, height: widget.size);
       },
     );
   }

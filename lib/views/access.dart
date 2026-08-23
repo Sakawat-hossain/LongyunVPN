@@ -457,21 +457,7 @@ class PackageListItem extends StatelessWidget {
       leading: SizedBox(
         width: 48,
         height: 48,
-        child: FutureBuilder<ImageProvider?>(
-          future: app?.getPackageIcon(package.packageName),
-          builder: (_, snapshot) {
-            if (!snapshot.hasData && snapshot.data == null) {
-              return Container();
-            } else {
-              return Image(
-                image: snapshot.data!,
-                gaplessPlayback: true,
-                width: 48,
-                height: 48,
-              );
-            }
-          },
-        ),
+        child: PackageIcon(packageName: package.packageName, size: 48),
       ),
       title: Text(
         package.label,

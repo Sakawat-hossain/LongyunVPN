@@ -53,9 +53,7 @@ class App {
   }
 
   Future<bool?> requestNotificationsPermission() async {
-    return methodChannel.invokeMethod<bool>(
-      'requestNotificationsPermission',
-    );
+    return methodChannel.invokeMethod<bool>('requestNotificationsPermission');
   }
 
   Future<bool> openFile(String path) async {
@@ -88,20 +86,81 @@ class App {
         false;
   }
 
-  Future<ImageProvider?> getPackageIcon(String packageName) async {
-    final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
-      'packageName': packageName,
-    });
-    if (path == null) {
-      return null;
+  /// Icons resolved during this run, keyed by package name. A null value is a
+  /// remembered miss, so a package with no readable icon is not asked for again
+  /// on every rebuild.
+  final Map<String, ImageProvider?> _packageIcons = {};
+
+  /// Loads currently in flight, so rows that want the same icon at the same
+  /// moment share one channel call instead of each making their own.
+  final Map<String, Future<ImageProvider?>> _packageIconRequests = {};
+
+  /// Whether [packageName]'s icon can be answered without an await. Lets a
+  /// widget paint the icon on its very first frame instead of flashing an empty
+  /// box while a Future it already knows the answer to completes.
+  bool hasPackageIcon(String packageName) =>
+      _packageIcons.containsKey(packageName);
+
+  ImageProvider? cachedPackageIcon(String packageName) =>
+      _packageIcons[packageName];
+
+  /// The launcher icon for [packageName], or null if it has none.
+  ///
+  /// Resolving one crosses the method channel into a PackageManager lookup, and
+  /// the connections list rebuilds about once a second while traffic flows — so
+  /// without the cache every visible row re-fetched an icon that never changes.
+  Future<ImageProvider?> getPackageIcon(String packageName) {
+    if (packageName.isEmpty) {
+      return Future.value(null);
     }
-    return FileImage(File(path));
+    if (_packageIcons.containsKey(packageName)) {
+      return Future.value(_packageIcons[packageName]);
+    }
+    return _packageIconRequests[packageName] ??= _loadPackageIcon(packageName);
+  }
+
+  Future<ImageProvider?> _loadPackageIcon(String packageName) async {
+    ImageProvider? icon;
+    try {
+      final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
+        'packageName': packageName,
+      });
+      icon = path == null || path.isEmpty ? null : FileImage(File(path));
+    } catch (error) {
+      // A missing icon is not worth failing a row over — remember the miss and
+      // let the caller render its placeholder.
+      commonPrint.log('getPackageIcon $packageName error: $error');
+    }
+    _packageIcons[packageName] = icon;
+    _packageIconRequests.remove(packageName);
+    return icon;
+  }
+
+  /// Forgets [packageName] so the next request re-reads it from the system.
+  ///
+  /// The Android side names the icon file after the package's lastUpdateTime
+  /// and deletes the previous one, and it also ages files out on a TTL. Either
+  /// way a cached [FileImage] can end up pointing at a file that no longer
+  /// exists — which surfaces as an image load error, and that error is what
+  /// drives this call (see `PackageIcon`). Flutter caches the failed resolution
+  /// too, so the provider is evicted from the image cache as well; otherwise a
+  /// retry would just be handed the same error back.
+  void evictPackageIcon(String packageName) {
+    final stale = _packageIcons.remove(packageName);
+    _packageIconRequests.remove(packageName);
+    if (stale != null) {
+      unawaited(stale.evict());
+    }
+  }
+
+  @visibleForTesting
+  void clearPackageIconCache() {
+    _packageIcons.clear();
+    _packageIconRequests.clear();
   }
 
   Future<bool?> tip(String? message) async {
-    return methodChannel.invokeMethod<bool>('tip', {
-      'message': '$message',
-    });
+    return methodChannel.invokeMethod<bool>('tip', {'message': '$message'});
   }
 
   Future<bool?> initShortcuts() async {
