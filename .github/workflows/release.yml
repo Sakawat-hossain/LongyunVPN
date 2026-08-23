@@ -3,9 +3,9 @@ name: release
 # Builds every platform/arch on a version tag (e.g. v1.1.8) and publishes them
 # to a single GitHub Release. Each job uploads its own assets directly (the
 # proven approach), so a failure in one platform never blocks the others.
-#   Windows: windows-amd64 setup.exe/.zip, windows-arm64 setup.exe/.zip
+#   Windows: windows-amd64 setup.exe/.zip  (arm64: see the matrix comment below)
 #   Android: arm64-v8a.apk, armeabi-v7a.apk, x86_64.apk
-#   macOS:   macos-arm64.dmg   (universal/amd64 = follow-up)
+#   macOS:   macos-arm64.dmg, macos-amd64.dmg
 #   Linux:   linux-amd64 deb/AppImage/rpm  (arm64 = follow-up; no Flutter SDK)
 #   + SHA256SUMS over all assets, and GitHub's auto source archives.
 
@@ -30,7 +30,20 @@ jobs:
       matrix:
         include:
           - { os: windows-2022, arch: amd64 }
-          - { os: windows-11-arm, arch: arm64 }
+          # windows-arm64 is not built. firebase_core's Windows implementation
+          # links Google's Firebase C++ SDK, which ships x64 and x86 libraries
+          # only — there is no arm64 build — so the link step fails on
+          # windows-11-arm, and Flutter offers no way for an app to exclude a
+          # plugin on one platform while keeping it on others.
+          #
+          # The cost is small and already handled: Windows 11 on ARM runs x64
+          # binaries under emulation, and the in-app updater falls back to the
+          # amd64 asset when no arch-specific one is published (see
+          # _installerAssetFor in lib/providers/actions/common_action.dart).
+          #
+          # To restore native arm64 builds, drop the Firebase packages from
+          # pubspec.yaml — Firebase is inert on Windows anyway, since
+          # FirebaseService only initializes on Android and macOS.
     steps:
       - name: Setup Rust (arm64)
         if: matrix.os == 'windows-11-arm'
@@ -140,10 +153,11 @@ jobs:
     # with an actionable message instead of shipping a debug-signed build.
     runs-on: ubuntu-latest
     steps:
-      # A tagged release must never ship a debug-signed APK: debug keys use the
-      # `.dev` application id and can't be updated on a device that has a real
-      # build installed. Fail fast (before spending time on the build) if the
-      # release keystore secret is missing. See docs/ANDROID_SIGNING.md to set it.
+      # A tagged release must never ship a debug-signed APK. Debug builds carry
+      # the same com.longyunvpn.app id as a release but a different signature,
+      # so Android refuses to update an existing install with one. Fail fast,
+      # before spending time on the build, if the release keystore secret is
+      # missing. See docs/ANDROID_SIGNING.md to set it.
       - name: Require release keystore
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -363,10 +377,25 @@ jobs:
           flutter-version: 3.44.9
           cache: true
 
+      # Retried, and the failure is surfaced rather than swallowed. Both the pub
+      # fetch and the CocoaPods fetch that follows it reach out to the network,
+      # and this job has failed on transient DNS before
+      # ("Could not resolve host: cdn.cocoapods.org"). `set -x` and the version
+      # dump make the log say which of the two commands actually broke.
       - name: Get Flutter dependencies
+        shell: bash
         run: |
+          set -euxo pipefail
           flutter --version
-          flutter pub get
+          for attempt in 1 2 3; do
+            if flutter pub get; then
+              exit 0
+            fi
+            echo "::warning::flutter pub get failed (attempt $attempt/3); retrying"
+            sleep $((attempt * 15))
+          done
+          echo "::error::flutter pub get failed after 3 attempts"
+          exit 1
 
       - name: Code generation
         run: dart run build_runner build --delete-conflicting-outputs
