@@ -3,8 +3,13 @@
 Tagged releases (`git push origin vX.Y.Z`) build a **release-signed** APK. The CI
 job [`release.yml`](../.github/workflows/release.yml) now **fails fast** if the
 signing secret is missing, so you can never accidentally publish a debug-signed
-build (a debug build uses the `com.longyunvpn.app.dev` application id and cannot
-update a device that has a real install).
+build.
+
+Every variant now uses the single `com.longyunvpn.app` application id — there is
+no separate `.dev` id. Because a debug build is debug-signed and a release build
+is key-signed, and Android will not update a package whose signature changed,
+installing a locally-built app over a real release (or the reverse) needs an
+uninstall first.
 
 You only do this setup **once**. After that every tagged release is signed
 automatically.

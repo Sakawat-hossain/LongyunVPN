@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "783301981225",
+    "project_id": "jsss-group",
+    "storage_bucket": "jsss-group.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783301981225:android:c93f08c473d3522aae1838",
+        "android_client_info": {
+          "package_name": "com.longyunvpn.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA32FD82riXY_QI5zG7k09rgaSt5DcjUTI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

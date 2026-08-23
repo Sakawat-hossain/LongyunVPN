@@ -2929,21 +2929,41 @@ class AppLocalizations {
     );
   }
 
-  /// `Crash Analysis`
+  /// `Crash Reporting`
   String get crashlytics {
     return Intl.message(
-      'Crash Analysis',
+      'Crash Reporting',
       name: 'crashlytics',
       desc: '',
       args: [],
     );
   }
 
-  /// `When on, crash logs are kept on your device to help diagnose problems — never uploaded`
+  /// `When on, crash reports are sent to the developer to help fix problems. Off by default. A copy is always kept on this device either way`
   String get crashlyticsTip {
     return Intl.message(
-      'When on, crash logs are kept on your device to help diagnose problems — never uploaded',
+      'When on, crash reports are sent to the developer to help fix problems. Off by default. A copy is always kept on this device either way',
       name: 'crashlyticsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Usage Analytics`
+  String get analytics {
+    return Intl.message(
+      'Usage Analytics',
+      name: 'analytics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When on, anonymous usage data is sent to help improve the app. Off by default. This is separate from crash reporting and is never required`
+  String get analyticsTip {
+    return Intl.message(
+      'When on, anonymous usage data is sent to help improve the app. Off by default. This is separate from crash reporting and is never required',
+      name: 'analyticsTip',
       desc: '',
       args: [],
     );

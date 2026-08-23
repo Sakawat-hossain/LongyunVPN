@@ -179,6 +179,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "すでにアカウントをお持ちですか？サインイン",
     ),
     "amountLeft": m0,
+    "analytics": MessageLookupByLibrary.simpleMessage("利用状況の分析"),
+    "analyticsTip": MessageLookupByLibrary.simpleMessage(
+      "オンにすると、アプリ改善のため匿名の利用状況データを送信します。既定はオフです。クラッシュレポートとは別で、必須ではありません",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
@@ -295,9 +299,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "country": MessageLookupByLibrary.simpleMessage("国"),
     "couponCodeOptional": MessageLookupByLibrary.simpleMessage("クーポンコード（任意）"),
     "crashTest": MessageLookupByLibrary.simpleMessage("クラッシュテスト"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("クラッシュ分析"),
+    "crashlytics": MessageLookupByLibrary.simpleMessage("クラッシュレポート"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "オンにすると、問題診断のためクラッシュログを端末内に保存します。アップロードは行いません",
+      "オンにすると、問題修正のためクラッシュレポートを開発者に送信します。既定はオフです。いずれの場合もコピーは端末内に保存されます",
     ),
     "create": MessageLookupByLibrary.simpleMessage("作成"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Create Profile"),

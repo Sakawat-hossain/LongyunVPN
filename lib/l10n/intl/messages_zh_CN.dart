@@ -169,6 +169,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("允许通过局域网访问代理"),
     "alreadyHaveAccountSignIn": MessageLookupByLibrary.simpleMessage("已有账号？登录"),
     "amountLeft": m0,
+    "analytics": MessageLookupByLibrary.simpleMessage("使用情况分析"),
+    "analyticsTip": MessageLookupByLibrary.simpleMessage(
+      "开启后，将发送匿名使用数据以帮助改进应用。默认关闭。此项与崩溃报告相互独立，并非必需",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("应用"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("应用访问控制"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
@@ -265,9 +269,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "country": MessageLookupByLibrary.simpleMessage("区域"),
     "couponCodeOptional": MessageLookupByLibrary.simpleMessage("优惠码（可选）"),
     "crashTest": MessageLookupByLibrary.simpleMessage("崩溃测试"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("崩溃分析"),
+    "crashlytics": MessageLookupByLibrary.simpleMessage("崩溃报告"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "开启后，崩溃日志会保存在您的设备上以帮助排查问题——绝不会上传",
+      "开启后，崩溃报告将发送给开发者以帮助修复问题。默认关闭。无论是否开启，本机始终保留一份副本",
     ),
     "create": MessageLookupByLibrary.simpleMessage("创建"),
     "createProfile": MessageLookupByLibrary.simpleMessage("创建配置"),

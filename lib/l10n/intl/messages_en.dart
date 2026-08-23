@@ -205,6 +205,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Already have an account? Sign In",
     ),
     "amountLeft": m0,
+    "analytics": MessageLookupByLibrary.simpleMessage("Usage Analytics"),
+    "analyticsTip": MessageLookupByLibrary.simpleMessage(
+      "When on, anonymous usage data is sent to help improve the app. Off by default. This is separate from crash reporting and is never required",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("App"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "App access control",
@@ -361,9 +365,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Coupon code (optional)",
     ),
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("Crash Analysis"),
+    "crashlytics": MessageLookupByLibrary.simpleMessage("Crash Reporting"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "When on, crash logs are kept on your device to help diagnose problems — never uploaded",
+      "When on, crash reports are sent to the developer to help fix problems. Off by default. A copy is always kept on this device either way",
     ),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Create Profile"),

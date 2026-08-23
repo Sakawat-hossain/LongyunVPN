@@ -206,6 +206,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Уже есть аккаунт? Войти",
     ),
     "amountLeft": m0,
+    "analytics": MessageLookupByLibrary.simpleMessage(
+      "Аналитика использования",
+    ),
+    "analyticsTip": MessageLookupByLibrary.simpleMessage(
+      "Когда включено, анонимные данные об использовании отправляются для улучшения приложения. По умолчанию выключено. Это не связано с отчётами о сбоях и не является обязательным",
+    ),
     "app": MessageLookupByLibrary.simpleMessage("Приложение"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Контроль доступа приложений",
@@ -372,9 +378,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Промокод (необязательно)",
     ),
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("Анализ сбоев"),
+    "crashlytics": MessageLookupByLibrary.simpleMessage("Отчёты о сбоях"),
     "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "Когда включено, журналы сбоев хранятся на вашем устройстве для диагностики проблем — они не загружаются",
+      "Когда включено, отчёты о сбоях отправляются разработчику для устранения проблем. По умолчанию выключено. Копия в любом случае остаётся на этом устройстве",
     ),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Create Profile"),

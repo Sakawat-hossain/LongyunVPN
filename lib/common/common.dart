@@ -7,6 +7,7 @@ export 'converter.dart';
 export 'crash.dart';
 export 'datetime.dart';
 export 'file.dart';
+export 'firebase.dart';
 export 'fixed.dart';
 export 'function.dart';
 export 'future.dart';

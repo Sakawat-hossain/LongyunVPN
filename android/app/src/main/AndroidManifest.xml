@@ -167,6 +167,21 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!--
+          Firebase collects nothing until the user turns it on in Settings.
+          These pin both SDKs off at install time, before any Dart code has run
+          — without them Crashlytics and Analytics default to enabled and would
+          report on first launch, ahead of any consent. FirebaseService then
+          enables whichever the user has actually agreed to, and that choice is
+          persisted by the SDKs across launches.
+        -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

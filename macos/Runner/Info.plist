@@ -45,5 +45,16 @@
 	<string>NSApplication</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>LongyunVPN needs location access to detect WiFi network name for connectivity features.</string>
+	<!--
+	  Firebase collects nothing until the user turns it on in Settings. These
+	  pin both SDKs off before any Dart code runs; without them Crashlytics and
+	  Analytics default to enabled and would report on first launch, ahead of
+	  any consent. FirebaseService then enables whichever the user agreed to.
+	  Mirrors the two meta-data entries in the Android manifest.
+	-->
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
 </dict>
 </plist>

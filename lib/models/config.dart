@@ -87,7 +87,13 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool showLabel,
     @Default(false) bool disclaimerAccepted,
     @Default(false) bool crashlyticsTip,
+    // Both default off. Crash reports and usage analytics leave the device, and
+    // a VPN client is the last place to turn either on for someone without
+    // asking. They are separate switches on purpose: agreeing to send a stack
+    // trace when the app dies is a different decision from agreeing to
+    // continuous behavioural reporting.
     @Default(false) bool crashlytics,
+    @Default(false) bool analytics,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,

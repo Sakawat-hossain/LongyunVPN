@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/plugins/app.dart';
 import 'package:longyunvpn/providers/config.dart';
@@ -222,11 +224,15 @@ class OpenLogsItem extends ConsumerWidget {
   }
 }
 
+/// Sends crash reports off the device. Hidden on Windows and Linux, where there
+/// is no Firebase to send them to and crashes stay in the local log — showing a
+/// dead switch there would be worse than showing none.
 class CrashlyticsItem extends ConsumerWidget {
   const CrashlyticsItem({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!isFirebasePlatform) return const SizedBox.shrink();
     final appLocalizations = context.appLocalizations;
     final crashlytics = ref.watch(
       appSettingProvider.select((state) => state.crashlytics),
@@ -240,6 +246,53 @@ class CrashlyticsItem extends ConsumerWidget {
           ref
               .read(appSettingProvider.notifier)
               .update((state) => state.copyWith(crashlytics: value));
+          final analytics = ref.read(
+            appSettingProvider.select((state) => state.analytics),
+          );
+          unawaited(
+            FirebaseService.applyConsent(
+              crashlytics: value,
+              analytics: analytics,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Usage analytics — separate from crash reporting on purpose. Agreeing to send
+/// a stack trace when the app dies is a different decision from agreeing to
+/// continuous reporting of what you do in the app, and folding the second into a
+/// switch labelled "crash analysis" would be quietly dishonest.
+class AnalyticsItem extends ConsumerWidget {
+  const AnalyticsItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!isFirebasePlatform) return const SizedBox.shrink();
+    final appLocalizations = context.appLocalizations;
+    final analytics = ref.watch(
+      appSettingProvider.select((state) => state.analytics),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.analytics),
+      subtitle: Text(appLocalizations.analyticsTip),
+      delegate: SwitchDelegate(
+        value: analytics,
+        onChanged: (bool value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(analytics: value));
+          final crashlytics = ref.read(
+            appSettingProvider.select((state) => state.crashlytics),
+          );
+          unawaited(
+            FirebaseService.applyConsent(
+              crashlytics: crashlytics,
+              analytics: value,
+            ),
+          );
         },
       ),
     );
@@ -347,14 +400,20 @@ class ApplicationSettingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> items = [
       const MinimizeItem(),
-      if (system.isDesktop) ...[const AutoLaunchItem(), const SilentLaunchItem()],
+      if (system.isDesktop) ...[
+        const AutoLaunchItem(),
+        const SilentLaunchItem(),
+      ],
       const AutoRunItem(),
       if (system.isAndroid) ...[const HiddenItem()],
       const AnimateTabItem(),
       const OpenLogsItem(),
       const CloseConnectionsItem(),
       const UsageItem(),
-      if (system.isAndroid) const CrashlyticsItem(),
+      // Both are gated inside the widgets themselves (Firebase platforms only),
+      // so macOS now gets them too rather than Android alone.
+      const CrashlyticsItem(),
+      const AnalyticsItem(),
       if (system.isAndroid) const KillSwitchItem(),
       if (system.isDesktop) const DesktopKillSwitchItem(),
       const AutoCheckUpdateItem(),

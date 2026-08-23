@@ -89,6 +89,9 @@ dependencies:
     path: plugins/rust_api
   setup:
     path: plugins/setup
+  firebase_core: ^4.13.0
+  firebase_crashlytics: ^5.2.7
+  firebase_analytics: ^12.4.6
 dev_dependencies:
   flutter_test:
     sdk: flutter
