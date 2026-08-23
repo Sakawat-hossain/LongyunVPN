@@ -1,4 +1,4 @@
-import 'package:fl_clash/providers/action.dart';
+import 'package:longyunvpn/providers/action.dart';
 import 'package:test/test.dart';
 
 void main() {

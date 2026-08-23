@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/path.dart';
-import 'package:fl_clash/common/print.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:longyunvpn/common/path.dart';
+import 'package:longyunvpn/common/print.dart';
+import 'package:longyunvpn/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 
 /// Persistent, size-bounded crash capture.

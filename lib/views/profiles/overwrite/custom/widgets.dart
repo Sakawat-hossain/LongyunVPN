@@ -1,6 +1,6 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class InfoMessageButton extends StatelessWidget {

@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/request.dart';
+import 'package:longyunvpn/common/request.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

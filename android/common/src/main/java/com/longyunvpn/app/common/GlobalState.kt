@@ -8,10 +8,13 @@ import kotlinx.coroutines.Dispatchers
 
 object GlobalState : CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
-    // Internal channel id — kept as-is so existing users' notification-channel
-    // settings (importance/sound they may have customized) survive upgrades. The
-    // user-visible channel name is "LongyunVPN".
-    const val NOTIFICATION_CHANNEL = "FlClash"
+    // Internal channel id. Renamed off the pre-rebrand "FlClash" id as part of
+    // the branding migration. Android channels are immutable once created, so
+    // this is a one-time reset for anyone upgrading: they get a fresh channel at
+    // default importance, and the old "FlClash" entry lingers in the system
+    // notification settings until the app is reinstalled. New installs are
+    // unaffected. Do not rename again without the same consideration.
+    const val NOTIFICATION_CHANNEL = "LongyunVPN"
 
     const val NOTIFICATION_ID = 1
 

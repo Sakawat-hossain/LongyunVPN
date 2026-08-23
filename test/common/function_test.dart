@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/function.dart';
+import 'package:longyunvpn/common/function.dart';
 import 'package:test/test.dart';
 
 void main() {

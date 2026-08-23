@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fl_clash/enum/enum.dart';
+import 'package:longyunvpn/enum/enum.dart';
 
 import 'print.dart';
 

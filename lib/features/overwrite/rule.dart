@@ -1,12 +1,12 @@
 library;
 
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/models/state.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/models/clash_config.dart';
+import 'package:longyunvpn/models/state.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 final ruleItemHeight =

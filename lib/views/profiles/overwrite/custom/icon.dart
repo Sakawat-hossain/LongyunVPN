@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/database/database.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/database/database.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/providers/app.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

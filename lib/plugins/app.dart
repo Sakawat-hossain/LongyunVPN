@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

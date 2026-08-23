@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/enum/enum.dart';
 
 class SingleInstanceLock {
   static SingleInstanceLock? _instance;

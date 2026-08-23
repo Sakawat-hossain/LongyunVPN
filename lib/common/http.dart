@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/providers/providers.dart';
+import 'package:longyunvpn/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LongyunHttpOverrides extends HttpOverrides {

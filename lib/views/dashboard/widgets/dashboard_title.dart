@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
+import 'package:longyunvpn/common/common.dart';
 import 'package:flutter/material.dart';
 
 /// The Dashboard app-bar title, which greets with the brand and then settles.

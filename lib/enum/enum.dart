@@ -2,11 +2,11 @@
 
 import 'dart:io';
 
-import 'package:fl_clash/common/context.dart';
-import 'package:fl_clash/common/system.dart';
-import 'package:fl_clash/views/dashboard/subscription_status.dart';
-import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:longyunvpn/common/context.dart';
+import 'package:longyunvpn/common/system.dart';
+import 'package:longyunvpn/views/dashboard/subscription_status.dart';
+import 'package:longyunvpn/views/dashboard/widgets/widgets.dart';
+import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';

@@ -37,8 +37,8 @@ class GoBuilder {
   String get _outputPath => p.join(rootDir, config.outputDir);
 
   Future<String> build(Target target) async {
-    // Desktop: output directly to libclash/{platform}/
-    // Android: output to libclash/android/{abi}/
+    // Desktop: output directly to native/{platform}/
+    // Android: output to native/android/{abi}/
     final outDir = target.isLib
         ? p.join(_outputPath, target.platformDir, target.abi!)
         : p.join(_outputPath, target.platformDir);

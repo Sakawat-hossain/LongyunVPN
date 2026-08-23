@@ -35,7 +35,7 @@ class BuildConfig {
     coreDir: 'core',
     coreName: 'LongyunCore',
     libName: 'liblongyuncore',
-    outputDir: 'libclash',
+    outputDir: 'native',
     helperDir: 'services/helper',
     helperName: 'LongyunVPNHelperService',
     distDir: 'dist',

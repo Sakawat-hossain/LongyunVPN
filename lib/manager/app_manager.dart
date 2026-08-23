@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/manager/window_manager.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/core/controller.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/manager/window_manager.dart';
+import 'package:longyunvpn/providers/providers.dart';
+import 'package:longyunvpn/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

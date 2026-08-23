@@ -1,10 +1,10 @@
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/database/database.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/state.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/core/controller.dart';
+import 'package:longyunvpn/database/database.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/models/models.dart';
+import 'package:longyunvpn/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

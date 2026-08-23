@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/common.dart';
+import 'package:longyunvpn/common/common.dart';
 import 'package:flutter/material.dart';
 
 /// Download progress for the in-app updater.

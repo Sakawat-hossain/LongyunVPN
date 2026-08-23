@@ -1,13 +1,13 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/config/dns.dart';
-import 'package:fl_clash/views/config/network.dart';
-import 'package:fl_clash/views/config/on_demand.dart';
-import 'package:fl_clash/views/config/scripts.dart';
-import 'package:fl_clash/widgets/list.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/models/clash_config.dart';
+import 'package:longyunvpn/providers/config.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/views/config/dns.dart';
+import 'package:longyunvpn/views/config/network.dart';
+import 'package:longyunvpn/views/config/on_demand.dart';
+import 'package:longyunvpn/views/config/scripts.dart';
+import 'package:longyunvpn/widgets/list.dart';
+import 'package:longyunvpn/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

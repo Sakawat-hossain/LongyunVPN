@@ -4,9 +4,9 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/models/models.dart';
 import 'package:flutter/material.dart';
 
 const appName = 'LongyunVPN';
@@ -17,7 +17,7 @@ const appHelperService = 'LongyunVPNHelperService';
 // the old service (see Windows.registerService) — do not register anything under
 // this name.
 const legacyHelperService = 'FlClashHelperService';
-const coreName = 'clash.meta';
+const coreName = 'LongyunCore';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 // MethodChannel namespace shared with the Android side (Kotlin

@@ -1,6 +1,6 @@
 #include <jni.h>
 
-#ifdef LIBCLASH
+#ifdef LONGYUN_CORE
 
 #include "jni_helper.h"
 #include "liblongyuncore.h"

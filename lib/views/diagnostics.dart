@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/core.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/core/core.dart';
+import 'package:longyunvpn/l10n/l10n.dart';
+import 'package:longyunvpn/models/models.dart';
+import 'package:longyunvpn/providers/providers.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

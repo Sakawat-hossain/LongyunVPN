@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/views/proxies/common.dart';
+import 'package:longyunvpn/common/constant.dart';
+import 'package:longyunvpn/models/models.dart';
+import 'package:longyunvpn/views/proxies/common.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

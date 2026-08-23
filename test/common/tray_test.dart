@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/tray.dart';
+import 'package:longyunvpn/common/tray.dart';
 import 'package:test/test.dart';
 
 void main() {

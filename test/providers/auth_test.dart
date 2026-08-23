@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/xboard.dart';
-import 'package:fl_clash/providers/auth.dart';
+import 'package:longyunvpn/common/xboard.dart';
+import 'package:longyunvpn/providers/auth.dart';
 import 'package:test/test.dart';
 
 void main() {

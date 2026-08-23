@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/enum/enum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'action.dart';

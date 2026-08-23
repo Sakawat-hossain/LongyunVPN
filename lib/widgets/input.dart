@@ -1,13 +1,13 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/common.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/dialog.dart';
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/widgets/null_status.dart';
-import 'package:fl_clash/widgets/pop_scope.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:longyunvpn/common/common.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/models/common.dart';
+import 'package:longyunvpn/providers/providers.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/widgets/dialog.dart';
+import 'package:longyunvpn/widgets/inherited.dart';
+import 'package:longyunvpn/widgets/null_status.dart';
+import 'package:longyunvpn/widgets/pop_scope.dart';
+import 'package:longyunvpn/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/common.dart';
-import 'package:fl_clash/state.dart';
+import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/models/common.dart';
+import 'package:longyunvpn/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

@@ -21,10 +21,10 @@ function(apply_buildkit)
 
   # The output files the build_tool produces
   if(WIN32)
-    set(_output "${PROJECT_ROOT}/libclash/windows/LongyunCore.exe")
+    set(_output "${PROJECT_ROOT}/native/windows/LongyunCore.exe")
     set(_platform_args "windows")
   else()
-    set(_output "${PROJECT_ROOT}/libclash/linux/LongyunCore")
+    set(_output "${PROJECT_ROOT}/native/linux/LongyunCore")
     set(_platform_args "linux")
   endif()
 

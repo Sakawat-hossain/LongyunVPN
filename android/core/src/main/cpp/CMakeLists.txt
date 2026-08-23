@@ -13,16 +13,16 @@ if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_link_options(-flto -Wl,--gc-sections,--strip-all)
 endif ()
 
-set(LIB_CLASH_PATH "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/liblongyuncore.so")
-set(LIB_CLASH_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../cpp/includes/${ANDROID_ABI}")
-set(LIB_CLASH_HEADER_PATH "${LIB_CLASH_INCLUDE_DIR}/liblongyuncore.h")
-set(BRIDE_HEADER_PATH "${LIB_CLASH_INCLUDE_DIR}/bride.h")
+set(LONGYUN_CORE_PATH "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/liblongyuncore.so")
+set(LONGYUN_CORE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../cpp/includes/${ANDROID_ABI}")
+set(LONGYUN_CORE_HEADER_PATH "${LONGYUN_CORE_INCLUDE_DIR}/liblongyuncore.h")
+set(BRIDE_HEADER_PATH "${LONGYUN_CORE_INCLUDE_DIR}/bride.h")
 
-message("LIB_CLASH_PATH ${LIB_CLASH_PATH}")
-if (EXISTS ${LIB_CLASH_PATH} AND EXISTS ${LIB_CLASH_HEADER_PATH} AND EXISTS ${BRIDE_HEADER_PATH})
+message("LONGYUN_CORE_PATH ${LONGYUN_CORE_PATH}")
+if (EXISTS ${LONGYUN_CORE_PATH} AND EXISTS ${LONGYUN_CORE_HEADER_PATH} AND EXISTS ${BRIDE_HEADER_PATH})
     message("Found liblongyuncore.so and headers for ABI ${ANDROID_ABI}")
-    add_compile_definitions(LIBCLASH)
-    include_directories(${LIB_CLASH_INCLUDE_DIR})
+    add_compile_definitions(LONGYUN_CORE)
+    include_directories(${LONGYUN_CORE_INCLUDE_DIR})
     link_directories(${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
     add_library(${CMAKE_PROJECT_NAME} SHARED
             jni_helper.cpp
@@ -30,7 +30,7 @@ if (EXISTS ${LIB_CLASH_PATH} AND EXISTS ${LIB_CLASH_HEADER_PATH} AND EXISTS ${BR
     target_link_libraries(${CMAKE_PROJECT_NAME}
             longyuncore)
 else ()
-    message("Not found complete liblongyuncore output for ABI ${ANDROID_ABI}; building core without LIBCLASH")
+    message("Not found complete liblongyuncore output for ABI ${ANDROID_ABI}; building core without LONGYUN_CORE")
     add_library(${CMAKE_PROJECT_NAME} SHARED
             jni_helper.cpp
             core.cpp)

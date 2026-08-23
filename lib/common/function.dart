@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
+import 'package:longyunvpn/common/common.dart';
 
 class Debouncer {
   final Map<dynamic, Timer?> _operations = {};

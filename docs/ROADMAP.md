@@ -69,7 +69,7 @@ improve next. Tick items as you go.
 - [ ] Replace `core/Clash.Meta/Meta.png` (Mihomo logo) with the Longyun logo.
 - [ ] Linux `APPLICATION_ID` (`com.follow.clash`) — rename after a Linux build
       confirms the data-dir keying (risk: could reset Linux users' data).
-- [ ] Dart package name `fl_clash` — invisible internal id; large rename; leave unless wanted.
+- [x] Dart package name `fl_clash` → `longyunvpn` — done; all `package:` imports updated.
 - [ ] Notification-channel id `"FlClash"` — leave (renaming resets users' notification prefs).
 
 ## ⚪ Maintenance / hygiene
