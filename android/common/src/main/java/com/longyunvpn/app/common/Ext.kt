@@ -146,11 +146,18 @@ fun Context.receiveBroadcastFlow(
 }
 
 
+// maxRetries x retryDelayMillis is the whole window the core process has to
+// become bindable. It was 10 x 200ms - two seconds - which is fine on a fast
+// phone and far too short for a cold :remote process on a loaded or
+// aggressively power-managed device, where bindService can legitimately be
+// refused for several seconds. Falling out of that window used to be
+// unrecoverable; it is now retryable, but widening it means most devices never
+// reach the failure path at all.
 inline fun <reified T : IBinder> Context.bindServiceFlow(
     intent: Intent,
     flags: Int = Context.BIND_AUTO_CREATE,
-    maxRetries: Int = 10,
-    retryDelayMillis: Long = 200L
+    maxRetries: Int = 20,
+    retryDelayMillis: Long = 500L
 ): Flow<Pair<IBinder?, String>> = callbackFlow {
     val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {

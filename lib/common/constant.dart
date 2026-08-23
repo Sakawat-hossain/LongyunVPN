@@ -46,6 +46,16 @@ const watchExecution = false;
 final defaultTextScaleFactor =
     WidgetsBinding.instance.platformDispatcher.textScaleFactor;
 const httpTimeoutDuration = Duration(milliseconds: 8000);
+
+/// Delay-test concurrency, client side.
+///
+/// Must stay at or below the core's own delay-test concurrency (`mBatch` in
+/// core/common.go, currently 50). Anything past that queues *inside* the core
+/// behind a full wave of [httpTimeoutDuration] timeouts, which the client's own
+/// timeout cannot wait out — so the surplus comes back as "timeout" for nodes
+/// that are perfectly healthy.
+const maxConcurrentDelayTests = 50;
+
 const moreDuration = Duration(milliseconds: 100);
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);

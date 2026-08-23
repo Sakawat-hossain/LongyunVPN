@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -33,12 +34,27 @@ class _MemoryInfoState extends State<MemoryInfo> {
 
   Future<void> _updateMemory() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final rss = ProcessInfo.currentRss;
-      if (coreController.isCompleted) {
-        _memoryStateNotifier.value = await coreController.getMemory() + rss;
-      } else {
-        _memoryStateNotifier.value = rss;
+      // dispose() cancels the pending timer, but it cannot cancel a post-frame
+      // callback that is already queued. Without this guard that callback woke
+      // up on a dead State and armed a *new* timer that nothing owned any more
+      // — a 2-second poll of the core that then ran for the life of the
+      // process, one more each time the dashboard was disposed mid-tick.
+      if (!mounted) return;
+      try {
+        final rss = ProcessInfo.currentRss;
+        if (coreController.isCompleted) {
+          _memoryStateNotifier.value = await coreController.getMemory() + rss;
+        } else {
+          _memoryStateNotifier.value = rss;
+        }
+      } catch (error) {
+        // A failed read must not stop the polling, same as the connections view.
+        commonPrint.log(
+          'updateMemory error: $error',
+          logLevel: LogLevel.warning,
+        );
       }
+      if (!mounted) return;
       timer = Timer(const Duration(seconds: 2), () async {
         _updateMemory();
       });

@@ -69,6 +69,25 @@ class App {
     return await methodChannel.invokeMethod<bool>('openVpnSettings') ?? false;
   }
 
+  /// The device's primary ABI (e.g. `arm64-v8a`), so the updater can pick the
+  /// matching APK instead of guessing. Empty when unavailable.
+  Future<String> getAbi() async {
+    return await methodChannel.invokeMethod<String>('getAbi') ?? '';
+  }
+
+  /// Hands a downloaded APK to Android's package installer.
+  ///
+  /// Returns false if it could not be offered — the file is missing, or
+  /// "install unknown apps" is not granted, in which case the user is taken to
+  /// the settings screen that grants it. Never installs silently: Android shows
+  /// its own confirmation and the user approves there.
+  Future<bool> installApk(String path) async {
+    return await methodChannel.invokeMethod<bool>('installApk', {
+          'path': path,
+        }) ??
+        false;
+  }
+
   Future<ImageProvider?> getPackageIcon(String packageName) async {
     final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
       'packageName': packageName,

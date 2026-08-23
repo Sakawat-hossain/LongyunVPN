@@ -48,6 +48,23 @@ class ServiceDelegate<T>(
                 runCatching {
                     GlobalState.application.bindServiceFlow<IBinder>(intent)
                         .collect { handleBind(it) }
+                }.onFailure {
+                    GlobalState.log("Service bind failed: $it")
+                }
+                // Release the latch whatever happened.
+                //
+                // Without this the flow terminating - which is what
+                // bindServiceFlow does once its retries are exhausted - left
+                // _bindingState stuck at true with no service behind it. Every
+                // later bind() was then a no-op because compareAndSet(false,
+                // true) could never succeed again, and every useService sat
+                // out its timeout against a delegate that would never recover.
+                // The core could not be reached for the rest of the process,
+                // no matter how many times the app retried, which is why the
+                // affected phones stayed on "Connecting..." until a full
+                // restart.
+                if (_serviceState.value?.first == null) {
+                    _bindingState.set(false)
                 }
             }
         }

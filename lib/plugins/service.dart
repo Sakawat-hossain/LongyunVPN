@@ -69,8 +69,25 @@ class Service {
     return await methodChannel.invokeMethod<bool>('stop') ?? false;
   }
 
+  /// Binds the core service and installs the event listener.
+  ///
+  /// Bounded, unlike every other call here, because this one could hang
+  /// forever. The Kotlin side only answers from inside useService, whose
+  /// timeout cannot interrupt a blocking AIDL transaction - a binder call is
+  /// not a suspension point. On a slow or cold :remote process the reply never
+  /// arrived, connectCore never reached its status assignment, and the app sat
+  /// on "Connecting..." for the rest of the session with the core never
+  /// initialised. Reporting a failure instead lets the status fall to
+  /// disconnected so the existing reconnect logic can take over.
   Future<String> init() async {
-    return await methodChannel.invokeMethod<String>('init') ?? '';
+    try {
+      return await methodChannel
+              .invokeMethod<String>('init')
+              .timeout(const Duration(seconds: 20)) ??
+          '';
+    } on TimeoutException {
+      return 'core service did not respond';
+    }
   }
 
   Future<String> syncState(SharedState state) async {

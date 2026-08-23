@@ -48,10 +48,12 @@ class CommonAction extends _$CommonAction {
   }
 
   Future<void> autoCheckUpdate() async {
-    // On mobile the app is distributed/updated through the app store (Google
-    // Play), which prohibits in-app self-update prompts — only the desktop
-    // builds check GitHub Releases.
-    if (Platform.isAndroid || Platform.isIOS) return;
+    // Android ships its APKs from GitHub Releases, not Play, so it checks for
+    // updates like the desktop builds do. (If this app is ever listed on Play,
+    // this check and the REQUEST_INSTALL_PACKAGES permission in the manifest
+    // both have to go — Play forbids self-updating.) iOS has no sideload path
+    // at all, so there is nothing it could do with an update it found.
+    if (Platform.isIOS) return;
     if (!ref.read(appSettingProvider).autoCheckUpdate) return;
     final res = await request.checkForUpdate();
     // Automatic checks honor a previously-skipped version so the user isn't
@@ -75,35 +77,14 @@ class CommonAction extends _$CommonAction {
       final submits = utils.parseReleaseBody(body);
       final currentVersion = globalState.packageInfo.version;
 
-      // Locate the Windows installer asset (.exe) matching this machine's
-      // architecture (releases ship both amd64 and arm64 installers), falling
-      // back to any .exe if no arch-specific match is found.
-      Map<String, dynamic>? exeAsset;
-      final assets = data['assets'];
-      if (assets is List) {
-        final exeAssets = assets
-            .whereType<Map<String, dynamic>>()
-            .where((a) =>
-                (a['name'] ?? '').toString().toLowerCase().endsWith('.exe'))
-            .toList();
-        final procArch =
-            (Platform.environment['PROCESSOR_ARCHITECTURE'] ?? '').toLowerCase();
-        final archTag = procArch.contains('arm') ? 'arm64' : 'amd64';
-        for (final a in exeAssets) {
-          if ((a['name'] ?? '').toString().toLowerCase().contains(archTag)) {
-            exeAsset = a;
-            break;
-          }
-        }
-        exeAsset ??= exeAssets.isNotEmpty ? exeAssets.first : null;
-      }
-      final sizeText = exeAsset != null && exeAsset['size'] is num
-          ? ' (${_formatSize((exeAsset['size'] as num).toInt())})'
-          : '';
-
       final context = globalState.navigatorKey.currentContext!;
       final textTheme = context.textTheme;
-      final canInstall = exeAsset != null && Platform.isWindows;
+
+      final installerAsset = await _installerAssetFor(data['assets']);
+      final sizeText = installerAsset != null && installerAsset['size'] is num
+          ? ' (${_formatSize((installerAsset['size'] as num).toInt())})'
+          : '';
+      final canInstall = installerAsset != null;
       final res = await globalState.showMessage(
         title: l.discoverNewVersion,
         message: TextSpan(
@@ -122,7 +103,7 @@ class CommonAction extends _$CommonAction {
       );
       if (res == true) {
         if (canInstall) {
-          await _downloadAndLaunchInstaller(exeAsset);
+          await _downloadAndLaunchInstaller(installerAsset);
         } else {
           _openReleasesPage();
         }
@@ -141,6 +122,119 @@ class CommonAction extends _$CommonAction {
 
   void _openReleasesPage() {
     launchUrl(Uri.parse('https://github.com/$repository/releases/latest'));
+  }
+
+  /// Picks the release asset that can update *this* build in place: the Windows
+  /// installer for the running architecture, the APK for the device's ABI, or
+  /// the AppImage when the app is running as one.
+  ///
+  /// Returns null where there is no in-app install path — macOS, Linux deb/rpm
+  /// installs, and anywhere the right asset simply isn't in the release — and
+  /// the dialog then offers the releases page instead of an install button.
+  Future<Map<String, dynamic>?> _installerAssetFor(Object? assets) async {
+    if (assets is! List) return null;
+    final candidates = assets.whereType<Map<String, dynamic>>();
+    String nameOf(Map<String, dynamic> a) =>
+        (a['name'] ?? '').toString().toLowerCase();
+
+    if (Platform.isWindows) {
+      final exeAssets = candidates
+          .where((a) => nameOf(a).endsWith('.exe'))
+          .toList();
+      if (exeAssets.isEmpty) return null;
+      // Releases ship both amd64 and arm64 installers. An arm64 machine runs
+      // the amd64 build under emulation, so falling back to whatever .exe
+      // exists still produces a working install.
+      final procArch = (Platform.environment['PROCESSOR_ARCHITECTURE'] ?? '')
+          .toLowerCase();
+      final archTag = procArch.contains('arm') ? 'arm64' : 'amd64';
+      return exeAssets.firstWhere(
+        (a) => nameOf(a).contains(archTag),
+        orElse: () => exeAssets.first,
+      );
+    }
+
+    if (Platform.isAndroid) {
+      final apkAssets = candidates
+          .where((a) => nameOf(a).endsWith('.apk'))
+          .toList();
+      if (apkAssets.isEmpty) return null;
+      // Releases ship one APK per ABI, and unlike Windows there is no viable
+      // fallback: an APK for the wrong ABI carries the wrong native core, so
+      // if this device's ABI isn't published we send the user to the releases
+      // page rather than install something that can't run.
+      final abi = (await app?.getAbi() ?? '').toLowerCase();
+      if (abi.isEmpty) return null;
+      // Bounded match so a 32-bit "x86" device doesn't claim the "x86_64" APK.
+      final abiPattern = RegExp(
+        '(^|[^a-z0-9])${RegExp.escape(abi)}([^a-z0-9_]|\$)',
+      );
+      for (final asset in apkAssets) {
+        if (abiPattern.hasMatch(nameOf(asset))) return asset;
+      }
+      return null;
+    }
+
+    if (Platform.isLinux) {
+      // Only an AppImage can replace itself. deb and rpm installs belong to the
+      // package manager and need root, so those users get the releases page and
+      // their distro's normal upgrade path instead. APPIMAGE is set by the
+      // AppImage runtime and holds the path of the running image, so its
+      // absence also covers running from source.
+      final appImagePath = _runningAppImagePath();
+      if (appImagePath == null) return null;
+      final images = candidates
+          .where((a) => nameOf(a).endsWith('.appimage'))
+          .toList();
+      if (images.isEmpty) return null;
+      // Releases only build linux-amd64 today, but match the running
+      // architecture anyway so an arm64 image can never be handed to an amd64
+      // machine once one is published.
+      final archTag = Platform.version.contains('linux_arm64')
+          ? 'arm64'
+          : 'amd64';
+      for (final image in images) {
+        if (nameOf(image).contains(archTag)) return image;
+      }
+      return null;
+    }
+
+    return null;
+  }
+
+  /// Path of the running AppImage, or null when this isn't one (a deb/rpm
+  /// install, running from source, or any non-Linux platform).
+  String? _runningAppImagePath() {
+    if (!Platform.isLinux) return null;
+    final path = Platform.environment['APPIMAGE'];
+    if (path == null || path.isEmpty) return null;
+    return path;
+  }
+
+  /// Directory containing [path]. Only ever used for the Linux AppImage path,
+  /// so a '/' split is enough and saves pulling package:path into this library.
+  String _parentDirOf(String path) {
+    final index = path.lastIndexOf('/');
+    return index <= 0 ? '/' : path.substring(0, index);
+  }
+
+  /// Removes installers left behind by previous updates. They are tens of
+  /// megabytes each and nothing else ever cleans them up, so without this the
+  /// data directory grows by one installer per release. Only ever touches the
+  /// two extensions the updater itself writes.
+  Future<void> _cleanStaleDownloads(String dirPath, String keepPath) async {
+    try {
+      await for (final entity in Directory(dirPath).list(followLinks: false)) {
+        if (entity is! File) continue;
+        if (entity.path == keepPath) continue;
+        final lower = entity.path.toLowerCase();
+        if (lower.endsWith('.exe') || lower.endsWith('.apk')) {
+          await entity.safeDelete();
+        }
+      }
+    } catch (_) {
+      // Best-effort housekeeping — never let it block an update.
+    }
   }
 
   String _formatSize(int bytes) {
@@ -163,8 +257,19 @@ class CommonAction extends _$CommonAction {
     // Save to the app's private data dir rather than the world-writable system
     // temp, so no other user/process can swap the file between verification and
     // launch (closes the TOCTOU window).
-    final dir = await appPath.homeDirPath;
+    // An AppImage is replaced by an atomic rename, and rename only works within
+    // a single filesystem — so that download lands beside the image it will
+    // replace rather than in the app's data directory.
+    final appImagePath = _runningAppImagePath();
+    final dir = appImagePath != null
+        ? _parentDirOf(appImagePath)
+        : await appPath.homeDirPath;
     final savePath = '$dir${Platform.pathSeparator}$name';
+    if (appImagePath == null) {
+      // Only sweep our own data directory. The AppImage's directory belongs to
+      // the user and may hold anything.
+      await _cleanStaleDownloads(dir, savePath);
+    }
     // Show real progress rather than an indeterminate spinner: the installer is
     // tens of megabytes, and the old blocking "please wait" gave no sign of
     // life and no way to back out. downloadFile never throws — it returns false
@@ -207,8 +312,93 @@ class CommonAction extends _$CommonAction {
       _openReleasesPage();
       return;
     }
+    if (appImagePath != null) {
+      // Replace the running AppImage with the verified one and relaunch. The
+      // rename is atomic and the running process keeps the old inode open, so
+      // this is safe to do to ourselves; if any step fails, the image on disk
+      // is either untouched or already fully replaced — never half-written.
+      // Settings and profiles live in ~/.local/share, which this doesn't touch.
+      try {
+        // Dart can't chmod, and an AppImage that isn't executable won't start.
+        final chmod = await Process.run('chmod', ['+x', savePath]);
+        if (chmod.exitCode != 0) {
+          throw ProcessException('chmod', ['+x', savePath], chmod.stderr
+              .toString());
+        }
+        await File(savePath).rename(appImagePath);
+      } catch (e) {
+        // Read-only mount, an image owned by another user, /tmp mounted noexec:
+        // nothing has changed, so leave the user on the working version.
+        commonPrint.log(
+          'AppImage self-update failed: $e',
+          logLevel: LogLevel.warning,
+        );
+        await File(savePath).safeDelete();
+        globalState.showNotifier(l.updateDownloadFailed);
+        _openReleasesPage();
+        return;
+      }
+      globalState.showNotifier(l.installerLaunched);
+      // Start the new image before quitting: the single-instance lock retries
+      // for six seconds and this process force-exits after three, so the new
+      // instance waits out the handover exactly as it does after "Clear Data".
+      try {
+        await Process.start(
+          appImagePath,
+          const [],
+          mode: ProcessStartMode.detached,
+        );
+      } catch (e) {
+        // The update is already installed at this point — the user just has to
+        // start it themselves, so don't tear the running app down.
+        commonPrint.log(
+          'AppImage relaunch failed: $e',
+          logLevel: LogLevel.warning,
+        );
+        return;
+      }
+      await ref.read(systemActionProvider.notifier).handleExit(true);
+      return;
+    }
+
+    if (Platform.isAndroid) {
+      // Android does the installing itself: hand the verified APK to the system
+      // package installer, which shows its own confirmation screen. It upgrades
+      // the app in place, so settings, profiles and the session survive, and it
+      // only accepts a package signed with the same key — a tampered or
+      // differently-signed APK is rejected by the OS, on top of the SHA256
+      // check above.
+      final handedOff = await app!.installApk(savePath);
+      if (!handedOff) {
+        // Either "install unknown apps" isn't granted for us — in which case
+        // the plugin has just opened the settings screen that grants it — or
+        // the handover failed outright. The running app is untouched either
+        // way, and the verified APK stays on disk so a retry doesn't have to
+        // download it again.
+        globalState.showNotifier(l.installPermissionRequired);
+      }
+      return;
+    }
     try {
-      await Process.start(savePath, const [], mode: ProcessStartMode.detached);
+      // One click, not two. The installer used to open its wizard and wait for
+      // the user to click through it; run it silently instead so the update
+      // completes on its own.
+      //
+      // /SILENT keeps the progress window (the app is about to be closed and
+      // reopened, so some visible sign that something is happening is worth
+      // keeping) while skipping every page that needs an answer.
+      // /SUPPRESSMSGBOXES answers the prompts that would otherwise block a
+      // silent run, and /NORESTART stops setup deciding to reboot the machine.
+      //
+      // Setup closes this app itself and relaunches it from its [Run] section,
+      // so nothing here needs to exit or restart anything. Deliberately NOT
+      // exiting first: if the user declines the elevation prompt, the update
+      // simply doesn't happen and they are left with a working app.
+      await Process.start(savePath, const [
+        '/SILENT',
+        '/SUPPRESSMSGBOXES',
+        '/NORESTART',
+      ], mode: ProcessStartMode.detached);
       globalState.showNotifier(l.installerLaunched);
     } catch (_) {
       globalState.showNotifier(l.updateDownloadFailed);

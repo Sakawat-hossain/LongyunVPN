@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -67,9 +68,21 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView> {
   }
 
   Future<void> _updateConnections() async {
-    _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
-      trackerInfos: await coreController.getConnections(),
-    );
+    // The poll loop schedules its next tick *after* awaiting this. Letting an
+    // error escape — the core restarting, the service dropping — skipped that
+    // scheduling and killed the loop for good, freezing the view on its last
+    // snapshot until the page was closed and reopened.
+    try {
+      final trackerInfos = await coreController.getConnections();
+      if (!mounted) return;
+      _connectionsStateNotifier.value = _connectionsStateNotifier.value
+          .copyWith(trackerInfos: trackerInfos);
+    } catch (error) {
+      commonPrint.log(
+        'updateConnections error: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
   }
 
   Future<void> _handleBlockConnection(String id) async {
@@ -104,36 +117,39 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView> {
               illustration: const ConnectionEmptyIllustration(),
             );
           }
-          final items = connections
-              .map<Widget>(
-                (trackerInfo) => TrackerInfoItem(
-                  key: Key(trackerInfo.id),
-                  trackerInfo: trackerInfo,
-                  onClickKeyword: (value) {
-                    context.commonScaffoldState?.addKeyword(value);
-                  },
-                  trailing: IconButton(
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(minimumSize: Size.zero),
-                    icon: const Icon(Icons.block),
-                    onPressed: () {
-                      _handleBlockConnection(trackerInfo.id);
-                    },
-                  ),
-                  detailTitle: appLocalizations.details(
-                    appLocalizations.connection,
-                  ),
-                ),
-              )
-              .separated(const Divider(height: 0))
-              .toList();
-          return SuperListView.builder(
+          // Build rows lazily. The old code materialised every row on each
+          // update — once a second — and then indexed that list from an
+          // itemBuilder, so the laziness bought nothing. Worse, .separated()
+          // interleaves dividers into a list of 2n-1 entries while itemCount
+          // stayed at n, so only the first half of the connections were ever
+          // reachable. Letting the list widget insert the separators fixes
+          // both.
+          return SuperListView.separated(
             controller: _scrollController,
-            itemBuilder: (context, index) {
-              return items[index];
-            },
             itemCount: connections.length,
+            separatorBuilder: (_, _) => const Divider(height: 0),
+            itemBuilder: (_, index) {
+              final trackerInfo = connections[index];
+              return TrackerInfoItem(
+                key: Key(trackerInfo.id),
+                trackerInfo: trackerInfo,
+                onClickKeyword: (value) {
+                  context.commonScaffoldState?.addKeyword(value);
+                },
+                trailing: IconButton(
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  style: IconButton.styleFrom(minimumSize: Size.zero),
+                  icon: const Icon(Icons.block),
+                  onPressed: () {
+                    _handleBlockConnection(trackerInfo.id);
+                  },
+                ),
+                detailTitle: appLocalizations.details(
+                  appLocalizations.connection,
+                ),
+              );
+            },
           );
         },
       ),

@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -176,6 +177,14 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(openVpnSettings())
             }
 
+            "getAbi" -> {
+                result.success(getAbi())
+            }
+
+            "installApk" -> {
+                result.success(installApk(call.argument<String>("path")))
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -241,6 +250,67 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             activityRef?.get()?.startActivity(intent)
             true
         } catch (_: Exception) {
+            false
+        }
+    }
+
+    // The ABI this device actually runs, so the updater downloads the matching
+    // APK rather than guessing. SUPPORTED_ABIS is ordered best-first, so entry
+    // zero is the one to use — an arm64 device lists arm64-v8a before the 32-bit
+    // ABIs it can also run, and installing the 32-bit build on it would work but
+    // be a silent downgrade.
+    private fun getAbi(): String = Build.SUPPORTED_ABIS.firstOrNull() ?: ""
+
+    /// Hands a downloaded APK to the system installer.
+    ///
+    /// Returns false when the APK can't be offered — a missing file, or the
+    /// user hasn't granted "install unknown apps" for LongyunVPN. In the latter
+    /// case the user is sent to the settings screen that grants it, because the
+    /// install intent would otherwise be refused with nothing shown.
+    ///
+    /// This never installs anything by itself: Android shows its own confirm
+    /// screen and the user approves there.
+    private fun installApk(path: String?): Boolean {
+        if (path.isNullOrEmpty()) return false
+        val file = File(path)
+        if (!file.exists()) {
+            GlobalState.log("installApk: file missing at $path")
+            return false
+        }
+        val context = activityRef?.get() ?: GlobalState.application
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            !GlobalState.application.packageManager.canRequestPackageInstalls()
+        ) {
+            // Send them to the toggle rather than failing silently.
+            return try {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    "package:${GlobalState.application.packageName}".toUri()
+                ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                context.startActivity(intent)
+                false
+            } catch (e: Exception) {
+                GlobalState.log("installApk: cannot open unknown-sources settings: $e")
+                false
+            }
+        }
+        return try {
+            val uri = FileProvider.getUriForFile(
+                GlobalState.application,
+                "${GlobalState.application.packageName}.updateprovider",
+                file,
+            )
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                )
+            }
+            context.startActivity(intent)
+            true
+        } catch (e: Exception) {
+            GlobalState.log("installApk failed: $e")
             false
         }
     }

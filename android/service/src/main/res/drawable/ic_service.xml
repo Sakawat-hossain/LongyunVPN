@@ -2,8 +2,8 @@
   LongyunVPN status-bar / foreground-service notification icon.
   Android renders status-bar small icons as a single flat (tinted) silhouette
   using only the alpha channel, so this MUST be a solid monochrome shape.
-  A shield reads as "protected/VPN" at 24dp; the old FlClash lightning glyph
-  was removed here.
+  A shield reads as "protected/VPN" at 24dp; the lightning glyph inherited
+  from the upstream project was removed here.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"

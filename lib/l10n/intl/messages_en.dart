@@ -352,6 +352,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyReport": MessageLookupByLibrary.simpleMessage("Copy report"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Copy success"),
     "core": MessageLookupByLibrary.simpleMessage("Core"),
+    "coreStartFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t start the VPN core. Please try again.",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Core status"),
     "country": MessageLookupByLibrary.simpleMessage("Country"),
     "couponCodeOptional": MessageLookupByLibrary.simpleMessage(
@@ -610,8 +613,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Input rule content",
     ),
+    "installPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Allow LongyunVPN to install apps, then tap Update again.",
+    ),
     "installerLaunched": MessageLookupByLibrary.simpleMessage(
-      "Installer launched — follow the prompts to finish updating.",
+      "Updating LongyunVPN — the app will close and reopen automatically.",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Intelligent selection",

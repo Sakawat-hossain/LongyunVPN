@@ -363,6 +363,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyReport": MessageLookupByLibrary.simpleMessage("Копировать отчёт"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Копирование успешно"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
+    "coreStartFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось запустить ядро VPN. Попробуйте ещё раз.",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Основной статус"),
     "country": MessageLookupByLibrary.simpleMessage("Страна"),
     "couponCodeOptional": MessageLookupByLibrary.simpleMessage(
@@ -637,8 +640,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Введите содержимое правила",
     ),
+    "installPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Разрешите LongyunVPN устанавливать приложения и нажмите «Обновить» ещё раз.",
+    ),
     "installerLaunched": MessageLookupByLibrary.simpleMessage(
-      "Установщик запущен — следуйте инструкциям для завершения обновления.",
+      "Обновление LongyunVPN — приложение закроется и откроется снова автоматически.",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage(
       "Интеллектуальный выбор",

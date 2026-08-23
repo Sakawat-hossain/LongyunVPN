@@ -260,6 +260,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyReport": MessageLookupByLibrary.simpleMessage("复制报告"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("复制成功"),
     "core": MessageLookupByLibrary.simpleMessage("内核"),
+    "coreStartFailed": MessageLookupByLibrary.simpleMessage("无法启动 VPN 内核，请重试。"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("核心状态"),
     "country": MessageLookupByLibrary.simpleMessage("区域"),
     "couponCodeOptional": MessageLookupByLibrary.simpleMessage("优惠码（可选）"),
@@ -440,8 +441,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage("请输入正确的快捷键"),
     "inputProxyGroupName": MessageLookupByLibrary.simpleMessage("输入策略组名称"),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage("输入规则内容"),
+    "installPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "请允许 LongyunVPN 安装应用，然后重新点击更新。",
+    ),
     "installerLaunched": MessageLookupByLibrary.simpleMessage(
-      "安装程序已启动 — 请按提示完成更新。",
+      "正在更新 LongyunVPN — 应用将自动关闭并重新打开。",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("智能选择"),
     "internet": MessageLookupByLibrary.simpleMessage("互联网"),

@@ -288,6 +288,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyReport": MessageLookupByLibrary.simpleMessage("レポートをコピー"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("コピー成功"),
     "core": MessageLookupByLibrary.simpleMessage("コア"),
+    "coreStartFailed": MessageLookupByLibrary.simpleMessage(
+      "VPNコアを起動できませんでした。もう一度お試しください。",
+    ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("コアステータス"),
     "country": MessageLookupByLibrary.simpleMessage("国"),
     "couponCodeOptional": MessageLookupByLibrary.simpleMessage("クーポンコード（任意）"),
@@ -498,8 +501,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage("正しいホットキーを入力"),
     "inputProxyGroupName": MessageLookupByLibrary.simpleMessage("プロキシグループ名を入力"),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage("ルール内容を入力"),
+    "installPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "「不明なアプリのインストール」を許可してから、もう一度更新してください。",
+    ),
     "installerLaunched": MessageLookupByLibrary.simpleMessage(
-      "インストーラーを起動しました — 画面の指示に従って更新を完了してください。",
+      "LongyunVPN を更新しています — アプリは自動的に再起動します。",
     ),
     "intelligentSelected": MessageLookupByLibrary.simpleMessage("インテリジェント選択"),
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),

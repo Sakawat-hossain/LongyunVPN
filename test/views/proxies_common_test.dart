@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/proxies/common.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,19 +11,13 @@ void main() {
   group('fastestProxyName (Quick Connect selection)', () {
     test('picks the lowest positive delay', () {
       const delays = {'A': 120, 'B': 40, 'C': 300};
-      expect(
-        fastestProxyName([p('A'), p('B'), p('C')], (n) => delays[n]),
-        'B',
-      );
+      expect(fastestProxyName([p('A'), p('B'), p('C')], (n) => delays[n]), 'B');
     });
 
     test('ignores null / timeout / untested (non-positive) delays', () {
       const delays = {'A': null, 'B': 0, 'C': -1, 'D': 90};
       expect(
-        fastestProxyName(
-          [p('A'), p('B'), p('C'), p('D')],
-          (n) => delays[n],
-        ),
+        fastestProxyName([p('A'), p('B'), p('C'), p('D')], (n) => delays[n]),
         'D',
       );
     });
@@ -41,6 +38,30 @@ void main() {
           exclude: const {'DIRECT'},
         ),
         'X',
+      );
+    });
+  });
+
+  group('delay-test concurrency', () {
+    // maxConcurrentDelayTests exists to stay within the core's own delay-test
+    // concurrency. If either side is retuned without the other, the surplus
+    // requests queue inside the core behind a full wave of timeouts and come
+    // back as "timeout" for nodes that are actually reachable — so pin the
+    // relationship rather than trusting the comment.
+    test('stays at or below the core mBatch concurrency', () {
+      final source = File('core/common.go').readAsStringSync();
+      final match = RegExp(
+        r'WithConcurrencyNum\[bool\]\((\d+)\)',
+      ).firstMatch(source);
+
+      expect(
+        match,
+        isNotNull,
+        reason: 'mBatch concurrency not found in core/common.go',
+      );
+      expect(
+        maxConcurrentDelayTests,
+        lessThanOrEqualTo(int.parse(match!.group(1)!)),
       );
     });
   });

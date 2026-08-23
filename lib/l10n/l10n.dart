@@ -2899,6 +2899,16 @@ class AppLocalizations {
     return Intl.message('Core status', name: 'coreStatus', desc: '', args: []);
   }
 
+  /// `Couldn't start the VPN core. Please try again.`
+  String get coreStartFailed {
+    return Intl.message(
+      'Couldn\'t start the VPN core. Please try again.',
+      name: 'coreStartFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Data Collection Notice`
   String get dataCollectionTip {
     return Intl.message(
@@ -5534,10 +5544,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Installer launched — follow the prompts to finish updating.`
+  /// `Updating LongyunVPN — the app will close and reopen automatically.`
   String get installerLaunched {
     return Intl.message(
-      'Installer launched — follow the prompts to finish updating.',
+      'Updating LongyunVPN — the app will close and reopen automatically.',
       name: 'installerLaunched',
       desc: '',
       args: [],
@@ -5559,6 +5569,16 @@ class AppLocalizations {
     return Intl.message(
       'Update verification failed. Opening the releases page instead.',
       name: 'updateVerificationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow LongyunVPN to install apps, then tap Update again.`
+  String get installPermissionRequired {
+    return Intl.message(
+      'Allow LongyunVPN to install apps, then tap Update again.',
+      name: 'installPermissionRequired',
       desc: '',
       args: [],
     );

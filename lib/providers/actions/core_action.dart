@@ -90,11 +90,23 @@ class CoreAction extends _$CoreAction {
 
   Future<void> connectCore() async {
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
-    final result = await Future.wait([
-      coreController.preload(),
-      Future.delayed(const Duration(milliseconds: 300)),
-    ]);
-    final String message = result[0];
+    // Belt and braces around preload. The status is set to connecting before
+    // it runs and only corrected afterwards, so anything that stops preload
+    // returning leaves the app on "Connecting..." forever with a core that was
+    // never initialised — every later call then answers "not initialized" and
+    // nothing on screen explains why. init() is bounded now; this guarantees
+    // the status resolves even if some other await below it stalls.
+    String message;
+    try {
+      final result = await Future.wait([
+        coreController.preload(),
+        Future.delayed(const Duration(milliseconds: 300)),
+      ]).timeout(const Duration(seconds: 30));
+      message = result[0];
+    } catch (e) {
+      commonPrint.log('connectCore failed: $e', logLevel: LogLevel.error);
+      message = currentAppLocalizations.coreStartFailed;
+    }
     if (message.isNotEmpty) {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
       globalState.showNotifier(message);

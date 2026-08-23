@@ -74,13 +74,26 @@ Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
 }
 
 Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
-  final delayProxies = proxies.map<Future>((proxy) async {
-    await proxyDelayTest(proxy, testUrl);
-  }).toList();
-
-  final batchesDelayProxies = delayProxies.batch(8);
-  for (final batchDelayProxies in batchesDelayProxies) {
-    await Future.wait(batchDelayProxies);
+  // Batch the proxies, not the futures. Mapping to futures first and batching
+  // the result caps nothing: an async closure runs synchronously up to its
+  // first await, so building the list already fires every request. That left
+  // delay-testing a large group unbounded — the requests past the core's own
+  // concurrency queued behind a full wave of timeouts and came back as
+  // "timeout" even for reachable nodes.
+  for (final batch in proxies.batch(maxConcurrentDelayTests)) {
+    await Future.wait(
+      batch.map((proxy) async {
+        try {
+          await proxyDelayTest(proxy, testUrl);
+        } catch (error) {
+          // One unreadable result must not abandon the rest of the group.
+          commonPrint.log(
+            'delayTest ${proxy.name} error: $error',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }),
+    );
   }
   globalState.rootRef.read(sortNumProvider.notifier).add();
 }

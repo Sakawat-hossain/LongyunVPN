@@ -148,4 +148,11 @@ Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
+; Interactive install: the usual "Launch LongyunVPN" tick box on the last page.
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+; Silent install: the in-app updater runs setup with /SILENT, and postinstall
+; entries are skipped in that mode, so without this the app would be closed by
+; the installer and never come back. runasoriginaluser matters here - setup is
+; elevated, and relaunching as the elevated user would leave the app running as
+; admin and writing its data as admin.
+Filename: "{app}\\{{EXECUTABLE_NAME}}"; Flags: runasoriginaluser nowait; Check: WizardSilent

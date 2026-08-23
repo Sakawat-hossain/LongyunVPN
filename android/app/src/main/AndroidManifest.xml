@@ -22,6 +22,18 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!--
+      Needed to hand a downloaded APK to the system installer for the in-app
+      update. It only lets us *ask* — Android still shows its own install screen
+      and the user confirms there; it grants no silent install.
+
+      NOTE FOR DISTRIBUTION: Google Play restricts this permission and treats
+      self-updating outside Play as a policy violation. It is here because
+      LongyunVPN ships its APKs from GitHub Releases. If this app is ever listed
+      on Play, remove this permission and the update path in CommonAction that
+      uses it.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!--
       Per-app split tunnelling needs to list the apps the user can pick from.
@@ -136,6 +148,24 @@
                 <action android:name="${applicationId}.intent.action.SERVICE_DESTROYED" />
             </intent-filter>
         </receiver>
+
+        <!--
+          Grants the system installer read access to the downloaded APK. A
+          file:// URI would throw FileUriExposedException on API 24+, so the
+          update has to hand over a content:// URI instead. Distinct authority
+          from the service module's FilesProvider so the two cannot collide.
+          file_paths.xml already exposes the app's files directory, which is
+          where the updater saves the download.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updateprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <meta-data
             android:name="flutterEmbedding"
