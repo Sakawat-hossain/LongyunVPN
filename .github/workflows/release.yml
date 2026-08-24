@@ -377,6 +377,27 @@ jobs:
           flutter-version: 3.44.9
           cache: true
 
+      # Build this app through CocoaPods, not Swift Package Manager.
+      #
+      # Adding Firebase brought in the first plugins that ship SPM support, and
+      # `flutter pub get` then tries to stage them into
+      # build/macos/SourcePackages/ — with an rsync that cannot create the
+      # parent directory on a clean checkout:
+      #
+      #   Failed to copy plugin firebase_analytics:
+      #   rsync: mkdir ".../build/macos/SourcePackages/firebase_analytics-12.4.6"
+      #          failed: No such file or directory (2)
+      #
+      # That is what broke macos-arm64 from v1.3.9 onward, and no amount of
+      # retrying helps because it fails identically every time. Eight of this
+      # project's plugins (rust_api, setup, tray_manager, wifi_ssid, window_ext,
+      # flutter_js, hotkey_manager_macos, flutter_inappwebview_macos) have no SPM
+      # support at all, so the pods path is the one that has to work regardless —
+      # it is what built every green macOS release before Firebase landed.
+      # Firebase itself ships podspecs, so nothing is lost by staying on it.
+      - name: Use CocoaPods instead of Swift Package Manager
+        run: flutter config --no-enable-swift-package-manager
+
       # Retried, and the failure is surfaced rather than swallowed. Both the pub
       # fetch and the CocoaPods fetch that follows it reach out to the network,
       # and this job has failed on transient DNS before

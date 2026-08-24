@@ -61,7 +61,13 @@ dependencies:
   hotkey_manager: ^0.2.3
   uni_platform: ^0.1.3
   device_info_plus: ^12.2.0
-  connectivity_plus: ^7.0.0
+  # Pinned, not ranged. 7.3.1 fails to compile on macOS —
+  #   SwiftCompile normal ... ConnectivityPlusPlugin.swift,
+  #   PathMonitorConnectivityProvider.swift (in target 'connectivity_plus')
+  # — which is what broke the macos DMG build in v1.4.0. 7.0.0 is the version
+  # every green macOS release shipped. Revisit when a later release fixes it;
+  # widening the range again without checking a macOS build just reintroduces it.
+  connectivity_plus: 7.0.0
   screen_retriever: ^0.2.0
   defer_pointer: ^0.0.2
   flutter_riverpod: ^3.3.1
