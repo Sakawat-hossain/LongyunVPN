@@ -352,11 +352,25 @@ jobs:
     # Intel image is labelled macos-15-intel, so amd64 builds natively again and
     # needs no cross-compilation. fail-fast is off so a problem on one
     # architecture still lets the other publish.
+    #
+    # arm64 runs on macos-15, not macos-14, because of the Xcode each image
+    # defaults to. The Firebase pods are Swift 6 source — UnfairLock.swift uses
+    # `sending` and `internal import` — and macos-14 selects Xcode 15.4, whose
+    # Swift 5.10 compiler rejects both:
+    #
+    #   error: cannot find type 'sending' in scope
+    #   error: Access level on imports require '-enable-experimental-feature
+    #          AccessLevelOnImport'
+    #
+    # That is what broke the arm64 DMG while Intel built fine — nothing to do
+    # with the architecture, only with macos-15-intel already carrying a newer
+    # Xcode. Putting both architectures on the macos-15 generation gives them
+    # the same toolchain.
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-14, arch: arm64 }
+          - { os: macos-15, arch: arm64 }
           - { os: macos-15-intel, arch: amd64 }
     steps:
       - name: Checkout
@@ -376,6 +390,19 @@ jobs:
           channel: stable
           flutter-version: 3.44.9
           cache: true
+
+      # Pick the newest Xcode on the image rather than trusting its default.
+      # The Firebase pods need a Swift 6 compiler, and an image that quietly
+      # defaults to an older Xcode fails deep in the pod build with errors that
+      # look nothing like a toolchain problem. Listing what is installed keeps
+      # the next diagnosis to one glance instead of a log hunt.
+      - name: Select the newest available Xcode
+        run: |
+          set -euxo pipefail
+          ls -d /Applications/Xcode*.app
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
+          swift --version
 
       # Build this app through CocoaPods, not Swift Package Manager.
       #
