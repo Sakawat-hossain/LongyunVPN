@@ -184,6 +184,13 @@ func readFile(path string) ([]byte, error) {
 func updateConfig(params *UpdateParams) {
 	runLock.Lock()
 	defer runLock.Unlock()
+	if currentConfig == nil {
+		// Same crash as applyConfig's, reached from a different door: any
+		// settings change before a config has successfully loaded would
+		// dereference nil here. updateListeners already guards this way.
+		logError("updateConfig: no config loaded yet, ignoring update")
+		return
+	}
 	general := currentConfig.General
 	if params.MixedPort != nil {
 		general.MixedPort = *params.MixedPort
@@ -276,12 +283,38 @@ func registerGeoUpdater() {
 func applyConfig(params *SetupParams) error {
 	runLock.Lock()
 	defer runLock.Unlock()
-	var err error
 	constant.DefaultTestURL = params.TestURL
-	currentConfig, err = executor.ParseWithPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
+
+	// Parse into a local first. This used to assign straight into the global,
+	// which meant a failed parse replaced a perfectly good running config with
+	// nil — and then handed that nil to hub.ApplyConfig, whose very first act is
+	// to read cfg.Controller.ExternalUI. That is the
+	//
+	//   internal panic: runtime error: invalid memory address or nil pointer
+	//   dereference
+	//
+	// users hit on connect: the fallback's error was discarded with `_`, so when
+	// both the profile and the built-in default failed to parse the code walked
+	// into a nil dereference instead of reporting why. A panic here kills the
+	// whole core process, which on Android is the separate :remote process, so
+	// the app is left showing "Connecting..." against a core that no longer
+	// exists.
+	cfg, err := executor.ParseWithPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
 	if err != nil {
-		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
+		var fallbackErr error
+		cfg, fallbackErr = config.ParseRawConfig(config.DefaultRawConfig())
+		if fallbackErr != nil {
+			return fmt.Errorf(
+				"config unusable: %w (built-in default also failed: %v)", err, fallbackErr)
+		}
 	}
+	if cfg == nil {
+		// Belt and braces: a nil config with a nil error would still crash, and
+		// the cost of checking is nothing next to taking the core down.
+		return fmt.Errorf("config parsed to nil (original error: %v)", err)
+	}
+
+	currentConfig = cfg
 	hub.ApplyConfig(currentConfig)
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()

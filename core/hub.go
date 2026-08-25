@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/observable"
@@ -545,7 +546,13 @@ func handleSetupConfig(bytes []byte) string {
 	err := UnmarshalJson(bytes, params)
 	if err != nil {
 		logError("unmarshalRawConfig error %v", err)
-		_ = applyConfig(defaultSetupParams())
+		// Fall back to defaults, but say so if even that fails rather than
+		// swallowing it — applyConfig now reports an unusable config instead of
+		// crashing, and that reason is worth surfacing to the caller.
+		if fallbackErr := applyConfig(defaultSetupParams()); fallbackErr != nil {
+			logError("fallback applyConfig failed: %v", fallbackErr)
+			return fmt.Sprintf("%v (fallback failed: %v)", err, fallbackErr)
+		}
 		return err.Error()
 	}
 	err = applyConfig(params)
