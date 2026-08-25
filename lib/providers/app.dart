@@ -135,6 +135,20 @@ class RunTime extends _$RunTime with AutoDisposeNotifierMixin {
   }
 }
 
+/// Which auto-reconnect attempt is in flight, 1-based; 0 when not reconnecting.
+///
+/// The status pill said "Connecting..." and nothing else for as long as the
+/// backoff ran — up to five attempts across roughly three and a half minutes —
+/// which is indistinguishable from a hang. Exposing the attempt lets the UI say
+/// that something is being retried and how far along it is.
+@Riverpod(keepAlive: true)
+class ReconnectAttempt extends _$ReconnectAttempt with AutoDisposeNotifierMixin {
+  @override
+  int build() {
+    return 0;
+  }
+}
+
 @Riverpod(keepAlive: true)
 class ViewSize extends _$ViewSize with AutoDisposeNotifierMixin {
   @override

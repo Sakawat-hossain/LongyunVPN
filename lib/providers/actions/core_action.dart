@@ -4,7 +4,7 @@ part of '../action.dart';
 class CoreAction extends _$CoreAction {
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
-  static const _maxReconnectAttempts = 5;
+  static const maxReconnectAttempts = 5;
   static const _reconnectDelaysSeconds = [2, 4, 8, 16, 30];
 
   @override
@@ -16,20 +16,21 @@ class CoreAction extends _$CoreAction {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     _reconnectAttempts = 0;
+    ref.read(reconnectAttemptProvider.notifier).value = 0;
   }
 
   /// Backoff delay for reconnect [attempt] (0-based), or null once the attempt
   /// cap is reached (i.e. give up). Pure — the backoff *policy*, separated from
   /// the scheduling mechanism so it can be unit-tested.
   static Duration? reconnectDelayFor(int attempt) {
-    if (attempt >= _maxReconnectAttempts) return null;
+    if (attempt >= maxReconnectAttempts) return null;
     final index = attempt.clamp(0, _reconnectDelaysSeconds.length - 1);
     return Duration(seconds: _reconnectDelaysSeconds[index]);
   }
 
   /// Schedules an auto-reconnect after an *unexpected* core drop, with capped
   /// exponential backoff. No-op unless the user still intends to be connected
-  /// (not stopped, not suspended). Gives up after [_maxReconnectAttempts].
+  /// (not stopped, not suspended). Gives up after [maxReconnectAttempts].
   void scheduleReconnect() {
     if (!ref.read(isStartProvider) || ref.read(suspendProvider)) {
       cancelReconnect();
@@ -51,6 +52,7 @@ class CoreAction extends _$CoreAction {
       return;
     }
     _reconnectAttempts++;
+    ref.read(reconnectAttemptProvider.notifier).value = _reconnectAttempts;
     // Surface the recovery in the UI (the start button already renders this).
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     _reconnectTimer?.cancel();

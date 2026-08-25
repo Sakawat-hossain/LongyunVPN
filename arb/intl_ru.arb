@@ -697,6 +697,8 @@
   "updateDownloadFailed": "Не удалось загрузить. Открываю страницу релизов.",
   "updateVerificationFailed": "Проверка обновления не удалась. Открываю страницу релизов.",
   "installPermissionRequired": "Разрешите LongyunVPN устанавливать приложения и нажмите «Обновить» ещё раз.",
+  "reconnecting": "Переподключение… ({current}/{total})",
+  "@reconnecting": { "placeholders": { "current": {}, "total": {} } },
   "reconnectFailed": "Не удалось переподключиться автоматически. Нажмите, чтобы повторить.",
   "noActiveSubscription": "Нет активной подписки",
   "noSubscriptionServersMessage": "У вас нет активного VPN-пакета.\nКупите план для доступа к VPN-серверам.",

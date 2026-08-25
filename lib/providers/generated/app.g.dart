@@ -528,6 +528,84 @@ abstract class _$RunTime extends $Notifier<int?> {
   }
 }
 
+/// Which auto-reconnect attempt is in flight, 1-based; 0 when not reconnecting.
+///
+/// The status pill said "Connecting..." and nothing else for as long as the
+/// backoff ran — up to five attempts across roughly three and a half minutes —
+/// which is indistinguishable from a hang. Exposing the attempt lets the UI say
+/// that something is being retried and how far along it is.
+
+@ProviderFor(ReconnectAttempt)
+final reconnectAttemptProvider = ReconnectAttemptProvider._();
+
+/// Which auto-reconnect attempt is in flight, 1-based; 0 when not reconnecting.
+///
+/// The status pill said "Connecting..." and nothing else for as long as the
+/// backoff ran — up to five attempts across roughly three and a half minutes —
+/// which is indistinguishable from a hang. Exposing the attempt lets the UI say
+/// that something is being retried and how far along it is.
+final class ReconnectAttemptProvider
+    extends $NotifierProvider<ReconnectAttempt, int> {
+  /// Which auto-reconnect attempt is in flight, 1-based; 0 when not reconnecting.
+  ///
+  /// The status pill said "Connecting..." and nothing else for as long as the
+  /// backoff ran — up to five attempts across roughly three and a half minutes —
+  /// which is indistinguishable from a hang. Exposing the attempt lets the UI say
+  /// that something is being retried and how far along it is.
+  ReconnectAttemptProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'reconnectAttemptProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$reconnectAttemptHash();
+
+  @$internal
+  @override
+  ReconnectAttempt create() => ReconnectAttempt();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$reconnectAttemptHash() => r'ed8bb38bfc9f3208febad3b98fd711ba20c40688';
+
+/// Which auto-reconnect attempt is in flight, 1-based; 0 when not reconnecting.
+///
+/// The status pill said "Connecting..." and nothing else for as long as the
+/// backoff ran — up to five attempts across roughly three and a half minutes —
+/// which is indistinguishable from a hang. Exposing the attempt lets the UI say
+/// that something is being retried and how far along it is.
+
+abstract class _$ReconnectAttempt extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(ViewSize)
 final viewSizeProvider = ViewSizeProvider._();
 

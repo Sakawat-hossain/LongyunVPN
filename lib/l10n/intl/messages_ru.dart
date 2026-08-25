@@ -94,16 +94,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(name) => "Подключено к ${name}";
 
-  static String m33(count) => "Выбрано ${count} элементов";
+  static String m33(current, total) => "Переподключение… (${current}/${total})";
 
-  static String m34(error) =>
+  static String m34(count) => "Выбрано ${count} элементов";
+
+  static String m35(error) =>
       "Не удалось загрузить требования регистрации: ${error}";
 
-  static String m35(label) => "${label} должен быть URL";
+  static String m36(label) => "${label} должен быть URL";
 
-  static String m36(used, total) => "Использовано ${used} из ${total}";
+  static String m37(used, total) => "Использовано ${used} из ${total}";
 
-  static String m37(count) =>
+  static String m38(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1030,6 +1032,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reconnectFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось переподключиться автоматически. Нажмите, чтобы повторить.",
     ),
+    "reconnecting": m33,
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir-порт"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "refresh": MessageLookupByLibrary.simpleMessage("Обновить"),
@@ -1262,14 +1265,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, выберите подправило",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
-    "selectedCountTitle": m33,
+    "selectedCountTitle": m34,
     "sendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),
     "signIn": MessageLookupByLibrary.simpleMessage("Вход"),
     "signUp": MessageLookupByLibrary.simpleMessage("Регистрация"),
-    "signupConfigError": m34,
+    "signupConfigError": m35,
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Тихий запуск"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Запуск в фоновом режиме",
@@ -1416,12 +1419,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m35,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
     ),
-    "usedOfTotal": m36,
+    "usedOfTotal": m37,
     "value": MessageLookupByLibrary.simpleMessage("Значение"),
     "verdictCantPassTraffic": MessageLookupByLibrary.simpleMessage(
       "Не пропускает трафик",
@@ -1476,7 +1479,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistYourIp": MessageLookupByLibrary.simpleMessage(
       "Добавить ваш IP в белый список",
     ),
-    "yearsAgo": m37,
+    "yearsAgo": m38,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

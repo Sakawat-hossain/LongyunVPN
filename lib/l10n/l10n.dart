@@ -5604,6 +5604,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Reconnecting… ({current}/{total})`
+  String reconnecting(Object current, Object total) {
+    return Intl.message(
+      'Reconnecting… ($current/$total)',
+      name: 'reconnecting',
+      desc: '',
+      args: [current, total],
+    );
+  }
+
   /// `Couldn't reconnect automatically. Tap to try again.`
   String get reconnectFailed {
     return Intl.message(

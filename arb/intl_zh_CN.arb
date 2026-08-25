@@ -697,6 +697,8 @@
   "updateDownloadFailed": "下载失败，已改为打开发布页面。",
   "updateVerificationFailed": "更新校验失败，已改为打开发布页面。",
   "installPermissionRequired": "请允许 LongyunVPN 安装应用，然后重新点击更新。",
+  "reconnecting": "正在重连… ({current}/{total})",
+  "@reconnecting": { "placeholders": { "current": {}, "total": {} } },
   "reconnectFailed": "自动重连失败，点击重试。",
   "noActiveSubscription": "无有效订阅",
   "noSubscriptionServersMessage": "您还没有有效的 VPN 套餐。\n购买套餐以访问 VPN 服务器。",

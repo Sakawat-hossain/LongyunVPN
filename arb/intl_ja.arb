@@ -697,6 +697,8 @@
   "updateDownloadFailed": "ダウンロードに失敗しました。リリースページを開きます。",
   "updateVerificationFailed": "更新の検証に失敗しました。リリースページを開きます。",
   "installPermissionRequired": "「不明なアプリのインストール」を許可してから、もう一度更新してください。",
+  "reconnecting": "再接続中… ({current}/{total})",
+  "@reconnecting": { "placeholders": { "current": {}, "total": {} } },
   "reconnectFailed": "自動再接続に失敗しました。タップして再試行します。",
   "noActiveSubscription": "有効なサブスクリプションがありません",
   "noSubscriptionServersMessage": "有効な VPN プランがありません。\nプランを購入して VPN サーバーにアクセスしてください。",

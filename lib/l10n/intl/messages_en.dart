@@ -94,15 +94,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(name) => "Connected to ${name}";
 
-  static String m33(count) => "${count} items have been selected";
+  static String m33(current, total) => "Reconnecting… (${current}/${total})";
 
-  static String m34(error) => "Could not load signup requirements: ${error}";
+  static String m34(count) => "${count} items have been selected";
 
-  static String m35(label) => "${label} must be a url";
+  static String m35(error) => "Could not load signup requirements: ${error}";
 
-  static String m36(used, total) => "Used ${used} of ${total}";
+  static String m36(label) => "${label} must be a url";
 
-  static String m37(count) =>
+  static String m37(used, total) => "Used ${used} of ${total}";
+
+  static String m38(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -979,6 +981,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reconnectFailed": MessageLookupByLibrary.simpleMessage(
       "Couldn\'t reconnect automatically. Tap to try again.",
     ),
+    "reconnecting": m33,
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
     "redo": MessageLookupByLibrary.simpleMessage("redo"),
     "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
@@ -1199,14 +1202,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please select sub rule",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m33,
+    "selectedCountTitle": m34,
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),
     "signIn": MessageLookupByLibrary.simpleMessage("Sign In"),
     "signUp": MessageLookupByLibrary.simpleMessage("Sign Up"),
-    "signupConfigError": m34,
+    "signupConfigError": m35,
     "silentLaunch": MessageLookupByLibrary.simpleMessage("SilentLaunch"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Start in the background",
@@ -1337,10 +1340,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m35,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
-    "usedOfTotal": m36,
+    "usedOfTotal": m37,
     "value": MessageLookupByLibrary.simpleMessage("Value"),
     "verdictCantPassTraffic": MessageLookupByLibrary.simpleMessage(
       "Can\'t pass traffic",
@@ -1391,7 +1394,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistYourIp": MessageLookupByLibrary.simpleMessage(
       "Whitelist Your IP",
     ),
-    "yearsAgo": m37,
+    "yearsAgo": m38,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

@@ -137,12 +137,29 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             ),
                           },
                         ),
-                        label: Text(switch (coreStatus) {
-                          CoreStatus.connecting => appLocalizations.connecting,
-                          CoreStatus.connected => appLocalizations.connected,
-                          CoreStatus.disconnected =>
-                            appLocalizations.disconnected,
-                        }),
+                        label: Consumer(
+                          builder: (_, ref, _) {
+                            // While auto-reconnect is running, say so and show
+                            // which attempt this is. A bare "Connecting..."
+                            // held for up to five attempts across roughly three
+                            // and a half minutes is indistinguishable from a
+                            // hang, which is exactly how users read it.
+                            final attempt = ref.watch(reconnectAttemptProvider);
+                            return Text(switch (coreStatus) {
+                              CoreStatus.connecting when attempt > 0 =>
+                                appLocalizations.reconnecting(
+                                  attempt,
+                                  CoreAction.maxReconnectAttempts,
+                                ),
+                              CoreStatus.connecting =>
+                                appLocalizations.connecting,
+                              CoreStatus.connected =>
+                                appLocalizations.connected,
+                              CoreStatus.disconnected =>
+                                appLocalizations.disconnected,
+                            });
+                          },
+                        ),
                       ),
               ),
             );

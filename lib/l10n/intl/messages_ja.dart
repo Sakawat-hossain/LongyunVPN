@@ -87,15 +87,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(name) => "${name} に接続しました";
 
-  static String m33(count) => "${count} 項目が選択されています";
+  static String m33(current, total) => "再接続中… (${current}/${total})";
 
-  static String m34(error) => "登録設定を読み込めませんでした：${error}";
+  static String m34(count) => "${count} 項目が選択されています";
 
-  static String m35(label) => "${label}はURLである必要があります";
+  static String m35(error) => "登録設定を読み込めませんでした：${error}";
 
-  static String m36(used, total) => "${total} 中 ${used} 使用";
+  static String m36(label) => "${label}はURLである必要があります";
 
-  static String m37(count) => "${count}年前";
+  static String m37(used, total) => "${total} 中 ${used} 使用";
+
+  static String m38(count) => "${count}年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -811,6 +813,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reconnectFailed": MessageLookupByLibrary.simpleMessage(
       "自動再接続に失敗しました。タップして再試行します。",
     ),
+    "reconnecting": m33,
     "redirPort": MessageLookupByLibrary.simpleMessage("Redirポート"),
     "redo": MessageLookupByLibrary.simpleMessage("やり直す"),
     "refresh": MessageLookupByLibrary.simpleMessage("更新"),
@@ -1001,14 +1004,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selectSubRule": MessageLookupByLibrary.simpleMessage("サブルールを選択してください"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
-    "selectedCountTitle": m33,
+    "selectedCountTitle": m34,
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "shrink": MessageLookupByLibrary.simpleMessage("縮小"),
     "signIn": MessageLookupByLibrary.simpleMessage("サインイン"),
     "signUp": MessageLookupByLibrary.simpleMessage("登録"),
-    "signupConfigError": m34,
+    "signupConfigError": m35,
     "silentLaunch": MessageLookupByLibrary.simpleMessage("バックグラウンド起動"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("バックグラウンドで起動"),
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
@@ -1113,10 +1116,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m35,
+    "urlTip": m36,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
-    "usedOfTotal": m36,
+    "usedOfTotal": m37,
     "value": MessageLookupByLibrary.simpleMessage("値"),
     "verdictCantPassTraffic": MessageLookupByLibrary.simpleMessage("通信できません"),
     "verdictDnsFailed": MessageLookupByLibrary.simpleMessage("名前解決に失敗"),
@@ -1153,7 +1156,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "なぜ IP の確認が必要ですか？",
     ),
     "whitelistYourIp": MessageLookupByLibrary.simpleMessage("IP をホワイトリストに登録"),
-    "yearsAgo": m37,
+    "yearsAgo": m38,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }
