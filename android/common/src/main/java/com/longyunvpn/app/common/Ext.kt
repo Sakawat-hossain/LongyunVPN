@@ -44,10 +44,24 @@ val KClass<*>.intent: Intent
     get() = Intent(GlobalState.application, this.java)
 
 fun Service.startForegroundCompat(id: Int, notification: Notification) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        startForeground(id, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-    } else {
-        startForeground(id, notification)
+    try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(id, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(id, notification)
+        }
+    } catch (e: Exception) {
+        // Do not swallow this — say what happened and rethrow.
+        //
+        // Going foreground can fail for reasons that look nothing like each
+        // other from the app side but produce one symptom: the service dies and
+        // the UI sits on "Connecting..." forever. SecurityException means the
+        // manifest is missing the permission for the type being requested;
+        // ForegroundServiceStartNotAllowedException means the OS refused a
+        // background start; a vendor ROM may refuse for its own reasons. Naming
+        // it in the log turns a silent disappearance into a one-line diagnosis.
+        GlobalState.log("startForeground failed (${e.javaClass.simpleName}): ${e.message}")
+        throw e
     }
 }
 

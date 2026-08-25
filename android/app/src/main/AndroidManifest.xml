@@ -15,6 +15,18 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <!--
+      Required, not optional. Both services declare
+      android:foregroundServiceType="specialUse", and startForegroundCompat()
+      passes FOREGROUND_SERVICE_TYPE_SPECIAL_USE on API 34+. Android refuses that
+      type without this permission and throws SecurityException out of
+      startForeground(), which kills the service the moment it tries to go
+      foreground — the app is then left showing "Connecting..." against a service
+      that never started, on exactly the devices new enough to enforce it.
+      SYSTEM_EXEMPTED above is a different type's permission and does not cover
+      specialUse.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />

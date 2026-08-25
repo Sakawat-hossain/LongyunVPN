@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/plugins/app.dart';
+import 'package:longyunvpn/providers/app.dart';
 import 'package:longyunvpn/providers/config.dart';
 import 'package:longyunvpn/state.dart';
 import 'package:longyunvpn/widgets/widgets.dart';
@@ -224,6 +225,46 @@ class OpenLogsItem extends ConsumerWidget {
   }
 }
 
+/// Battery-optimisation exemption, surfaced where people actually look.
+///
+/// This control already existed, but only inside the On-Demand / SSID screen —
+/// a page most users never open. That matters on OEM Android builds that kill
+/// background processes aggressively (Vivo, Xiaomi, Huawei and friends): the
+/// core runs in a separate `:remote` process, and when the system kills it the
+/// app shows "Service disconnected" and sits on "Connecting..." forever. The
+/// user has no way to guess that an exemption buried two screens away is the
+/// remedy.
+///
+/// Deliberately a settings entry rather than a dialog in the connect path:
+/// interrupting every connect on every Android device to warn about something
+/// most of them do not suffer from would be worse than the problem.
+class BatteryOptimizationItem extends ConsumerWidget {
+  const BatteryOptimizationItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!system.isAndroid) return const SizedBox.shrink();
+    final appLocalizations = context.appLocalizations;
+    final disabled = ref.watch(batteryOptimizationDisableProvider);
+    return ListItem(
+      title: Text(appLocalizations.ignoreBatteryOptimization),
+      subtitle: Text(
+        disabled
+            ? appLocalizations.batteryOptimizationStatusTip
+            : appLocalizations.batteryOptimizationDesc,
+      ),
+      trailing: disabled
+          ? const Icon(Icons.check_circle_outline)
+          : const Icon(Icons.chevron_right),
+      onTap: () {
+        if (disabled) return;
+        permissions.needWaitingBatteryOptimizationSettings = true;
+        app?.openBatteryOptimizationSettings();
+      },
+    );
+  }
+}
+
 /// Sends crash reports off the device. Hidden on Windows and Linux, where there
 /// is no Firebase to send them to and crashes stay in the local log — showing a
 /// dead switch there would be worse than showing none.
@@ -414,6 +455,7 @@ class ApplicationSettingView extends StatelessWidget {
       // so macOS now gets them too rather than Android alone.
       const CrashlyticsItem(),
       const AnalyticsItem(),
+      const BatteryOptimizationItem(),
       if (system.isAndroid) const KillSwitchItem(),
       if (system.isDesktop) const DesktopKillSwitchItem(),
       const AutoCheckUpdateItem(),
