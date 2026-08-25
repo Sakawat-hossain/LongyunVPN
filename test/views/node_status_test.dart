@@ -1,4 +1,4 @@
-import 'package:longyunvpn/views/proxies/node_status.dart';
+import 'package:longyunvpn/views/proxies/common.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

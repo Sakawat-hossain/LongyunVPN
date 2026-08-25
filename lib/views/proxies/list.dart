@@ -135,7 +135,11 @@ class _ProxiesListViewState extends State<ProxiesListView> {
         const SizedBox(height: 8),
       ]);
       if (isExpand) {
-        final proxies = group.all;
+        // Drop the panel's info rows ("剩余流量: …", "套餐到期: …") before
+        // rendering. Xboard/V2Board inject them into the proxy list, and they
+        // were being shown as ordinary tappable nodes — selecting one leaves
+        // the user with no connection and nothing saying why.
+        final proxies = realServerNodes(group.all);
         final chunks = proxies.chunks(columns);
         final rows = chunks
             .map<Widget>((proxies) {
@@ -257,7 +261,10 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   void _scrollToGroupSelected(String groupName) {
     final currentInitOffset = _getGroupOffset(groupName);
     final currentGroups = getCurrentGroups();
-    final proxies = currentGroups.getGroup(groupName)?.all;
+    // Must match what the list actually renders, or the scroll lands on the
+    // wrong row once info entries are filtered out.
+    final all = currentGroups.getGroup(groupName)?.all;
+    final proxies = all == null ? null : realServerNodes(all);
     _jumpTo(
       currentInitOffset +
           8 +
@@ -411,7 +418,8 @@ class _ListHeaderState extends State<ListHeader> {
   Future<void> _delayTest() async {
     if (isLock) return;
     isLock = true;
-    await delayTest(widget.group.all, widget.group.testUrl);
+    // No point latency-testing rows that are not servers.
+    await delayTest(realServerNodes(widget.group.all), widget.group.testUrl);
     isLock = false;
   }
 

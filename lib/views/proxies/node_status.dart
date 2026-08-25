@@ -6,6 +6,7 @@ import 'package:longyunvpn/core/core.dart';
 import 'package:longyunvpn/enum/enum.dart';
 import 'package:longyunvpn/models/models.dart';
 import 'package:longyunvpn/providers/providers.dart';
+import 'package:longyunvpn/views/proxies/common.dart';
 import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,32 +101,9 @@ String? _countryCode(String name) {
   return code.length >= 2 ? code.substring(0, 2) : null;
 }
 
-/// Filters out the panel's informational pseudo-entries (remaining traffic,
-/// plan expiry, reset countdown, subscription links, …) that V2Board/Xboard
-/// inject into the proxy list. A real server node carries a traffic multiplier
-/// (e.g. "| x1") or a leading 2–3 letter country code; the info entries have
-/// neither, and are additionally matched by a few well-known markers.
-bool isRealServerNode(String name) {
-  const infoMarkers = [
-    '剩余流量', '套餐到期', '距离下次', '重置', '到期', '过期', '官网', '订阅',
-    'expire', 'expir', 'traffic', 'reset', 'remaining', 'official', 'subscribe',
-  ];
-  final lower = name.toLowerCase();
-  for (final marker in infoMarkers) {
-    if (lower.contains(marker.toLowerCase())) return false;
-  }
-  // Anything that isn't a recognised info entry is a server.
-  //
-  // This used to also *require* a traffic multiplier or a leading Latin
-  // country code, which is only how some panels name things. A node called
-  // 香港01, 日本 IEPL 专线, or 🇭🇰 香港 01 has neither — the name starts with a
-  // CJK character or a flag emoji — so every one of them was discarded as a
-  // pseudo-entry and the list came up empty on panels that name nodes that
-  // way. Dropping only what we positively recognise as an info row is the
-  // right way round: a stray info entry showing up is a cosmetic problem,
-  // whereas hiding every server is not.
-  return true;
-}
+// isRealServerNode now lives in common.dart, so this screen, the node list and
+// quick-connect all agree on what counts as a server rather than each deciding
+// separately.
 
 /// Converts an ISO country code to its flag emoji (regional indicators).
 String _flagEmoji(String code) {

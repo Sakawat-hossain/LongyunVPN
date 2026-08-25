@@ -98,6 +98,35 @@ Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
   globalState.rootRef.read(sortNumProvider.notifier).add();
 }
 
+/// Filters out the panel's informational pseudo-entries (remaining traffic,
+/// plan expiry, reset countdown, subscription links, …) that V2Board/Xboard
+/// inject into the proxy list alongside real servers.
+///
+/// These are not servers. Selecting one leaves the user with no working
+/// connection and nothing explaining why — and they were being shown as
+/// perfectly ordinary, tappable nodes.
+///
+/// Only entries positively recognised as info rows are dropped. Requiring a
+/// traffic multiplier or a Latin country code instead would discard real nodes
+/// named 香港01, 日本 IEPL 专线 or 🇭🇰 香港 01, which start with a CJK character
+/// or a flag emoji — a stray info row showing through is cosmetic, hiding every
+/// server is not.
+bool isRealServerNode(String name) {
+  const infoMarkers = [
+    '剩余流量', '套餐到期', '距离下次', '重置', '到期', '过期', '官网', '订阅',
+    'expire', 'expir', 'traffic', 'reset', 'remaining', 'official', 'subscribe',
+  ];
+  final lower = name.toLowerCase();
+  for (final marker in infoMarkers) {
+    if (lower.contains(marker.toLowerCase())) return false;
+  }
+  return true;
+}
+
+/// The real servers in [proxies], with the panel's info rows removed.
+List<Proxy> realServerNodes(List<Proxy> proxies) =>
+    proxies.where((proxy) => isRealServerNode(proxy.name)).toList();
+
 /// Built-in pseudo proxies that Quick Connect must never select as "fastest".
 const _quickConnectExclude = {
   'DIRECT',
@@ -120,6 +149,10 @@ String? fastestProxyName(
   var bestDelay = 0;
   for (final proxy in proxies) {
     if (exclude.contains(proxy.name)) continue;
+    // The named exclusions above only cover Clash's own built-ins. A panel info
+    // row that happens to answer a delay test would otherwise be picked as the
+    // "fastest" node and connect the user to nothing.
+    if (!isRealServerNode(proxy.name)) continue;
     final delay = delayOf(proxy.name);
     if (delay == null || delay <= 0) continue;
     if (best == null || delay < bestDelay) {
