@@ -95,9 +95,45 @@ dependencies:
     path: plugins/rust_api
   setup:
     path: plugins/setup
+  # Forked to drop the Windows plugin: upstream declares Windows support, and its
+  # implementation links Google's Firebase C++ SDK, which ships x64/x86 libraries
+  # only. On a native arm64 build the linker pulled the x64 firebase_app.lib into
+  # an ARM64 target and died with LNK1120 (4 unresolved firebase::App symbols),
+  # which is what stopped windows-arm64 from ever publishing.
+  #
+  # Firebase only ever ran on Android and macOS here - FirebaseService.init()
+  # returns early anywhere else - so the plugin was linked in and never called.
+  # The fork removes the windows: platform entry and nothing else; name and
+  # version are unchanged so crashlytics/analytics (^4.13.0) still resolve.
   firebase_core: ^4.13.0
   firebase_crashlytics: ^5.2.7
   firebase_analytics: ^12.4.6
+dependency_overrides:
+  # Overridden rather than swapped: firebase_crashlytics and firebase_analytics
+  # both declare a hosted "firebase_core: ^4.13.0", and pub refuses to satisfy a
+  # hosted constraint from a git source. An override is the only way to redirect
+  # it without also forking those two packages.
+  #
+  # The fork is 4.13.0 with the "windows:" platform entry removed, and nothing
+  # else. Upstream declares Windows support, so Flutter registered the plugin
+  # into Windows builds, where it links Google's Firebase C++ SDK — and that SDK
+  # ships x64/x86 libraries only. A native arm64 build pulled the x64
+  # firebase_app.lib into an ARM64 target and died:
+  #
+  #   firebase_app.lib : warning LNK4272: library machine type 'x64' conflicts
+  #                      with target machine type 'ARM64'
+  #   LongyunVPN.exe   : fatal error LNK1120: 4 unresolved externals
+  #
+  # That is what kept windows-arm64 from ever publishing. Firebase runs only on
+  # Android and macOS here — FirebaseService.init() returns early anywhere else —
+  # so the plugin was linked in and never called; dropping it changes no
+  # behaviour. Linux was never affected, as firebase_core declares no Linux
+  # support.
+  firebase_core:
+    git:
+      url: https://github.com/Sakawat-hossain/firebase_core
+      ref: 18d60ef48f5bbf5d460acbafcf20a261e3c2cda4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
