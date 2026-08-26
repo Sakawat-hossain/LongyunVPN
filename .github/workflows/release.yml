@@ -3,7 +3,7 @@ name: release
 # Builds every platform/arch on a version tag (e.g. v1.1.8) and publishes them
 # to a single GitHub Release. Each job uploads its own assets directly (the
 # proven approach), so a failure in one platform never blocks the others.
-#   Windows: windows-amd64 setup.exe/.zip  (arm64: see the matrix comment below)
+#   Windows: windows-amd64 setup.exe/.zip, windows-arm64 setup.exe/.zip
 #   Android: arm64-v8a.apk, armeabi-v7a.apk, x86_64.apk
 #   macOS:   macos-arm64.dmg, macos-amd64.dmg
 #   Linux:   linux-amd64 deb/AppImage/rpm  (arm64 = follow-up; no Flutter SDK)
@@ -30,20 +30,20 @@ jobs:
       matrix:
         include:
           - { os: windows-2022, arch: amd64 }
-          # windows-arm64 is not built. firebase_core's Windows implementation
-          # links Google's Firebase C++ SDK, which ships x64 and x86 libraries
-          # only — there is no arm64 build — so the link step fails on
-          # windows-11-arm, and Flutter offers no way for an app to exclude a
-          # plugin on one platform while keeping it on others.
+          # arm64 is back on trial. It was dropped on the assumption that
+          # firebase_core's Windows plugin — which links Google's Firebase C++
+          # SDK, and that SDK ships x64/x86 libraries only — could not link on
+          # arm64. The SDK's architecture limit is real and verified, but the
+          # job's actual failure log was never read, and it failed at "Build
+          # installer" for reasons that were never confirmed. Restoring the
+          # entry is how we find out instead of guessing.
           #
-          # The cost is small and already handled: Windows 11 on ARM runs x64
-          # binaries under emulation, and the in-app updater falls back to the
-          # amd64 asset when no arch-specific one is published (see
-          # _installerAssetFor in lib/providers/actions/common_action.dart).
-          #
-          # To restore native arm64 builds, drop the Firebase packages from
-          # pubspec.yaml — Firebase is inert on Windows anyway, since
-          # FirebaseService only initializes on Android and macOS.
+          # The two arches deliberately use different Flutter channels: the
+          # stable channel publishes no Windows arm64 SDK at all (0 arm64
+          # entries across 730 releases in releases_windows.json), so
+          # subosito cannot resolve stable on windows-11-arm. That difference
+          # is forced, not accidental — see the two if-gated setup steps below.
+          - { os: windows-11-arm, arch: arm64 }
     steps:
       - name: Setup Rust (arm64)
         if: matrix.os == 'windows-11-arm'
