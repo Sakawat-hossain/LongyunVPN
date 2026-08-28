@@ -37,7 +37,7 @@ dependencies:
   wifi_ssid:
     path: plugins/wifi_ssid
   collection: ^1.19.1
-  animations: ^2.1.1
+  animations: ^3.0.0
   package_info_plus: ^9.0.0
   url_launcher: ^6.3.2
   # In-app browser for the IP-whitelist and payment pages. Covers Android, iOS,
