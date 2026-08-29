@@ -43,6 +43,7 @@ export 'string.dart';
 export 'system.dart';
 export 'task.dart';
 export 'text.dart';
+export 'traffic_rate.dart';
 export 'tray.dart';
 export 'utils.dart';
 export 'window.dart';

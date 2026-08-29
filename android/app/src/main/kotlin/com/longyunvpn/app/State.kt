@@ -150,6 +150,19 @@ object State {
         )
     }
 
+    // A run time of 0 is how the service says it did not start. This used to
+    // emit START either way, so a refused or timed-out start still flipped the
+    // UI to connected and left it there.
+    private fun emitStarted(nextRunTime: Long) {
+        runTime = nextRunTime
+        if (nextRunTime == 0L) {
+            GlobalState.log("Start failed: service did not report a run time")
+            runStateFlow.tryEmit(RunState.STOP)
+            return
+        }
+        runStateFlow.tryEmit(RunState.START)
+    }
+
     private fun startService() {
         GlobalState.launch {
             runLock.withLock {
@@ -158,19 +171,25 @@ object State {
                 }
                 try {
                     runStateFlow.tryEmit(RunState.PENDING)
-                    val options = sharedState.vpnOptions ?: return@launch
+                    val options = sharedState.vpnOptions ?: run {
+                        GlobalState.log("Start aborted: no VPN options configured")
+                        return@launch
+                    }
                     appPlugin?.let {
                         it.prepare(options.enable) {
-                            runTime = Service.startService(options, runTime)
-                            runStateFlow.tryEmit(RunState.START)
+                            emitStarted(Service.startService(options, runTime))
                         }
                     } ?: run {
                         val intent = VpnService.prepare(GlobalState.application)
                         if (intent != null) {
+                            // The system wants the consent dialog shown, and
+                            // there is no activity here to show it. Bailing is
+                            // correct; bailing silently is what made a ROM that
+                            // suppresses the dialog look like a hung connect.
+                            GlobalState.log("Start aborted: VPN consent not granted")
                             return@launch
                         }
-                        runTime = Service.startService(options, runTime)
-                        runStateFlow.tryEmit(RunState.START)
+                        emitStarted(Service.startService(options, runTime))
                     }
                 } finally {
                     if (runStateFlow.value == RunState.PENDING) {

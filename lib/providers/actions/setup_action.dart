@@ -26,14 +26,62 @@ class SetupAction extends _$SetupAction {
     ref.read(requestsProvider.notifier).value = FixedList(500);
   }
 
+  /// How long to wait for the platform service to publish a run time after a
+  /// start request, and how often to look while waiting.
+  static const _startConfirmTimeout = Duration(seconds: 15);
+  static const _startConfirmInterval = Duration(milliseconds: 300);
+
+  /// Waits for the Android service to say it is actually running.
+  ///
+  /// The start call is answered before the tunnel exists — the method channel
+  /// replies the moment the request is queued — so its return value proves
+  /// nothing about whether establish() succeeded. A run time is published only
+  /// once the service is genuinely up, and 0 (null here) is how it reports that
+  /// it is not, which makes it the only honest signal available. Polling rather
+  /// than reading once because the start runs on its own coroutine: checking
+  /// immediately would call every slow-but-successful start a failure.
+  Future<bool> _confirmStarted() async {
+    final deadline = DateTime.now().add(_startConfirmTimeout);
+    while (DateTime.now().isBefore(deadline)) {
+      await _updateStartTime();
+      if (startTime != null) {
+        return true;
+      }
+      await Future.delayed(_startConfirmInterval);
+    }
+    return false;
+  }
+
   Future<void> _handleStart() async {
-    startTime ??= DateTime.now();
+    // Start first, then believe the service rather than the clock. This used to
+    // open with `startTime ??= DateTime.now()`, which set a start time whether
+    // or not anything started — so a refused establish(), a missing options
+    // payload, or a bind that timed out all produced a running timer over a
+    // tunnel that was never created. Every request then failed on a timeout
+    // with nothing on screen, and nothing in the log, to explain it.
+    // Suspended means no start was requested at all, so there is nothing for
+    // the confirmation below to wait on.
+    final didRequestStart = !ref.read(suspendProvider);
+    if (didRequestStart) {
+      await coreController.startListener();
+    }
+    if (didRequestStart && Platform.isAndroid) {
+      if (!await _confirmStarted()) {
+        commonPrint.log(
+          'the VPN service never reported a run time - the tunnel did not '
+          'start; see the service log above for the reason',
+          logLevel: LogLevel.error,
+        );
+        await handleStop();
+        ref.read(runTimeProvider.notifier).value = null;
+        return;
+      }
+    } else {
+      startTime ??= DateTime.now();
+    }
     //The local status must be updated when performing the run task
     ref.read(commonActionProvider.notifier).updateRunTime();
     ref.read(commonActionProvider.notifier).updateTraffic();
-    if (!ref.read(suspendProvider)) {
-      await coreController.startListener();
-    }
     _startPollingTimer();
   }
 
@@ -58,6 +106,10 @@ class SetupAction extends _$SetupAction {
   void resumePolling() {
     if (!isStart || _updateTimer != null) return;
     ref.read(commonActionProvider.notifier).updateRunTime();
+    // The gap while backgrounded can be minutes long. Measuring across it would
+    // report the average over that whole window as the current speed, so start
+    // a fresh baseline and let the next tick produce the first real sample.
+    ref.read(commonActionProvider.notifier).resetTrafficBaseline();
     ref.read(commonActionProvider.notifier).updateTraffic();
     _startPollingTimer();
   }
@@ -129,6 +181,10 @@ class SetupAction extends _$SetupAction {
       ref.read(coreActionProvider.notifier).cancelReconnect();
       await handleStop();
       coreController.resetTraffic();
+      // Speed is a delta against the previous totals, so the baseline has to go
+      // with them — otherwise the first sample after the next start divides a
+      // stale delta by a one-second interval and reports a spike.
+      ref.read(commonActionProvider.notifier).resetTrafficBaseline();
       ref.read(trafficsProvider.notifier).clear();
       ref.read(totalTrafficProvider.notifier).value = const Traffic();
       ref.read(runTimeProvider.notifier).value = null;

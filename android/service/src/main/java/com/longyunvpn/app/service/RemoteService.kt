@@ -62,8 +62,25 @@ class RemoteService : Service(),
                     intent = nextIntent
                     delegate?.bind()
                 }
-                delegate?.useService { service ->
+                // useService returns a Result, and dropping it was how a failed
+                // start still came back as a run time. Three things it hides:
+                // the bind never completing inside its five seconds, the binder
+                // being gone, and start() itself throwing. Any of them left the
+                // app holding a timestamp for a tunnel that does not exist,
+                // which is what "connected, but everything times out" is.
+                //
+                // A run time of 0 is the established way to say "not running" —
+                // getRunTime() already returns it, and the Dart side reads it as
+                // null — so report that instead of a fabricated success.
+                val started = delegate?.useService { service ->
                     service.start()
+                }
+                if (started == null || started.isFailure) {
+                    val reason = started?.exceptionOrNull()?.message ?: "service unavailable"
+                    GlobalState.log("startService failed: $reason")
+                    State.runTime = 0
+                    result.onResult(0)
+                    return@withLock
                 }
                 State.runTime = when (runTime != 0L) {
                     true -> runTime

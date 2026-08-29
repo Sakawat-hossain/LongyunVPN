@@ -37,15 +37,53 @@ class CommonAction extends _$CommonAction {
     }
   }
 
+  final _rateMeter = TrafficRateMeter();
+  bool _sampling = false;
+
+  /// Samples throughput once and appends it to the speed history.
+  ///
+  /// Speed is computed from the cumulative counters and the measured interval,
+  /// not from the core's own per-second figure. That figure is a snapshot the
+  /// core refreshes on a one-second ticker of its own, and this poll runs on a
+  /// separate one-second timer, so the two clocks drift against each other. As
+  /// the phase slides, one poll reads a snapshot it has already reported and
+  /// the next skips a whole second that is never reported at all — a duplicate
+  /// then a gap, over and over. On a perfectly steady download that alone draws
+  /// a line that keeps stepping up and down, which is what the speed graph was
+  /// doing. Dividing a counter delta by the time actually elapsed cannot alias:
+  /// nothing is double-counted and nothing is dropped, however the two timers
+  /// happen to line up, and a late poll is corrected by its own longer interval
+  /// rather than showing up as a spike.
   Future<void> updateTraffic() async {
-    final onlyStatisticsProxy = ref.read(
-      appSettingProvider.select((state) => state.onlyStatisticsProxy),
-    );
-    final traffic = await coreController.getTraffic(onlyStatisticsProxy);
-    ref.read(trafficsProvider.notifier).addTraffic(traffic);
-    ref.read(totalTrafficProvider.notifier).value = await coreController
-        .getTotalTraffic(onlyStatisticsProxy);
+    // One sample at a time. Timer.periodic does not wait for the previous run,
+    // and on a slow device two overlapping calls would take their deltas from
+    // the same baseline and each report roughly half the real speed.
+    if (_sampling) return;
+    _sampling = true;
+    try {
+      final onlyStatisticsProxy = ref.read(
+        appSettingProvider.select((state) => state.onlyStatisticsProxy),
+      );
+      final total = await coreController.getTotalTraffic(onlyStatisticsProxy);
+      ref.read(totalTrafficProvider.notifier).value = total;
+
+      final speed = _rateMeter.sample(
+        total,
+        onlyProxy: onlyStatisticsProxy,
+        nowMs: DateTime.now().millisecondsSinceEpoch,
+      );
+      // Null means there was no interval worth measuring across — the first
+      // sample after a reset, or a change of accounting scope. Reporting a
+      // figure there would be worse than reporting nothing.
+      if (speed == null) return;
+      ref.read(trafficsProvider.notifier).addTraffic(speed);
+    } finally {
+      _sampling = false;
+    }
   }
+
+  /// Drops the speed baseline so the next sample starts a fresh interval.
+  void resetTrafficBaseline() => _rateMeter.reset();
 
   Future<void> autoCheckUpdate() async {
     // Android ships its APKs from GitHub Releases, not Play, so it checks for

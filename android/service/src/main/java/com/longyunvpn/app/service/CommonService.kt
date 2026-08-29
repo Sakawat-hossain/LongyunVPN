@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import com.longyunvpn.app.common.GlobalState
 import com.longyunvpn.app.core.Core
 import com.longyunvpn.app.service.modules.NetworkObserveModule
 import com.longyunvpn.app.service.modules.NotificationModule
@@ -49,11 +50,16 @@ class CommonService : Service(), IBaseService,
         return binder
     }
 
+    // Rethrow rather than swallow, for the same reason as VpnService.start:
+    // a module that fails to load leaves nothing running, and reporting that as
+    // a successful start is what produces a "connected" app with no tunnel.
     override fun start() {
         try {
             loader.load()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            GlobalState.log("CommonService start failed: ${e.javaClass.simpleName}: ${e.message}")
             stop()
+            throw e
         }
     }
 

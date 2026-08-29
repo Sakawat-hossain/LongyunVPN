@@ -257,14 +257,31 @@ class VpnService : SystemVpnService(), IBaseService,
         )
     }
 
+    // Every failure here used to end the same way: the exception was discarded,
+    // stop() ran, and the caller was told nothing. The app went on showing
+    // "Connected" over a tunnel that was never established, so every request
+    // died on a timeout with no line in the log to say why. The three ways that
+    // happened, all silent:
+    //
+    //   - establish() returns null. The system refused the interface: another
+    //     VPN app holds the slot, consent was revoked, or an OEM ROM denied it.
+    //   - State.options is null. handleStart never ran, nothing threw, and the
+    //     service reported a clean start with no interface behind it.
+    //   - anything the Builder throws, which on a phone with a stale access
+    //     control list is routine.
+    //
+    // Name the reason in the log, then rethrow so the caller can report the
+    // failure instead of inventing a success.
     override fun start() {
         try {
             loader.load()
-            State.options?.let {
-                handleStart(it)
-            }
-        } catch (_: Exception) {
+            val options = State.options
+                ?: throw IllegalStateException("no VPN options were supplied")
+            handleStart(options)
+        } catch (e: Exception) {
+            GlobalState.log("VpnService start failed: ${e.javaClass.simpleName}: ${e.message}")
             stop()
+            throw e
         }
     }
 
