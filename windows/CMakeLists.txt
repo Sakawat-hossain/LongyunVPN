@@ -83,6 +83,40 @@ install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
 install(FILES "EnableLoopback.exe" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
+# Ship the MSVC runtime next to the executable.
+#
+# LongyunVPN.exe imports msvcp140.dll, vcruntime140.dll and vcruntime140_1.dll,
+# which come from the Visual C++ Redistributable and are NOT part of Windows.
+# Most machines have it because other software installs it, but a clean image,
+# an LTSC install or a debloated system may not — and there the app does not
+# start at all: "The code execution cannot proceed because msvcp140.dll was not
+# found." The portable zip is the worse case, since no installer runs there to
+# warn or to install anything.
+#
+# App-local deployment is Microsoft's supported way to solve this, and it fixes
+# the zip and the installer in one place. Static linking (/MT) would not: this
+# app loads ~15 plugin DLLs, each would get its own heap, and memory allocated
+# in one and freed in another corrupts.
+#
+# The UCRT (api-ms-win-crt-*.dll) is deliberately excluded — it is part of
+# Windows 10 and later, so bundling it would add size for nothing.
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
+include(InstallRequiredSystemLibraries)
+if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+  message(STATUS "Bundling MSVC runtime: ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}")
+  install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+else()
+  # Empty means the redist was not found for this architecture, and install()
+  # would silently do nothing. Say so here; CI also asserts on the built output
+  # so a quiet miss cannot reach a release.
+  message(WARNING
+    "MSVC runtime redistributable not found - the build will depend on the "
+    "Visual C++ Redistributable being installed on the user's machine.")
+endif()
+
 if(PLUGIN_BUNDLED_LIBRARIES)
   install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
