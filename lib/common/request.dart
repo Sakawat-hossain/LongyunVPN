@@ -78,6 +78,40 @@ class Request {
     );
   }
 
+  /// A short, readable cause for a network failure.
+  ///
+  /// DioExceptionType.unknown is a wrapper, not a diagnosis: the actual reason
+  /// — a TLS handshake that failed, a name that did not resolve, a socket the
+  /// machine refused — sits in [error]. Reporting only "Unknown network error"
+  /// discarded it, which left the person looking at a dialog naming no cause
+  /// and nothing to act on. A Windows machine that cannot add a profile on a
+  /// network where every other device can is exactly the case that hid: the
+  /// answer was in the exception the whole time.
+  ///
+  /// Kept short, and appended to the localized message rather than replacing
+  /// it, so the dialog stays readable. The detail is OS text and stays in
+  /// English — untranslated but specific beats translated and useless.
+  static String describeNetworkError(Object? error) {
+    if (error is HandshakeException) {
+      final detail = error.osError?.message ?? error.message;
+      return detail.isEmpty ? 'TLS handshake failed' : 'TLS: $detail';
+    }
+    if (error is SocketException) {
+      final host = error.address?.host;
+      final detail = error.osError?.message ?? error.message;
+      final where = host == null || host.isEmpty ? '' : ' ($host)';
+      return detail.isEmpty ? 'no connection$where' : '$detail$where';
+    }
+    if (error is FormatException) {
+      return 'malformed response';
+    }
+    if (error == null) {
+      return 'no further detail';
+    }
+    final text = error.toString();
+    return text.length > 160 ? '${text.substring(0, 160)}…' : text;
+  }
+
   /// True when the failure is the local proxy refusing the connection, rather
   /// than the remote host being unreachable. Only that case is worth retrying
   /// direct — a genuinely offline device should still report being offline.
@@ -127,7 +161,8 @@ class Request {
       commonPrint.log('getFileResponseForUrl error ${e.toString()}');
       if (e is DioException) {
         if (e.type == DioExceptionType.unknown) {
-          throw currentAppLocalizations.unknownNetworkError;
+          throw '${currentAppLocalizations.unknownNetworkError}\n'
+              '${describeNetworkError(e.error)}';
         } else if (e.type == DioExceptionType.badResponse) {
           throw currentAppLocalizations.networkException;
         } else if (e.type == DioExceptionType.connectionTimeout ||
@@ -140,7 +175,10 @@ class Request {
         }
         throw e;
       }
-      throw currentAppLocalizations.unknownNetworkError;
+      // Not a DioException at all — describe whatever it is rather than
+      // reporting the same bare "unknown" for every possible cause.
+      throw '${currentAppLocalizations.unknownNetworkError}\n'
+          '${describeNetworkError(e)}';
     }
   }
 
