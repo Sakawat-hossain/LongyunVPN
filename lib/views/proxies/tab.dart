@@ -46,10 +46,11 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       if (!stringListEquality.equals(prev?.a, next.a)) {
         _destroyTabController();
         final groupNames = next.a;
-        // Node Status is the leading tab, followed by every proxy group.
+        // Every proxy group, plus the Node Status tab among them.
         // +1 for it; must match the tabs rendered in build().
         final length = groupNames.isEmpty ? 0 : groupNames.length + 1;
-        // Open on Node Status.
+        // Open on the first group. Status no longer leads, so tab 0 is a
+        // server list — which is what the page is for.
         _updateTabController(length, 0);
       }
     }, fireImmediately: true);
@@ -70,6 +71,22 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     final currentGroupName = getCurrentGroupName();
     final currentState = _keyMap[currentGroupName]?.currentState;
     await delayTest(currentState?.currentProxies ?? [], currentState?.testUrl);
+  }
+
+  Widget _buildGroupView(
+    Group group, {
+    required int columns,
+    required ProxyCardType cardType,
+  }) {
+    return ProxyGroupView(
+      key: _keyMap.updateCacheValue(
+        group.name,
+        () => GlobalObjectKey<_ProxyGroupViewState>(group.name),
+      ),
+      group: group,
+      columns: columns,
+      cardType: cardType,
+    );
   }
 
   Widget _buildMoreButton() {
@@ -114,8 +131,9 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                               (item) => item == groupName,
                             );
                             if (index == -1) return;
-                            // +1: tab 0 is Node Status, groups start at 1.
-                            _tabController?.animateTo(index + 1);
+                            _tabController?.animateTo(
+                              tabIndexForGroup(index, groupNames.length),
+                            );
                             updateCurrentGroupName(groupName);
                             Navigator.of(context).pop();
                           },
@@ -144,13 +162,13 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         groupIndex = currentIndex;
       }
       final currentGroups = getCurrentGroups();
-      // Tab 0 is Node Status, which has no backing group; groups start at 1.
-      widget.groupTabActive?.value = (groupIndex ?? 0) >= 1;
-      if (groupIndex == null || groupIndex < 1) {
-        return;
-      }
-      final realIndex = groupIndex - 1;
-      if (realIndex >= currentGroups.length) {
+      // Node Status has no backing group, and it is no longer tab 0 — ask which
+      // group a tab maps to rather than assuming an offset.
+      final realIndex = groupIndex == null
+          ? null
+          : groupIndexForTab(groupIndex, currentGroups.length);
+      widget.groupTabActive?.value = realIndex != null;
+      if (realIndex == null) {
         return;
       }
       final currentGroup = currentGroups[realIndex];
@@ -223,18 +241,22 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                     overlayColor: const WidgetStatePropertyAll(
                       Colors.transparent,
                     ),
-                    // Node Status leads, then every proxy group.
+                    // Groups lead; Node Status follows the first few of them.
+                    // See nodeStatusTabIndex.
                     tabs: [
-                      Tab(child: Text(appLocalizations.nodeStatus)),
-                      for (final group in groups)
-                        Tab(
-                          child: Builder(
-                            builder: (context) => EmojiText(
-                              group.name,
-                              style: DefaultTextStyle.of(context).style,
+                      for (var i = 0; i <= groups.length; i++)
+                        if (i == nodeStatusTabIndex(groups.length))
+                          Tab(child: Text(appLocalizations.nodeStatus))
+                        else
+                          Tab(
+                            child: Builder(
+                              builder: (context) => EmojiText(
+                                groups[groupIndexForTab(i, groups.length)!]
+                                    .name,
+                                style: DefaultTextStyle.of(context).style,
+                              ),
                             ),
                           ),
-                        ),
                     ],
                   ),
                   if (value) Positioned(right: 0, child: child!),
@@ -261,17 +283,15 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
           child: TabBarView(
             controller: _tabController,
             children: [
-              const NodeStatusView(),
-              for (final group in groups)
-                ProxyGroupView(
-                  key: _keyMap.updateCacheValue(
-                    group.name,
-                    () => GlobalObjectKey<_ProxyGroupViewState>(group.name),
+              for (var i = 0; i <= groups.length; i++)
+                if (i == nodeStatusTabIndex(groups.length))
+                  const NodeStatusView()
+                else
+                  _buildGroupView(
+                    groups[groupIndexForTab(i, groups.length)!],
+                    columns: state.columns,
+                    cardType: state.proxyCardType,
                   ),
-                  group: group,
-                  columns: state.columns,
-                  cardType: state.proxyCardType,
-                ),
             ],
           ),
         ),

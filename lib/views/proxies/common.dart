@@ -6,6 +6,34 @@ import 'package:longyunvpn/providers/providers.dart';
 import 'package:longyunvpn/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Where the Node Status tab sits among the proxy tabs.
+///
+/// It used to lead, which put a diagnostics screen in front of the servers
+/// people open this page to reach. It now follows the first
+/// [_nodeStatusAfterGroups] groups, so the common case — pick a server — is the
+/// first thing in view, and status is still close enough to find.
+///
+/// With fewer groups than that it lands last, which is the same thing: every
+/// group still comes first.
+const _nodeStatusAfterGroups = 3;
+
+int nodeStatusTabIndex(int groupCount) =>
+    groupCount < _nodeStatusAfterGroups ? groupCount : _nodeStatusAfterGroups;
+
+/// Tab index showing the group at [groupIndex].
+int tabIndexForGroup(int groupIndex, int groupCount) =>
+    groupIndex < nodeStatusTabIndex(groupCount) ? groupIndex : groupIndex + 1;
+
+/// Group index shown by [tabIndex], or null when that tab is Node Status or
+/// falls outside the groups.
+int? groupIndexForTab(int tabIndex, int groupCount) {
+  final statusIndex = nodeStatusTabIndex(groupCount);
+  if (tabIndex == statusIndex) return null;
+  final groupIndex = tabIndex < statusIndex ? tabIndex : tabIndex - 1;
+  if (groupIndex < 0 || groupIndex >= groupCount) return null;
+  return groupIndex;
+}
+
 double get listHeaderHeight {
   final measure = globalState.measure;
   return 20 + measure.titleMediumHeight + 4 + measure.bodyMediumHeight + 2;

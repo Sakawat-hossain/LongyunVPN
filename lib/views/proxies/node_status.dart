@@ -11,52 +11,13 @@ import 'package:longyunvpn/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:longyunvpn/views/in_app_browser.dart';
 import 'package:yaml/yaml.dart';
 
-/// IP whitelist verification for LongyunVPN. Users must whitelist their current
-/// public IP before servers become reachable / report status.
-const _whitelistUrl = 'https://verify.solionvpn.com/longyunvpn';
-
-/// Opens the IP-verification page inside the app. The in-app browser clears
-/// cache/cookies first, so the page always reflects the caller's current IP
-/// rather than a cached result from a previous visit.
-Future<void> _openWhitelist(BuildContext context) async {
-  await openInApp(
-    context,
-    url: _whitelistUrl,
-    title: context.appLocalizations.whitelistYourIp,
-  );
-}
-
-void _showWhitelistInfo(BuildContext context) {
-  final l = context.appLocalizations;
-  showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      icon: const Icon(Icons.verified_user_outlined),
-      title: Text(l.whitelistWhyTitle),
-      content: SingleChildScrollView(child: Text(l.whitelistInfo)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: Text(l.close),
-        ),
-        FilledButton(
-          onPressed: () {
-            Navigator.of(ctx).pop();
-            // Use the page's context, not the dialog's: `ctx` belongs to the
-            // route just popped, so pushing the browser through it would target
-            // a deactivated element and never open.
-            _openWhitelist(context);
-          },
-          child: Text(l.whitelistYourIp),
-        ),
-      ],
-    ),
-  );
-}
-
+/// The IP-whitelist entry point lived here — a button and an info dialog that
+/// opened verify.solionvpn.com in the in-app browser. Removed for now at the
+/// product's request. The whitelist* strings are deliberately left in the arb
+/// files so bringing it back is a UI change and not a translation round.
+///
 /// Built-in pseudo proxies that are never real server nodes.
 const _builtInProxies = {
   'DIRECT',
@@ -547,27 +508,6 @@ class _NodeStatusViewState extends ConsumerState<NodeStatusView> {
             justCompleted: _justCompleted,
             checked: _checked,
             onRefresh: _refreshStatus,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: () => _openWhitelist(context),
-                  icon: const Icon(Icons.verified_user_outlined, size: 18),
-                  label: Text(l.whitelistYourIp),
-                ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                // No hover tooltip: the full explanation is long and covered the
-                // page on hover. Tap opens it in a dialog instead.
-                icon: const Icon(Icons.info_outline),
-                onPressed: () => _showWhitelistInfo(context),
-              ),
-            ],
           ),
         ),
         Expanded(
