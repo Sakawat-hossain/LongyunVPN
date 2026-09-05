@@ -19,6 +19,9 @@ ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
 [Code]
+var
+  WebView2Page: TDownloadWizardPage;
+
 procedure KillProcesses;
 var
   Processes: TArrayOfString;
@@ -74,21 +77,62 @@ begin
     (RegQueryStringValue(HKCU, 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', Value) and (Value <> ''));
 end;
 
+// Inverted for use as a Tasks Check, which must be a parameterless function.
+function WebView2Missing(): Boolean;
+begin
+  Result := not WebView2Installed();
+end;
+
 function InitializeSetup(): Boolean;
 begin
   KillProcesses;
-  if not WebView2Installed() then
-  begin
-    // A warning, not a blocker: everything except the in-app browser works
-    // without it, so refusing to install would be worse than proceeding.
-    MsgBox('Microsoft Edge WebView2 Runtime was not found.' #13#10 #13#10
-         + 'LongyunVPN uses it for in-app pages such as the IP whitelist and '
-         + 'checkout. Those pages will not open until it is installed.' #13#10 #13#10
-         + 'You can install it from:' #13#10
-         + 'https://developer.microsoft.com/microsoft-edge/webview2/',
-         mbInformation, MB_OK);
-  end;
+  // The old blocking message box is gone: setup now offers to fetch the
+  // runtime instead of telling the user to go and find it themselves. A
+  // message that names a URL and then does nothing about it is work handed
+  // back to the person least equipped to do it.
   Result := True;
+end;
+
+procedure InitializeWizard;
+begin
+  WebView2Page := CreateDownloadPage(
+    SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), nil);
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if (CurPageID <> wpReady) or (not WizardIsTaskSelected('webview2')) then
+    exit;
+  // The Evergreen bootstrapper: ~2 MB, always current, and Microsoft's
+  // supported way to redistribute the runtime.
+  WebView2Page.Clear;
+  WebView2Page.Add(
+    'https://go.microsoft.com/fwlink/p/?LinkId=2124703',
+    'MicrosoftEdgeWebview2Setup.exe', '');
+  WebView2Page.Show;
+  try
+    try
+      WebView2Page.Download;
+    except
+      // Never fail the install over this. People install a VPN precisely
+      // because their connection is restricted, and go.microsoft.com is slow
+      // or unreachable on some of the networks this app exists to get around.
+      // The app itself works without the runtime - only in-app pages do not -
+      // so say what happened and carry on.
+      SuppressibleMsgBox(
+        ExpandConstant('{cm:WebView2DownloadFailed}'), mbInformation, MB_OK, IDOK);
+    end;
+  finally
+    WebView2Page.Hide;
+  end;
+end;
+
+// True only when the bootstrapper actually arrived, so the [Run] entry is
+// skipped when the download failed rather than trying to execute nothing.
+function WebView2Downloaded(): Boolean;
+begin
+  Result := FileExists(ExpandConstant('{tmp}\MicrosoftEdgeWebview2Setup.exe'));
 end;
 
 // Runs after the install directory is settled but before files are copied, so
@@ -138,8 +182,19 @@ Name: "chineseSimplified"; MessagesFile: {% if locale.file %}{{ locale.file }}{%
 {% if locale.lang == 'uk' %}Name: "ukrainian"; MessagesFile: "compiler:Languages\\Ukrainian.isl"{% endif %}
 {% endfor %}
 
+[CustomMessages]
+english.InstallWebView2=Install Microsoft Edge WebView2 Runtime (about 2 MB download)
+english.PrerequisitesGroup=Missing components:
+english.WebView2DownloadFailed=The WebView2 Runtime could not be downloaded. Setup will continue without it; in-app pages such as checkout will not open until it is installed from:%n%nhttps://developer.microsoft.com/microsoft-edge/webview2/
+chineseSimplified.InstallWebView2=安装 Microsoft Edge WebView2 运行时（约 2 MB 下载）
+chineseSimplified.PrerequisitesGroup=缺少的组件：
+chineseSimplified.WebView2DownloadFailed=无法下载 WebView2 运行时。安装将继续，但结账等应用内页面将无法打开，直到从以下地址安装：%n%nhttps://developer.microsoft.com/microsoft-edge/webview2/
+
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if CREATE_DESKTOP_ICON != true %}unchecked{% else %}checkedonce{% endif %}
+; Offered only when the runtime is genuinely absent, so a machine that already
+; has it never sees the option or the download.
+Name: "webview2"; Description: "{cm:InstallWebView2}"; GroupDescription: "{cm:PrerequisitesGroup}"; Check: WebView2Missing
 [Files]
 Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -148,6 +203,10 @@ Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
+; Runs before the app launches, and only when the download succeeded. /silent
+; keeps it out of the user's way; the bootstrapper exits quickly and does
+; nothing when a newer runtime turns out to be present already.
+Filename: "{tmp}\\MicrosoftEdgeWebview2Setup.exe"; Parameters: "/silent /install"; StatusMsg: "{cm:InstallWebView2}"; Flags: waituntilterminated; Tasks: webview2; Check: WebView2Downloaded
 ; Interactive install: the usual "Launch LongyunVPN" tick box on the last page.
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
 ; Silent install: the in-app updater runs setup with /SILENT, and postinstall
