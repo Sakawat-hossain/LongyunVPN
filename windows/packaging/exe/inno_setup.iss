@@ -144,6 +144,67 @@ begin
   Result := '';
 end;
 
+// Windows Firewall rules for the binaries that open sockets.
+//
+// Without these, the first outbound connection raises the "Allow access?"
+// prompt. Anyone who dismisses or denies it - or any machine where policy
+// answers for them - gets a persistent Block rule against that executable, and
+// LongyunCore.exe then cannot reach a single node. Every server reads as
+// "timeout" in the list and none of them work, while the app itself looks
+// healthy: the UI, login and the panel API run out of LongyunVPN.exe, which is
+// a different program as far as the firewall is concerned. That difference is
+// why one laptop works and the next does not on the same network and the same
+// subscription.
+//
+// Deleted first so a reinstall replaces a stale or previously-denied rule
+// rather than stacking another one beside it. Failures are ignored throughout:
+// a firewall rule is not worth failing an install over, and delete on a rule
+// that was never there simply returns an error.
+procedure RemoveFirewallRules;
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\netsh.exe'),
+    'advfirewall firewall delete rule name="{{DISPLAY_NAME}}"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+procedure AddFirewallRules;
+var
+  Programs: TArrayOfString;
+  Directions: TArrayOfString;
+  i, j, ResultCode: Integer;
+begin
+  RemoveFirewallRules;
+  Programs := ['{{EXECUTABLE_NAME}}', 'LongyunCore.exe', 'LongyunVPNHelperService.exe'];
+  Directions := ['in', 'out'];
+  for i := 0 to GetArrayLength(Programs)-1 do
+  begin
+    for j := 0 to GetArrayLength(Directions)-1 do
+    begin
+      Exec(ExpandConstant('{sys}\netsh.exe'),
+        'advfirewall firewall add rule name="{{DISPLAY_NAME}}"'
+        + ' dir=' + Directions[j] + ' action=allow'
+        + ' program="' + ExpandConstant('{app}\') + Programs[i] + '"'
+        + ' enable=yes profile=any',
+        '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    end;
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+    AddFirewallRules;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  // Leave nothing behind pointing at a path that will not exist.
+  if CurUninstallStep = usPostUninstall then
+    RemoveFirewallRules;
+end;
+
 function InitializeUninstall(): Boolean;
 begin
   UnregisterHelperServices;
