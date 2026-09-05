@@ -301,6 +301,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
       "Текущее приложение уже является последней версией",
     ),
+    "checkUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось проверить обновления",
+    ),
     "checkingProgress": m1,
     "checkout": MessageLookupByLibrary.simpleMessage("Оформление"),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),

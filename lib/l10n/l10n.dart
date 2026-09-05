@@ -954,6 +954,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Could not check for updates`
+  String get checkUpdateFailed {
+    return Intl.message(
+      'Could not check for updates',
+      name: 'checkUpdateFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Go to download`
   String get goDownload {
     return Intl.message(

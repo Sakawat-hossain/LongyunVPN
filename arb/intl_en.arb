@@ -123,6 +123,7 @@
   "checkUpdate": "Check for updates",
   "discoverNewVersion": "Discover the new version",
   "checkUpdateError": "The current application is already the latest version",
+  "checkUpdateFailed": "Could not check for updates",
   "goDownload": "Go to download",
   "unknown": "Unknown",
   "country": "Country",

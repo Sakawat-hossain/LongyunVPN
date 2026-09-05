@@ -93,7 +93,17 @@ class CommonAction extends _$CommonAction {
     // at all, so there is nothing it could do with an update it found.
     if (Platform.isIOS) return;
     if (!ref.read(appSettingProvider).autoCheckUpdate) return;
-    final res = await request.checkForUpdate();
+    // checkForUpdate now throws when the check could not be made. An automatic
+    // check is background work nobody asked for, so a failure is logged and
+    // dropped rather than interrupting with a dialog — the manual check in
+    // Settings is where a person asking the question gets an answer.
+    final Map<String, dynamic>? res;
+    try {
+      res = await request.checkForUpdate();
+    } catch (e) {
+      commonPrint.log('auto update check failed: $e', logLevel: LogLevel.info);
+      return;
+    }
     // Automatic checks honor a previously-skipped version so the user isn't
     // re-nagged about it (a manual check from Settings bypasses this).
     final tagName = res?['tag_name']?.toString() ?? '';

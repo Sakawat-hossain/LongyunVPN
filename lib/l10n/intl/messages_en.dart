@@ -294,6 +294,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
       "The current application is already the latest version",
     ),
+    "checkUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not check for updates",
+    ),
     "checkingProgress": m1,
     "checkout": MessageLookupByLibrary.simpleMessage("Checkout"),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear Data"),

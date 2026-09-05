@@ -90,13 +90,22 @@ class AboutLinks extends StatelessWidget {
   const AboutLinks({super.key});
 
   Future<void> _checkUpdate(BuildContext context) async {
-    final data = await globalState.safeRun<Map<String, dynamic>?>(
-      request.checkForUpdate,
-      title: context.appLocalizations.checkUpdate,
-    );
-    globalState.rootRef
-        .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: data, isUser: true);
+    final l = context.appLocalizations;
+    try {
+      final data = await request.checkForUpdate();
+      globalState.rootRef
+          .read(commonActionProvider.notifier)
+          .checkUpdateResultHandle(data: data, isUser: true);
+    } catch (e) {
+      // A check that could not be made is not the same as being up to date.
+      // Routing the failure through checkUpdateResultHandle's null branch told
+      // people on an old build they had the newest one, which is how a release
+      // can sit unnoticed.
+      globalState.showMessage(
+        title: l.checkUpdate,
+        message: TextSpan(text: '${l.checkUpdateFailed}\n$e'),
+      );
+    }
   }
 
   @override

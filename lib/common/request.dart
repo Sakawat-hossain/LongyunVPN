@@ -255,27 +255,61 @@ class Request {
     return MemoryImage(data);
   }
 
+  /// Fetches the newest release, or null when this build is already it.
+  ///
+  /// Throws when the check could not be *made*. That distinction used to be
+  /// lost: every failure — a rate-limited API, no network, a malformed tag —
+  /// returned null, and the caller reports null as "already the latest
+  /// version". So a check that never happened told the user they were up to
+  /// date, and someone on an old build had no way to discover a new one.
+  ///
+  /// The rate limit is the likely one in practice. GitHub allows 60
+  /// unauthenticated calls an hour per IP, and while the VPN is connected this
+  /// request leaves from the exit node — an address shared by every user on
+  /// that node, so the quota is spent collectively and the API answers 403.
   Future<Map<String, dynamic>?> checkForUpdate() async {
+    final Response<dynamic> response;
     try {
-      final response = await dio.get(
+      response = await dio.get(
         'https://api.github.com/repos/$repository/releases/latest',
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          // Read the body ourselves rather than letting dio throw, so a 403
+          // can be named as a rate limit instead of a generic failure.
+          validateStatus: (_) => true,
+        ),
       );
-      if (response.statusCode != 200) return null;
-      final data = response.data as Map<String, dynamic>;
-      // Guard against a malformed/empty tag: calling replaceAll on a null (or
-      // non-String) tag_name used to throw and get swallowed as "no update".
-      final remoteVersion = data['tag_name'];
-      if (remoteVersion is! String || remoteVersion.isEmpty) return null;
-      final version = globalState.packageInfo.version;
-      final hasUpdate =
-          utils.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
-      if (!hasUpdate) return null;
-      return data;
     } catch (e) {
-      commonPrint.log('checkForUpdate failed', logLevel: LogLevel.warning);
-      return null;
+      commonPrint.log('checkForUpdate failed: $e', logLevel: LogLevel.warning);
+      throw describeNetworkError(e is DioException ? e.error ?? e : e);
     }
+    final status = response.statusCode;
+    if (status != 200) {
+      final isRateLimited =
+          status == 403 &&
+          response.headers.value('x-ratelimit-remaining') == '0';
+      final reason = isRateLimited
+          ? 'GitHub rate limit reached for this IP address. Try again later, '
+                'or disconnect the VPN and retry.'
+          : 'GitHub returned HTTP $status';
+      commonPrint.log('checkForUpdate: $reason', logLevel: LogLevel.warning);
+      throw reason;
+    }
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw 'GitHub returned an unexpected response';
+    }
+    // Guard against a malformed/empty tag: calling replaceAll on a null (or
+    // non-String) tag_name used to throw and get swallowed as "no update".
+    final remoteVersion = data['tag_name'];
+    if (remoteVersion is! String || remoteVersion.isEmpty) {
+      throw 'The latest release has no version tag';
+    }
+    final version = globalState.packageInfo.version;
+    final hasUpdate =
+        utils.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
+    if (!hasUpdate) return null;
+    return data;
   }
 
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {

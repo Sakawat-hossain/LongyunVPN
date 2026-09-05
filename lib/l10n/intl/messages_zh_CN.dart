@@ -224,6 +224,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("检查更新"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage("当前应用已经是最新版了"),
+    "checkUpdateFailed": MessageLookupByLibrary.simpleMessage("无法检查更新"),
     "checkingProgress": m1,
     "checkout": MessageLookupByLibrary.simpleMessage("结算"),
     "clearData": MessageLookupByLibrary.simpleMessage("清除数据"),

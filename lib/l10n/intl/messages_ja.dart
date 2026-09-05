@@ -240,6 +240,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage("アプリは最新版です"),
+    "checkUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "アップデートを確認できませんでした",
+    ),
     "checkingProgress": m1,
     "checkout": MessageLookupByLibrary.simpleMessage("お支払い"),
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
