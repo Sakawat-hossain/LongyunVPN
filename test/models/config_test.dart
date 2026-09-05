@@ -32,7 +32,8 @@ void main() {
       expect(restored.closeConnections, true);
       expect(restored.isAnimateToPage, true);
       expect(restored.autoCheckUpdate, true);
-      expect(restored.showLabel, false);
+      // Expanded on a fresh install; see sidebar_default_test.dart.
+      expect(restored.showLabel, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.testUrl, defaultTestUrl);

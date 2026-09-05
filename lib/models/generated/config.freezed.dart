@@ -15,7 +15,15 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettingProps {
 
- String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get crashlyticsTip;// Both default off. Crash reports and usage analytics leave the device, and
+ String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate;// Sidebar labels, on by default. A first-run desktop window showed a strip
+// of unlabelled icons and no hint that the menu button beside them would
+// name any of it, so the navigation had to be discovered by clicking each
+// one. Starting expanded means the app explains itself; the menu button
+// then collapses it for anyone who wants the space back.
+//
+// A default only applies where no config has been saved yet, so this
+// changes first runs and leaves everyone's existing choice alone.
+ bool get showLabel; bool get disclaimerAccepted; bool get crashlyticsTip;// Both default off. Crash reports and usage analytics leave the device, and
 // a VPN client is the last place to turn either on for someone without
 // asking. They are separate switches on purpose: agreeing to send a stack
 // trace when the app dies is a different decision from agreeing to
@@ -234,7 +242,7 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.analytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true}): _dashboardWidgets = dashboardWidgets;
+  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = true, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.analytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true}): _dashboardWidgets = dashboardWidgets;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
 @override final  String? locale;
@@ -254,6 +262,14 @@ class _AppSettingProps implements AppSettingProps {
 @override@JsonKey() final  String testUrl;
 @override@JsonKey() final  bool isAnimateToPage;
 @override@JsonKey() final  bool autoCheckUpdate;
+// Sidebar labels, on by default. A first-run desktop window showed a strip
+// of unlabelled icons and no hint that the menu button beside them would
+// name any of it, so the navigation had to be discovered by clicking each
+// one. Starting expanded means the app explains itself; the menu button
+// then collapses it for anyone who wants the space back.
+//
+// A default only applies where no config has been saved yet, so this
+// changes first runs and leaves everyone's existing choice alone.
 @override@JsonKey() final  bool showLabel;
 @override@JsonKey() final  bool disclaimerAccepted;
 @override@JsonKey() final  bool crashlyticsTip;

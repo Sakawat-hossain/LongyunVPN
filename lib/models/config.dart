@@ -84,7 +84,15 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(defaultTestUrl) String testUrl,
     @Default(true) bool isAnimateToPage,
     @Default(true) bool autoCheckUpdate,
-    @Default(false) bool showLabel,
+    // Sidebar labels, on by default. A first-run desktop window showed a strip
+    // of unlabelled icons and no hint that the menu button beside them would
+    // name any of it, so the navigation had to be discovered by clicking each
+    // one. Starting expanded means the app explains itself; the menu button
+    // then collapses it for anyone who wants the space back.
+    //
+    // A default only applies where no config has been saved yet, so this
+    // changes first runs and leaves everyone's existing choice alone.
+    @Default(true) bool showLabel,
     @Default(false) bool disclaimerAccepted,
     @Default(false) bool crashlyticsTip,
     // Both default off. Crash reports and usage analytics leave the device, and
