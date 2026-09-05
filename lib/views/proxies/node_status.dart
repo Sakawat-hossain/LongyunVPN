@@ -320,10 +320,23 @@ class _HealthRunner {
       } else {
         node.httpOk = false;
         node.latencyMs = null;
+        // The core reports why; this screen exists to diagnose nodes, so
+        // discarding the one field that explains a red row defeats the point.
+        final message = delay.message;
+        if (message != null && message.isNotEmpty) {
+          commonPrint.log(
+            'node status ${node.name}: $message',
+            logLevel: LogLevel.warning,
+          );
+        }
       }
-    } catch (_) {
+    } catch (e) {
       node.httpOk = false;
       node.latencyMs = null;
+      commonPrint.log(
+        'node status ${node.name} check failed: $e',
+        logLevel: LogLevel.warning,
+      );
     }
 
     node.checkedAt = DateTime.now();

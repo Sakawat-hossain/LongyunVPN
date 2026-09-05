@@ -96,9 +96,21 @@ Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
   ref
       .read(proxiesActionProvider.notifier)
       .setDelay(Delay(url: currentTestUrl, name: state.proxyName, value: 0));
-  ref
-      .read(proxiesActionProvider.notifier)
-      .setDelay(await coreController.getDelay(currentTestUrl, state.proxyName));
+  final delay = await coreController.getDelay(currentTestUrl, state.proxyName);
+  // The core says why a test failed — a refused connection, a DNS failure, a
+  // status the test URL was not expected to return — and that reason was
+  // parsed into Delay.message and then dropped on the floor. Every cause
+  // rendered as the same red "timeout", so a node that is genuinely
+  // unreachable looked identical to a test URL the node's exit cannot fetch,
+  // which is the case where the tunnel works fine and only the ping does not.
+  final message = delay.message;
+  if ((delay.value ?? -1) <= 0 && message != null && message.isNotEmpty) {
+    commonPrint.log(
+      'delay test ${state.proxyName} failed via $currentTestUrl: $message',
+      logLevel: LogLevel.warning,
+    );
+  }
+  ref.read(proxiesActionProvider.notifier).setDelay(delay);
 }
 
 Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
