@@ -124,6 +124,8 @@
   "discoverNewVersion": "新バージョンを発見",
   "checkUpdateError": "アプリは最新版です",
   "checkUpdateFailed": "アップデートを確認できませんでした",
+  "pruneCacheDone": "キャッシュを整理しました",
+  "logsTestDone": "テストログを追加しました",
   "goDownload": "ダウンロードへ",
   "unknown": "不明",
   "country": "国",

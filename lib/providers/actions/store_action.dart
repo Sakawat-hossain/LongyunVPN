@@ -5,7 +5,11 @@ class StoreAction extends _$StoreAction {
   @override
   void build() {}
 
-  Future<void> shakingStore() async {
+  /// Deletes profile/script files no longer referenced by anything, and returns
+  /// how many went. The count is returned rather than discarded so the caller
+  /// can say something happened — a button that does its work in silence is
+  /// indistinguishable from one that is broken.
+  Future<int> shakingStore() async {
     final profileIds = ref.read(
       profilesProvider.select((state) => state.map((item) => item.id)),
     );
@@ -26,6 +30,7 @@ class StoreAction extends _$StoreAction {
       });
       await Future.wait(deleteFutures);
     }
+    return pathsToDelete.length;
   }
 
   void savePreferencesDebounce() {

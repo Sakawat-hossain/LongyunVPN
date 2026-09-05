@@ -124,6 +124,8 @@
   "discoverNewVersion": "发现新版本",
   "checkUpdateError": "当前应用已经是最新版了",
   "checkUpdateFailed": "无法检查更新",
+  "pruneCacheDone": "缓存已清理",
+  "logsTestDone": "已添加测试日志",
   "goDownload": "前往下载",
   "unknown": "未知",
   "country": "区域",

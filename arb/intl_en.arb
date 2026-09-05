@@ -124,6 +124,8 @@
   "discoverNewVersion": "Discover the new version",
   "checkUpdateError": "The current application is already the latest version",
   "checkUpdateFailed": "Could not check for updates",
+  "pruneCacheDone": "Cache pruned",
+  "logsTestDone": "Test logs added",
   "goDownload": "Go to download",
   "unknown": "Unknown",
   "country": "Country",

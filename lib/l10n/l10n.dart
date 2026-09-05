@@ -964,6 +964,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Cache pruned`
+  String get pruneCacheDone {
+    return Intl.message(
+      'Cache pruned',
+      name: 'pruneCacheDone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test logs added`
+  String get logsTestDone {
+    return Intl.message(
+      'Test logs added',
+      name: 'logsTestDone',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Go to download`
   String get goDownload {
     return Intl.message(

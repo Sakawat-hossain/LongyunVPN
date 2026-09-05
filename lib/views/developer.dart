@@ -32,7 +32,8 @@ class DeveloperView extends ConsumerWidget {
           title: Text(appLocalizations.logsTest),
           minVerticalPadding: 12,
           onTap: () {
-            for (int i = 0; i < 1000; i++) {
+            const count = 1000;
+            for (int i = 0; i < count; i++) {
               ref
                   .read(logsProvider.notifier)
                   .add(
@@ -41,6 +42,10 @@ class DeveloperView extends ConsumerWidget {
                     ),
                   );
             }
+            // Say so. The logs go to a page that is hidden unless Logcat is
+            // switched on in Settings, so with it off this button filled a
+            // buffer nobody could see and looked like it did nothing at all.
+            context.showNotifier('${appLocalizations.logsTestDone} ($count)');
           },
         ),
         if (globalState.isPre)
@@ -85,9 +90,18 @@ class DeveloperView extends ConsumerWidget {
           title: Text(appLocalizations.pruneCache),
           minVerticalPadding: 12,
           onTap: () async {
-            await ref
+            // Report the count, including zero. This ran silently whether it
+            // removed a hundred files or found nothing to remove, so the only
+            // way to tell it had worked was that nothing happened — which is
+            // also what a broken button looks like.
+            final removed = await ref
                 .read(storeActionProvider.notifier)
                 .shakingStore();
+            if (context.mounted) {
+              context.showNotifier(
+                '${appLocalizations.pruneCacheDone} ($removed)',
+              );
+            }
           },
         ),
         // The exact mihomo config the app hands the core (written on setup at

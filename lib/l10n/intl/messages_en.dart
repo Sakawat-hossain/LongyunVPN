@@ -709,6 +709,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logs": MessageLookupByLibrary.simpleMessage("Logs"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Log capture records"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Logs test"),
+    "logsTestDone": MessageLookupByLibrary.simpleMessage("Test logs added"),
     "loopback": MessageLookupByLibrary.simpleMessage("Loopback unlock tool"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage(
       "Used for UWP loopback unlocking",
@@ -968,6 +969,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Proxy type"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
+    "pruneCacheDone": MessageLookupByLibrary.simpleMessage("Cache pruned"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR code"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(

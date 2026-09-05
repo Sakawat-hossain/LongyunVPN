@@ -124,6 +124,8 @@
   "discoverNewVersion": "Обнаружена новая версия",
   "checkUpdateError": "Текущее приложение уже является последней версией",
   "checkUpdateFailed": "Не удалось проверить обновления",
+  "pruneCacheDone": "Кэш очищен",
+  "logsTestDone": "Тестовые журналы добавлены",
   "goDownload": "Перейти к загрузке",
   "unknown": "Неизвестно",
   "country": "Страна",

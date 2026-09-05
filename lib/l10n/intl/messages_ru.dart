@@ -738,6 +738,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "logs": MessageLookupByLibrary.simpleMessage("Логи"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Записи захвата логов"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Тест журналов"),
+    "logsTestDone": MessageLookupByLibrary.simpleMessage(
+      "Тестовые журналы добавлены",
+    ),
     "loopback": MessageLookupByLibrary.simpleMessage(
       "Инструмент разблокировки Loopback",
     ),
@@ -1017,6 +1020,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Тип прокси"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
+    "pruneCacheDone": MessageLookupByLibrary.simpleMessage("Кэш очищен"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Чисто черный режим"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-код"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
