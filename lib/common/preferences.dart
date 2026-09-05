@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:longyunvpn/enum/enum.dart';
 import 'package:longyunvpn/models/models.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constant.dart';
+import 'print.dart';
 
 class Preferences {
   static Preferences? _instance;
@@ -127,7 +129,16 @@ class Preferences {
   Future<void> setXboardToken(String token) async {
     try {
       await _secureStorage.write(key: _xboardTokenKey, value: token);
-    } catch (_) {}
+    } catch (e) {
+      // A failed write is not visible until the next launch, when the token is
+      // simply not there and the user is asked to sign in again with nothing
+      // explaining why. getXboardToken fails closed deliberately; this one was
+      // failing closed silently, which is a different thing.
+      commonPrint.log(
+        'could not persist the account token: $e',
+        logLevel: LogLevel.error,
+      );
+    }
   }
 
   Future<void> clearXboardToken() async {

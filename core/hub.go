@@ -211,6 +211,20 @@ func handleResetTraffic() {
 
 func handleAsyncTestDelay(paramsString string, fn func(string)) {
 	mBatch.Go(paramsString, func() (bool, error) {
+		// handleAction recovers panics, but recover() only covers the goroutine
+		// it runs in and mBatch.Go starts a new one — so a panic in here is not
+		// caught by anything above and takes the process down. On Android that
+		// is the :remote process, which means the tunnel dies because a delay
+		// test went wrong. Recover here, report the node as unreachable, and
+		// let the rest of the batch finish.
+		defer func() {
+			if r := recover(); r != nil {
+				buf := make([]byte, 4096)
+				n := runtime.Stack(buf, false)
+				logError("panic in delay test: %v\n%s", r, buf[:n])
+				fn("")
+			}
+		}()
 		var params = &TestDelayParams{}
 		err := json.Unmarshal([]byte(paramsString), params)
 		if err != nil {
