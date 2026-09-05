@@ -106,7 +106,7 @@ dependencies:
   # The fork removes the windows: platform entry and nothing else; name and
   # version are unchanged so crashlytics/analytics (^4.13.0) still resolve.
   firebase_core: ^4.13.0
-  firebase_crashlytics: ^5.2.7
+  firebase_crashlytics: ^5.3.0
   firebase_analytics: ^12.4.6
 dependency_overrides:
   # Overridden rather than swapped: firebase_crashlytics and firebase_analytics
