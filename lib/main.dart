@@ -22,6 +22,10 @@ Future<void> main() async {
   // its own failures and the app carries on with local crash logging only.
   // Nothing is collected until the settings switches say so.
   await FirebaseService.init();
+  // Before anything can make an HTTPS request. On a Windows machine whose root
+  // store is incomplete, every call — sign-in, the panel API, fetching a
+  // subscription — fails the TLS handshake without this.
+  await CaBundle.install();
   try {
     if (system.isDesktop) {
       await RustLib.init();
