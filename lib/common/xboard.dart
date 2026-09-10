@@ -247,16 +247,50 @@ class XboardCommConfig {
     required this.isCaptcha,
   });
 
+  /// Xboard is loose about types here: a flag can arrive as 1, "1" or true,
+  /// and a list that is switched off arrives as the number 0 rather than an
+  /// empty array. A hard cast on any of them takes the whole config down, and
+  /// the config is what tells signup whether a verification code is required —
+  /// so one unexpected type made registration impossible rather than degraded.
+  static bool _flag(Object? value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final text = value.trim().toLowerCase();
+      return text == '1' || text == 'true';
+    }
+    return false;
+  }
+
+  /// Suffix list, however the panel chose to express it.
+  ///
+  /// `email_whitelist_suffix` is an array when the whitelist is on and the
+  /// number 0 when it is off. Anything that is not a list carries no suffixes,
+  /// and must not be read as one: treating 0 as data would produce a whitelist
+  /// of ["0"] and reject every address that does not end in a zero.
+  static List<String> _suffixes(Object? value) {
+    if (value is List) {
+      return value
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+    if (value is String) {
+      return value
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+    return const [];
+  }
+
   factory XboardCommConfig.fromJson(Map<String, dynamic> json) {
     return XboardCommConfig(
-      isEmailVerify: (json['is_email_verify'] as num? ?? 0) != 0,
-      isInviteForce: (json['is_invite_force'] as num? ?? 0) != 0,
-      emailWhitelistSuffix:
-          (json['email_whitelist_suffix'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          const [],
-      isCaptcha: (json['is_captcha'] as num? ?? 0) != 0,
+      isEmailVerify: _flag(json['is_email_verify']),
+      isInviteForce: _flag(json['is_invite_force']),
+      emailWhitelistSuffix: _suffixes(json['email_whitelist_suffix']),
+      isCaptcha: _flag(json['is_captcha']),
     );
   }
 }

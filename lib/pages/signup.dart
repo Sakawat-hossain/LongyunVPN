@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:longyunvpn/enum/enum.dart';
 import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/providers/providers.dart';
 import 'package:flutter/material.dart';
@@ -44,11 +45,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   Future<void> _loadConfig() async {
     try {
       final config = await xboardApi.getCommConfig();
+      // Backing out of signup while this is in flight disposes the state, and
+      // setState on a disposed State throws.
+      if (!mounted) return;
       setState(() {
         _config = config;
         _isLoadingConfig = false;
       });
     } catch (e) {
+      // Log it as well as showing it. Without the config the form does not know
+      // whether a verification code is required, so a failure here is the
+      // difference between a registration that can succeed and one the panel
+      // will refuse — worth a line in the log, not just a banner that is gone
+      // as soon as the screen is.
+      commonPrint.log(
+        'signup config failed to load: $e',
+        logLevel: LogLevel.error,
+      );
+      if (!mounted) return;
       setState(() {
         _configError = e.toString();
         _isLoadingConfig = false;
@@ -119,7 +133,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       await xboardApi.sendEmailVerifyCode(_emailController.text.trim());
       _startCooldown();
     } catch (e) {
-      setState(() => _sendCodeError = e.toString());
+      commonPrint.log(
+        'send verification code failed: $e',
+        logLevel: LogLevel.warning,
+      );
+      if (mounted) setState(() => _sendCodeError = e.toString());
     } finally {
       if (mounted) setState(() => _isSendingCode = false);
     }
