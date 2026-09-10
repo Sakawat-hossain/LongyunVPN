@@ -86,6 +86,16 @@ class App {
         false;
   }
 
+  /// Why Android last ended this app's process — an OEM battery manager, low
+  /// memory, an ANR, a native crash — as reported by ApplicationExitInfo.
+  ///
+  /// Keys are `reason` (an ApplicationExitInfo.REASON_* int), `timestamp`
+  /// (epoch milliseconds) and `description`. Null below Android 11, where the
+  /// system keeps no such record.
+  Future<Map<String, Object?>?> getLastExitInfo() async {
+    return methodChannel.invokeMapMethod<String, Object?>('getLastExitInfo');
+  }
+
   /// Icons resolved during this run, keyed by package name. A null value is a
   /// remembered miss, so a package with no readable icon is not asked for again
   /// on every rebuild.
