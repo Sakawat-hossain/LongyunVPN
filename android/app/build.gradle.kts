@@ -155,9 +155,23 @@ flutter {
 dependencies {
     implementation(project(":service"))
     implementation(project(":common"))
+    implementation(project(":core"))
     implementation(libs.core.splashscreen)
     implementation(libs.gson)
     implementation(libs.smali.dexlib2) {
         exclude(group = "com.google.guava", module = "guava")
     }
+}
+// Unit tests for the Android layer live under android/tests/<module> rather
+// than each module's src/test. A second android/dependencies block is additive
+// in the Kotlin DSL, so this sits apart from the release configuration above.
+android {
+    sourceSets {
+        getByName("test").java.setSrcDirs(listOf("../tests/app"))
+    }
+}
+
+dependencies {
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -14,13 +14,17 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
     }
 
-    buildFeatures {
-        aidl = true
-    }
+    // No AIDL any more: the service runs in the app's own process and is bound
+    // locally, so there is no cross-process interface left to generate.
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        // Unit tests live under android/tests/<module> rather than src/test.
+        getByName("test").java.setSrcDirs(listOf("../tests/service"))
     }
 
     buildTypes {
@@ -45,4 +49,6 @@ dependencies {
     implementation(project(":common"))
     implementation(libs.gson)
     implementation(libs.androidx.core)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

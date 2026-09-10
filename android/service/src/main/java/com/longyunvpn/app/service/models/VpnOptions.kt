@@ -1,21 +1,17 @@
 package com.longyunvpn.app.service.models
 
-import android.os.Parcelable
 import com.longyunvpn.app.common.AccessControlMode
-import kotlinx.parcelize.Parcelize
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 
-@Parcelize
 data class AccessControlProps(
     val enable: Boolean,
     val mode: AccessControlMode,
     val acceptList: List<String>,
     val rejectList: List<String>,
-) : Parcelable
+)
 
-@Parcelize
 data class VpnOptions(
     val enable: Boolean,
     val port: Int,
@@ -27,15 +23,13 @@ data class VpnOptions(
     val bypassDomain: List<String>,
     val stack: String,
     val routeAddress: List<String>,
-) : Parcelable
+)
 
-data class CIDR(val address: InetAddress, val prefixLength: Int)
+data class CIDR(
+    val address: InetAddress,
+    val prefixLength: Int,
+)
 
-// Each address is parsed exactly once and then sorted by the resulting type.
-// Filtering with a separate isIpv4()/isIpv6() predicate first re-parsed every
-// entry through InetAddress a second time, which is pure waste on the route
-// tables that matter — a bypass-China list runs to thousands of CIDRs and this
-// runs while the tunnel is coming up.
 fun VpnOptions.getIpv4RouteAddress(): List<CIDR> = routeAddress
     .map(String::toCIDR)
     .filter { it.address is Inet4Address }

@@ -1,3 +1,17 @@
+// JNI bridge between the Kotlin Core object and liblongyuncore.
+//
+// Every callback below deletes the local references it creates and clears any
+// exception the Kotlin side throws before calling into JNI again. Threads now
+// stay attached across calls (see jni_helper.cpp), so nothing reclaims locals by
+// detaching after each callback, and a JNI call made with an exception pending
+// is undefined.
+//
+// resolverProcess is the one that mattered. It runs once per connection, and
+// the Kotlin side calls getConnectionOwnerUid(), which can throw while the VPN
+// is coming up or going down. That used to return here as a null jstring with
+// the exception still pending, and reading it made a JNI call on a null object:
+// a hard native crash, only on the devices and at the moments where it throws.
+
 #include <jni.h>
 
 #ifdef LONGYUN_CORE
@@ -54,8 +68,6 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_longyunvpn_app_core_Core_getTraffic(JNIEnv *env, jobject thiz,
                                            const jboolean only_statistics_proxy) {
-    // scoped_string frees the Go-allocated buffer once it has been copied into
-    // the Java string; the core no longer frees it before we read it.
     scoped_string traffic = getTraffic(only_statistics_proxy);
     return new_string(traffic);
 }
@@ -64,8 +76,8 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_longyunvpn_app_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
                                                 const jboolean only_statistics_proxy) {
-    scoped_string total = getTotalTraffic(only_statistics_proxy);
-    return new_string(total);
+    scoped_string traffic = getTotalTraffic(only_statistics_proxy);
+    return new_string(traffic);
 }
 
 extern "C"
@@ -102,6 +114,7 @@ static void call_tun_interface_protect_impl(void *tun_interface, const int fd) {
     env->CallVoidMethod(static_cast<jobject>(tun_interface),
                         m_tun_interface_protect,
                         fd);
+    jni_clear_exception(env);
 }
 
 static char *
@@ -110,21 +123,39 @@ call_tun_interface_resolve_process_impl(void *tun_interface, const int protocol,
                                         const char *target,
                                         const int uid) {
     ATTACH_JNI();
-    const auto packageName = reinterpret_cast<jstring>(env->CallObjectMethod(
+    const auto source_string = new_string(source);
+    const auto target_string = new_string(target);
+    const auto package_name = reinterpret_cast<jstring>(env->CallObjectMethod(
             static_cast<jobject>(tun_interface),
             m_tun_interface_resolve_process,
             protocol,
-            new_string(source),
-            new_string(target),
+            source_string,
+            target_string,
             uid));
-    return get_string(packageName);
+    jni_clear_exception(env);
+    if (source_string != nullptr) {
+        env->DeleteLocalRef(source_string);
+    }
+    if (target_string != nullptr) {
+        env->DeleteLocalRef(target_string);
+    }
+    const auto result = get_string(package_name);
+    if (package_name != nullptr) {
+        env->DeleteLocalRef(package_name);
+    }
+    return result;
 }
 
 static void call_invoke_interface_result_impl(void *invoke_interface, const char *data) {
     ATTACH_JNI();
+    const auto value = new_string(data);
     env->CallVoidMethod(static_cast<jobject>(invoke_interface),
                         m_invoke_interface_result,
-                        new_string(data));
+                        value);
+    jni_clear_exception(env);
+    if (value != nullptr) {
+        env->DeleteLocalRef(value);
+    }
 }
 
 extern "C"
@@ -192,11 +223,13 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_longyunvpn_app_core_Core_getTraffic(JNIEnv *env, jobject thiz,
                                            const jboolean only_statistics_proxy) {
+    return env->NewStringUTF("{}");
 }
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_longyunvpn_app_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
                                                 const jboolean only_statistics_proxy) {
+    return env->NewStringUTF("{}");
 }
 
 extern "C"

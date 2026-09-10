@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Referenced as @string/LongyunVPN by the app manifest's label. -->
     <string name="LongyunVPN">LongyunVPN</string>
+    <!-- The ported service layer reads these by name: the VPN session label and
+         the foreground-service notification channel. -->
+    <string name="app_name">LongyunVPN</string>
+    <string name="service_channel_name">LongyunVPN Service</string>
 </resources>

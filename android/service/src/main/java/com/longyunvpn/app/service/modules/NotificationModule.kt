@@ -14,50 +14,41 @@ import com.longyunvpn.app.common.QuickAction
 import com.longyunvpn.app.common.quickIntent
 import com.longyunvpn.app.common.receiveBroadcastFlow
 import com.longyunvpn.app.common.startForeground
-import com.longyunvpn.app.common.tickerFlow
 import com.longyunvpn.app.common.toPendingIntent
 import com.longyunvpn.app.core.Core
 import com.longyunvpn.app.service.R
-import com.longyunvpn.app.service.State
+import com.longyunvpn.app.service.ServiceConfig
 import com.longyunvpn.app.service.models.NotificationParams
 import com.longyunvpn.app.service.models.getSpeedTrafficText
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-data class ExtendedNotificationParams(
+private data class ExtendedNotificationParams(
     val title: String,
     val stopText: String,
-    val onlyStatisticsProxy: Boolean,
     val contentText: String,
 )
 
-val NotificationParams.extended: ExtendedNotificationParams
+private val NotificationParams.extended: ExtendedNotificationParams
     get() = ExtendedNotificationParams(
-        title, stopText, onlyStatisticsProxy, Core.getSpeedTrafficText(onlyStatisticsProxy)
+        title,
+        stopText,
+        Core.getSpeedTrafficText(onlyStatisticsProxy),
     )
 
-class NotificationModule(private val service: Service) : Module() {
-    private val scope = CoroutineScope(Dispatchers.Default)
-
-    override fun onInstall() {
-        // Post a notification immediately, before anything can filter.
-        //
-        // This used to sit *after* the collect below, where it was unreachable —
-        // collect on an endless flow never returns. That mattered because the
-        // flow only emits while the screen is on, so starting with the screen
-        // off (boot auto-connect, Always-on VPN) meant update() never ran,
-        // startForeground() was never called, and the system killed the service
-        // for missing its five-second deadline.
-        update(
-            (State.notificationParamsFlow.value ?: NotificationParams()).extended
-        )
+internal class NotificationModule(
+    private val service: Service,
+    private val scope: CoroutineScope,
+) : ServiceModule {
+    override fun start() {
+        update(ServiceConfig.notificationParams.value.extended)
         scope.launch {
             val screenFlow = service.receiveBroadcastFlow {
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -69,35 +60,36 @@ class NotificationModule(private val service: Service) : Module() {
             }
 
             combine(
-                tickerFlow(1000, 0), State.notificationParamsFlow, screenFlow
+                flow {
+                    while (true) {
+                        delay(1_000)
+                        emit(Unit)
+                    }
+                },
+                ServiceConfig.notificationParams,
+                screenFlow,
             ) { _, params, screenOn ->
-                params?.extended to screenOn
-            }.filter { (params, screenOn) -> params != null && screenOn }
-                .distinctUntilChanged { old, new -> old.first == new.first && old.second == new.second }
-                .collect { (params, _) ->
-                    update(params!!)
-                }
+                params.takeIf { screenOn }?.extended
+            }.filterNotNull()
+                .distinctUntilChanged()
+                .collect(::update)
         }
     }
 
-    private fun isScreenOn(): Boolean {
-        val pm = service.getSystemService<PowerManager>()
-        return when (pm != null) {
-            true -> pm.isInteractive
-            false -> true
-        }
-    }
+    private fun isScreenOn() =
+        service.getSystemService<PowerManager>()?.isInteractive ?: true
 
     private val notificationBuilder: NotificationCompat.Builder by lazy {
-        val intent = Intent().setComponent(Components.MAIN_ACTIVITY)
+        val intent = Intent().setComponent(Components.mainActivity)
 
         NotificationCompat.Builder(
-            service, GlobalState.NOTIFICATION_CHANNEL
+            service,
+            GlobalState.NOTIFICATION_CHANNEL,
         ).apply {
             setSmallIcon(R.drawable.ic_service)
             setContentTitle("LongyunVPN")
             setContentIntent(intent.toPendingIntent)
-            setPriority(NotificationCompat.PRIORITY_HIGH)
+            setPriority(NotificationCompat.PRIORITY_LOW)
             setCategory(NotificationCompat.CATEGORY_SERVICE)
             setOngoing(true)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -105,9 +97,6 @@ class NotificationModule(private val service: Service) : Module() {
             }
             setShowWhen(true)
             setOnlyAlertOnce(true)
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//                setRequestPromotedOngoing(true)
-//            }
         }
     }
 
@@ -118,17 +107,20 @@ class NotificationModule(private val service: Service) : Module() {
                 setContentText(params.contentText)
                 clearActions()
                 addAction(
-                    0, params.stopText, QuickAction.STOP.quickIntent.toPendingIntent
+                    0,
+                    params.stopText,
+                    QuickAction.STOP.quickIntent.toPendingIntent,
                 ).build()
-            })
+            },
+        )
     }
 
-    override fun onUninstall() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    @Suppress("DEPRECATION")
+    override fun stop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             service.stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
             service.stopForeground(true)
         }
-        scope.cancel()
     }
 }

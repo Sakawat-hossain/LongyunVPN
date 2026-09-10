@@ -28,6 +28,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    sourceSets {
+        // Unit tests live under android/tests/<module> rather than src/test.
+        getByName("test").java.setSrcDirs(listOf("../tests/common"))
+    }
+
     testOptions {
         unitTests {
             // android.jar on the unit-test classpath is stubs that throw by
