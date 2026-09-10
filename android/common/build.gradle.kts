@@ -28,6 +28,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    testOptions {
+        unitTests {
+            // android.jar on the unit-test classpath is stubs that throw by
+            // default. The logic under test here is plain Kotlin that only
+            // brushes against Android types, so returning defaults lets it run
+            // on the JVM instead of needing a device.
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 kotlin {
@@ -39,4 +48,7 @@ kotlin {
 dependencies {
     implementation(libs.androidx.core)
     implementation(libs.gson)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
