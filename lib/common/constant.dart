@@ -10,6 +10,14 @@ import 'package:longyunvpn/models/models.dart';
 import 'package:flutter/material.dart';
 
 const appName = 'LongyunVPN';
+
+/// The brand as it is written for people to read - on the panel, in the
+/// subscription name and in the desktop window's title bar.
+///
+/// [appName] stays the plain-ASCII identifier and is what everything
+/// machine-facing keeps using: install paths, the Windows service, the core
+/// binary, release filenames. Those must not acquire two CJK characters.
+const appBrandName = '龙云 LongyunVPN';
 const xboardBaseUrl = 'https://admin.jsssbd.com/api/v1';
 const xboardPanelUrl = 'https://admin.jsssbd.com/';
 const appHelperService = 'LongyunVPNHelperService';

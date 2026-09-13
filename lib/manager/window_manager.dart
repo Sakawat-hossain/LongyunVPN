@@ -259,10 +259,56 @@ class _WindowHeaderState extends State<WindowHeader> {
             ),
           ),
           if (system.isMacOS)
-            const Text(appName)
+            // Centred: the traffic lights own the left corner on macOS.
+            const _WindowTitle()
           else ...[
+            // Ignores pointers so the brand does not swallow the window drag.
+            // The strip behind it is the drag handle, and a label that ate the
+            // gesture would make the one obvious place to grab the window the
+            // one place you cannot.
+            const Positioned(
+              left: 0,
+              child: IgnorePointer(child: _WindowTitle()),
+            ),
             Positioned(right: 0, child: _buildActions()),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The app's identity in the title bar: the mark, then the brand name.
+///
+/// The strip used to be blank apart from the window buttons, so the window
+/// carried no name anywhere on screen once it was open.
+class _WindowTitle extends StatelessWidget {
+  const _WindowTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    // The macOS strip is 28px against 40 elsewhere, so it gets the smaller set.
+    final compact = system.isMacOS;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 14),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/images/icon.png',
+            width: compact ? 15 : 18,
+            height: compact ? 15 : 18,
+            filterQuality: FilterQuality.medium,
+          ),
+          SizedBox(width: compact ? 6 : 8),
+          Text(
+            appBrandName,
+            style: context.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+              color: context.colorScheme.onSurface,
+            ),
+          ),
         ],
       ),
     );
