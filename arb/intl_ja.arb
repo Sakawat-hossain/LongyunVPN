@@ -749,5 +749,14 @@
   "resetSubscribeUrlTip": "新しいサブスクリプションリンクとノード認証情報が生成されます。他の端末では、新しいリンクを取り込むまで接続できなくなります。続行しますか？",
   "resetSubscribeUrlSuccess": "サブスクリプション URL をリセットし、再取得しました",
   "connectAction": "接続",
-  "disconnectAction": "切断"
+  "disconnectAction": "切断",
+  "orderHistory": "注文履歴",
+  "noOrders": "注文はありません",
+  "orderPending": "未払い",
+  "orderProcessing": "処理中",
+  "orderCancelled": "キャンセル済み",
+  "orderCompleted": "完了",
+  "orderDiscounted": "割引適用",
+  "cancelOrder": "注文をキャンセル",
+  "orderCancelled_success": "注文をキャンセルしました"
 }

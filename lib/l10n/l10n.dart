@@ -5983,6 +5983,86 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Order history`
+  String get orderHistory {
+    return Intl.message(
+      'Order history',
+      name: 'orderHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No orders yet`
+  String get noOrders {
+    return Intl.message('No orders yet', name: 'noOrders', desc: '', args: []);
+  }
+
+  /// `Unpaid`
+  String get orderPending {
+    return Intl.message('Unpaid', name: 'orderPending', desc: '', args: []);
+  }
+
+  /// `Processing`
+  String get orderProcessing {
+    return Intl.message(
+      'Processing',
+      name: 'orderProcessing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancelled`
+  String get orderCancelled {
+    return Intl.message(
+      'Cancelled',
+      name: 'orderCancelled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Completed`
+  String get orderCompleted {
+    return Intl.message(
+      'Completed',
+      name: 'orderCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discounted`
+  String get orderDiscounted {
+    return Intl.message(
+      'Discounted',
+      name: 'orderDiscounted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel order`
+  String get cancelOrder {
+    return Intl.message(
+      'Cancel order',
+      name: 'cancelOrder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Order cancelled`
+  String get orderCancelled_success {
+    return Intl.message(
+      'Order cancelled',
+      name: 'orderCancelled_success',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

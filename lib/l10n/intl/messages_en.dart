@@ -287,6 +287,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The cache is corrupt. Do you want to clear it?",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "cancelOrder": MessageLookupByLibrary.simpleMessage("Cancel order"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
     ),
@@ -797,6 +798,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "No nodes found in the active profile.",
     ),
     "noNodesFoundTitle": MessageLookupByLibrary.simpleMessage("No nodes found"),
+    "noOrders": MessageLookupByLibrary.simpleMessage("No orders yet"),
     "noPaymentMethods": MessageLookupByLibrary.simpleMessage(
       "No payment methods are available.",
     ),
@@ -842,6 +844,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "openSettings": MessageLookupByLibrary.simpleMessage("Open settings"),
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
+    "orderCancelled": MessageLookupByLibrary.simpleMessage("Cancelled"),
+    "orderCancelled_success": MessageLookupByLibrary.simpleMessage(
+      "Order cancelled",
+    ),
+    "orderCompleted": MessageLookupByLibrary.simpleMessage("Completed"),
+    "orderDiscounted": MessageLookupByLibrary.simpleMessage("Discounted"),
+    "orderHistory": MessageLookupByLibrary.simpleMessage("Order history"),
+    "orderPending": MessageLookupByLibrary.simpleMessage("Unpaid"),
+    "orderProcessing": MessageLookupByLibrary.simpleMessage("Processing"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
     "otherContributors": MessageLookupByLibrary.simpleMessage(
       "Other contributors",

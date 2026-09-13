@@ -749,5 +749,14 @@
   "resetSubscribeUrlTip": "This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?",
   "resetSubscribeUrlSuccess": "Subscription URL reset and re-imported",
   "connectAction": "Connect",
-  "disconnectAction": "Disconnect"
+  "disconnectAction": "Disconnect",
+  "orderHistory": "Order history",
+  "noOrders": "No orders yet",
+  "orderPending": "Unpaid",
+  "orderProcessing": "Processing",
+  "orderCancelled": "Cancelled",
+  "orderCompleted": "Completed",
+  "orderDiscounted": "Discounted",
+  "cancelOrder": "Cancel order",
+  "orderCancelled_success": "Order cancelled"
 }

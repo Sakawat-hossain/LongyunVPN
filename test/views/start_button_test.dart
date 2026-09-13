@@ -50,10 +50,10 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('says what it does while disconnected', (tester) async {
+  testWidgets('says where the tunnel is while disconnected', (tester) async {
     await pumpButton(tester, runTime: null);
 
-    expect(find.text('Connect'), findsOneWidget);
+    expect(find.text('Disconnected'), findsOneWidget);
   });
 
   testWidgets('uses a power symbol, not a play symbol', (tester) async {
@@ -70,7 +70,7 @@ void main() {
     await pumpButton(tester, runTime: 0);
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Connect'), findsNothing);
+    expect(find.text('Disconnected'), findsNothing);
     // Whatever the elapsed time renders as, it is not the resting label.
     expect(find.byType(Text), findsWidgets);
   });

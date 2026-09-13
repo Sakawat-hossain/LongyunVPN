@@ -749,5 +749,14 @@
   "resetSubscribeUrlTip": "将生成新的订阅链接和新的节点凭据。在其他设备上导入新链接之前，这些设备将无法连接。是否继续？",
   "resetSubscribeUrlSuccess": "订阅链接已重置并重新导入",
   "connectAction": "连接",
-  "disconnectAction": "断开"
+  "disconnectAction": "断开",
+  "orderHistory": "订单记录",
+  "noOrders": "暂无订单",
+  "orderPending": "待支付",
+  "orderProcessing": "处理中",
+  "orderCancelled": "已取消",
+  "orderCompleted": "已完成",
+  "orderDiscounted": "已折抵",
+  "cancelOrder": "取消订单",
+  "orderCancelled_success": "订单已取消"
 }

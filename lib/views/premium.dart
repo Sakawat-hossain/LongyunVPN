@@ -24,6 +24,7 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     Future(() {
       if (!mounted) return;
       ref.read(premiumProvider.notifier).loadPlans();
+      ref.read(premiumProvider.notifier).loadOrders();
     });
   }
 
@@ -197,7 +198,195 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
           ),
           const SizedBox(height: 16),
         ],
+        _OrderHistory(
+          orders: state.orders,
+          loading: state.ordersLoading,
+          formatPrice: _formatPrice,
+          onCancel: _onCancelOrder,
+        ),
       ],
+    );
+  }
+
+  Future<void> _onCancelOrder(XboardOrder order) async {
+    final l = context.appLocalizations;
+    final confirmed = await globalState.showMessage(
+      title: l.cancelOrder,
+      message: TextSpan(text: order.tradeNo),
+    );
+    if (confirmed != true || !mounted) return;
+    // _safe reports failure as null, which a void result cannot express, so the
+    // call returns a value of its own.
+    final done = await _safe(() async {
+      await ref.read(premiumProvider.notifier).cancelOrder(order.tradeNo);
+      return true;
+    });
+    if (!mounted || done != true) return;
+    globalState.showNotifier(l.orderCancelled_success);
+  }
+}
+
+/// The account's order history, under the plan cards.
+///
+/// Hidden entirely while it is loading and while it is empty for an account
+/// that has never ordered: a permanently empty "Order history" heading is worse
+/// than no heading, and this page's job is selling a plan.
+class _OrderHistory extends StatelessWidget {
+  final List<XboardOrder> orders;
+  final bool loading;
+  final String Function(int cents) formatPrice;
+  final Future<void> Function(XboardOrder order) onCancel;
+
+  const _OrderHistory({
+    required this.orders,
+    required this.loading,
+    required this.formatPrice,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (orders.isEmpty) return const SizedBox.shrink();
+    final l = context.appLocalizations;
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
+          child: Text(
+            l.orderHistory,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        for (final order in orders) ...[
+          _OrderTile(
+            order: order,
+            formatPrice: formatPrice,
+            onCancel: onCancel,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+class _OrderTile extends StatelessWidget {
+  final XboardOrder order;
+  final String Function(int cents) formatPrice;
+  final Future<void> Function(XboardOrder order) onCancel;
+
+  const _OrderTile({
+    required this.order,
+    required this.formatPrice,
+    required this.onCancel,
+  });
+
+  /// Panel status codes: 0 pending, 1 processing, 2 cancelled, 3 completed,
+  /// 4 discounted (absorbed into an upgrade).
+  (String, Color) _status(BuildContext context) {
+    final l = context.appLocalizations;
+    final scheme = Theme.of(context).colorScheme;
+    return switch (order.status) {
+      0 => (l.orderPending, const Color(0xFFFB8C00)),
+      1 => (l.orderProcessing, scheme.primary),
+      2 => (l.orderCancelled, scheme.outline),
+      3 => (l.orderCompleted, const Color(0xFF43A047)),
+      4 => (l.orderDiscounted, scheme.outline),
+      _ => ('', scheme.outline),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final (statusText, statusColor) = _status(context);
+    final periodLabel = xboardPeriods[order.period];
+    final created = order.createdAt;
+    return CommonCard(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    order.planName ?? order.tradeNo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: statusColor.withValues(alpha: 0.14),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                if (periodLabel != null) ...[
+                  Text(
+                    periodLabel,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                if (created != null)
+                  Text(
+                    DateFormat('yyyy-MM-dd HH:mm').format(
+                      DateTime.fromMillisecondsSinceEpoch(created * 1000),
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                const Spacer(),
+                Text(
+                  formatPrice(order.totalAmount),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            if (order.isPayable) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => onCancel(order),
+                  child: Text(context.appLocalizations.cancelOrder),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

@@ -294,6 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Кэш поврежден. Хотите очистить его?",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
+    "cancelOrder": MessageLookupByLibrary.simpleMessage("Отменить заказ"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
     ),
@@ -840,6 +841,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noNodesFoundTitle": MessageLookupByLibrary.simpleMessage(
       "Узлы не найдены",
     ),
+    "noOrders": MessageLookupByLibrary.simpleMessage("Заказов пока нет"),
     "noPaymentMethods": MessageLookupByLibrary.simpleMessage(
       "Нет доступных способов оплаты.",
     ),
@@ -885,6 +887,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "openSettings": MessageLookupByLibrary.simpleMessage("Открыть настройки"),
     "optional": MessageLookupByLibrary.simpleMessage("Необязательно"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
+    "orderCancelled": MessageLookupByLibrary.simpleMessage("Отменён"),
+    "orderCancelled_success": MessageLookupByLibrary.simpleMessage(
+      "Заказ отменён",
+    ),
+    "orderCompleted": MessageLookupByLibrary.simpleMessage("Завершён"),
+    "orderDiscounted": MessageLookupByLibrary.simpleMessage("Зачтён"),
+    "orderHistory": MessageLookupByLibrary.simpleMessage("История заказов"),
+    "orderPending": MessageLookupByLibrary.simpleMessage("Не оплачен"),
+    "orderProcessing": MessageLookupByLibrary.simpleMessage("Обработка"),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
     "otherContributors": MessageLookupByLibrary.simpleMessage(
       "Другие участники",

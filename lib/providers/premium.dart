@@ -15,12 +15,18 @@ class PremiumState {
   final String? pendingTradeNo;
   final bool isPurchasing;
 
+  /// The account's order history, newest first.
+  final List<XboardOrder> orders;
+  final bool ordersLoading;
+
   const PremiumState({
     this.plans = const [],
     this.isLoading = false,
     this.error,
     this.pendingTradeNo,
     this.isPurchasing = false,
+    this.orders = const [],
+    this.ordersLoading = false,
   });
 
   PremiumState copyWith({
@@ -32,6 +38,8 @@ class PremiumState {
     String? pendingTradeNo,
     bool clearPendingTradeNo = false,
     bool? isPurchasing,
+    List<XboardOrder>? orders,
+    bool? ordersLoading,
   }) {
     return PremiumState(
       plans: plans ?? this.plans,
@@ -40,6 +48,8 @@ class PremiumState {
       pendingTradeNo:
           clearPendingTradeNo ? null : (pendingTradeNo ?? this.pendingTradeNo),
       isPurchasing: isPurchasing ?? this.isPurchasing,
+      orders: orders ?? this.orders,
+      ordersLoading: ordersLoading ?? this.ordersLoading,
     );
   }
 }
@@ -56,6 +66,30 @@ class PremiumNotifier extends Notifier<PremiumState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  /// Loads the order history. Never fatal: the plans on this page are what the
+  /// user came for, and a history that failed to load must not take them with
+  /// it — the section just stays empty.
+  Future<void> loadOrders() async {
+    state = state.copyWith(ordersLoading: true);
+    try {
+      final orders = await xboardApi.getOrders();
+      state = state.copyWith(orders: orders, ordersLoading: false);
+    } catch (e) {
+      commonPrint.log('order history failed to load: $e',
+          logLevel: LogLevel.warning);
+      state = state.copyWith(ordersLoading: false);
+    }
+  }
+
+  /// Cancels an unpaid order, then re-reads the list so the row reflects it.
+  Future<void> cancelOrder(String tradeNo) async {
+    await xboardApi.cancelOrder(tradeNo);
+    if (state.pendingTradeNo == tradeNo) {
+      state = state.copyWith(clearPendingTradeNo: true);
+    }
+    await loadOrders();
   }
 
   Future<List<XboardPaymentMethod>> loadPaymentMethods() {
@@ -108,6 +142,7 @@ class PremiumNotifier extends Notifier<PremiumState> {
     // Home to connect, so land there instead.
     ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.dashboard);
     state = state.copyWith(clearPendingTradeNo: true);
+    await loadOrders();
     return true;
   }
 }

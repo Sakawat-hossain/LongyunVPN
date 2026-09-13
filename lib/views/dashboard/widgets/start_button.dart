@@ -102,7 +102,7 @@ class _StartButtonState extends ConsumerState<StartButton>
             .computeTextSize(Text(text, style: labelStyle))
             .width +
         padding;
-    final restingWidth = measure(appLocalizations.connectAction, 16);
+    final restingWidth = measure(appLocalizations.disconnected, 16);
     final runningWidth = suspend
         ? measure(appLocalizations.suspended, 24)
         : measure(utils.getTimeDifference(DateTime.now()), 16);
@@ -215,7 +215,9 @@ class _StartButtonState extends ConsumerState<StartButton>
               } else if (started) {
                 text = utils.getTimeText(ref.watch(runTimeProvider));
               } else {
-                text = appLocalizations.connectAction;
+                // The state, not the action. The label reports where the tunnel
+                // is; the tooltip below says what pressing will do.
+                text = appLocalizations.disconnected;
               }
               return Text(
                 text,

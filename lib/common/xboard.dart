@@ -146,6 +146,61 @@ const xboardPeriods = <String, String>{
   'onetime_price': 'One-time',
 };
 
+/// One row of the account's order history, from `GET /user/order/fetch`.
+///
+/// The panel runs `period` back through its legacy mapping before sending it,
+/// so it arrives as the same `*_price` key the purchase flow sends up and
+/// [xboardPeriods] already has a label for. `plan` is the eager-loaded plan,
+/// present for orders whose plan still exists.
+class XboardOrder {
+  final String tradeNo;
+  final String period;
+
+  /// Total in cents (分), the same unit the plan prices use.
+  final int totalAmount;
+
+  /// 0 pending · 1 processing · 2 cancelled · 3 completed · 4 discounted.
+  final int status;
+  final int? createdAt;
+  final int? paidAt;
+  final String? planName;
+
+  XboardOrder({
+    required this.tradeNo,
+    required this.period,
+    required this.totalAmount,
+    required this.status,
+    this.createdAt,
+    this.paidAt,
+    this.planName,
+  });
+
+  /// Still awaiting payment, so it is the one state the user can act on.
+  bool get isPayable => status == 0;
+
+  factory XboardOrder.fromJson(Map<String, dynamic> json) {
+    final plan = json['plan'];
+    return XboardOrder(
+      tradeNo: json['trade_no']?.toString() ?? '',
+      period: json['period']?.toString() ?? '',
+      // Xboard is loose with numeric types here — an amount can arrive as an
+      // int, a string, or null on a fully-discounted order — so none of these
+      // are cast hard. One unexpected type would take the whole list down.
+      totalAmount: _int(json['total_amount']) ?? 0,
+      status: _int(json['status']) ?? 0,
+      createdAt: _int(json['created_at']),
+      paidAt: _int(json['paid_at']),
+      planName: plan is Map<String, dynamic> ? plan['name']?.toString() : null,
+    );
+  }
+
+  static int? _int(Object? value) {
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+}
+
 class XboardPlan {
   final int id;
   final String name;
@@ -536,6 +591,31 @@ class XboardApi {
       // `true` (or a non-string) means the panel completed payment without a
       // redirect — nothing to open.
       return null;
+    } catch (e) {
+      throw _toApiException(e);
+    }
+  }
+
+  /// The account's orders, newest first. Empty for an account that has never
+  /// ordered — which is not an error.
+  Future<List<XboardOrder>> getOrders() async {
+    try {
+      final response = await _dio.get('/user/order/fetch');
+      final data = response.data['data'];
+      if (data is! List) return const [];
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(XboardOrder.fromJson)
+          .toList();
+    } catch (e) {
+      throw _toApiException(e);
+    }
+  }
+
+  /// Cancels an unpaid order.
+  Future<void> cancelOrder(String tradeNo) async {
+    try {
+      await _dio.post('/user/order/cancel', data: {'trade_no': tradeNo});
     } catch (e) {
       throw _toApiException(e);
     }

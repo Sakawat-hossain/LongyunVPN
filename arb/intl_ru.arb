@@ -749,5 +749,14 @@
   "resetSubscribeUrlTip": "Будут созданы новая ссылка подписки и новые учётные данные узлов. Другие устройства перестанут подключаться, пока вы не импортируете на них новую ссылку. Продолжить?",
   "resetSubscribeUrlSuccess": "Ссылка подписки сброшена и импортирована заново",
   "connectAction": "Подключить",
-  "disconnectAction": "Отключить"
+  "disconnectAction": "Отключить",
+  "orderHistory": "История заказов",
+  "noOrders": "Заказов пока нет",
+  "orderPending": "Не оплачен",
+  "orderProcessing": "Обработка",
+  "orderCancelled": "Отменён",
+  "orderCompleted": "Завершён",
+  "orderDiscounted": "Зачтён",
+  "cancelOrder": "Отменить заказ",
+  "orderCancelled_success": "Заказ отменён"
 }
