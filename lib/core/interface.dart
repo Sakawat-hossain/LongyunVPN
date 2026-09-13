@@ -184,9 +184,19 @@ abstract class CoreHandlerInterface with CoreInterface {
     final data = await _invoke<Map<String, dynamic>>(
       method: ActionMethod.getProxies,
     );
-    return data != null
-        ? ProxiesData.fromJson(data)
-        : const ProxiesData(proxies: {}, all: []);
+    if (data == null) {
+      // A null here means the call was never answered — the transport is
+      // disconnected or the core did not reply in time. It does NOT mean the
+      // core has no proxies. Reporting it as an empty ProxiesData (which is
+      // what this used to do) made a transient drop indistinguishable from an
+      // account with no servers, and the caller dutifully replaced a good
+      // proxy list with nothing.
+      throw CoreUnavailableException(
+        ActionMethod.getProxies.name,
+        completer.isCompleted ? 'no reply from core' : 'transport disconnected',
+      );
+    }
+    return ProxiesData.fromJson(data);
   }
 
   @override

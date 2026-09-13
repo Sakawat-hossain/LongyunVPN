@@ -214,3 +214,21 @@ extension ActionResultExt on ActionResult {
     }
   }
 }
+
+/// Thrown when a core call could not be answered at all — the process is gone,
+/// the IPC transport is disconnected, or the call timed out.
+///
+/// This exists to keep "the core did not answer" distinguishable from "the core
+/// answered, and there is nothing there". Returning an empty result for both
+/// meant a one-second hiccup in the transport read exactly like an account with
+/// no servers: the proxy groups were replaced with an empty list and the
+/// Servers page showed "No Nodes Available" with nothing logged to explain it.
+class CoreUnavailableException implements Exception {
+  final String method;
+  final String reason;
+
+  const CoreUnavailableException(this.method, this.reason);
+
+  @override
+  String toString() => 'core unavailable during $method: $reason';
+}

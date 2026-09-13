@@ -85,35 +85,81 @@ class CoreService extends CoreHandlerInterface {
     );
   }
 
-  Future<void> start() async {
+  /// How long to wait for a started core to dial back in over the transport.
+  /// Bounded so a core that launches but never connects fails with a reason
+  /// rather than leaving preload awaiting a completer forever.
+  static const _connectTimeout = Duration(seconds: 15);
+
+  /// Starts the core process and waits for it to connect.
+  ///
+  /// Returns an empty string on success and a human-readable reason on failure,
+  /// which is the contract [preload] and `connectCore` already work to.
+  Future<String> start() async {
     if (_process != null) {
       await shutdown(false);
     }
     if (system.isWindows && await system.checkIsAdmin()) {
       final isSuccess = await request.startCoreByHelper(_transport.address);
       if (isSuccess) {
-        await _transport.connectionCompleter.future;
-        return;
+        return _awaitConnection();
       }
     }
     try {
       _process = await Process.start(appPath.corePath, [_transport.address]);
     } catch (e) {
-      commonPrint.log(
-        'Failed to start core process: $e',
-        logLevel: LogLevel.error,
-      );
+      // Reported now, not only logged. This used to return normally and preload
+      // answered '' regardless — which every caller reads as success — so a core
+      // that never started left the app displaying "connected" over nothing:
+      // every later call timed out, the proxy list came back empty, and the
+      // Servers page said "No Nodes Available" with no error anywhere to explain
+      // it. The desktop path had the same hole that was already closed for
+      // Android in CoreLib.preload.
+      final message = 'core process failed to start: $e';
+      commonPrint.log(message, logLevel: LogLevel.error);
       _handleInvokeCrashEvent();
-      return;
+      return message;
     }
-    _process?.stdout.listen((_) {});
-    _process?.stderr.listen((e) {
+    final process = _process!;
+    process.stdout.listen((_) {});
+    process.stderr.listen((e) {
       final error = utf8.decode(e);
       if (error.isNotEmpty) {
         commonPrint.log(error, logLevel: LogLevel.warning);
       }
     });
-    await _transport.connectionCompleter.future;
+    // Why the core went away is otherwise unrecoverable, and it is the one fact
+    // that separates three very different problems that all look identical from
+    // the UI (an empty server list): the core crashing, the core exiting
+    // cleanly, and the OS killing it — a macOS code-signing or quarantine
+    // refusal shows up here as a SIGKILL. shutdown() clears _process before the
+    // exit code lands, so a deliberate stop stays quiet and only an unexpected
+    // death is reported.
+    unawaited(
+      process.exitCode.then((code) {
+        if (!identical(_process, process)) return;
+        commonPrint.log(
+          'core process ended unexpectedly with exit code $code',
+          logLevel: LogLevel.error,
+        );
+      }),
+    );
+    return _awaitConnection();
+  }
+
+  /// Waits for the core to connect back, bounded by [_connectTimeout]. A core
+  /// that spawns but is killed before it can dial in — a signed-binary or
+  /// quarantine refusal on macOS looks exactly like this — is a failure, not
+  /// something to wait on indefinitely.
+  Future<String> _awaitConnection() async {
+    try {
+      await _transport.connectionCompleter.future.timeout(_connectTimeout);
+      return '';
+    } on TimeoutException {
+      const message = 'core started but never connected';
+      commonPrint.log(message, logLevel: LogLevel.error);
+      _handleInvokeCrashEvent();
+      return message;
+    }
   }
 
   @override
@@ -153,8 +199,7 @@ class CoreService extends CoreHandlerInterface {
 
   @override
   Future<String> preload() async {
-    await start();
-    return '';
+    return start();
   }
 
   @override

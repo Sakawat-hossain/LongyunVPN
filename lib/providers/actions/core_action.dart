@@ -29,10 +29,17 @@ class CoreAction extends _$CoreAction {
   }
 
   /// Schedules an auto-reconnect after an *unexpected* core drop, with capped
-  /// exponential backoff. No-op unless the user still intends to be connected
-  /// (not stopped, not suspended). Gives up after [maxReconnectAttempts].
+  /// exponential backoff. Gives up after [maxReconnectAttempts].
+  ///
+  /// This runs whether or not the tunnel was running. The core process is not
+  /// only the tunnel — it is also what answers for the proxy list, delays and
+  /// traffic — so a core that dies while the user is merely browsing the
+  /// Servers page has to be brought back too. Bailing out on `!isStart` (which
+  /// is what this used to do) meant a dead core was left dead for the rest of
+  /// the session, and the Servers page stayed empty until the app was
+  /// restarted. Only an explicit suspend is a reason not to reconnect.
   void scheduleReconnect() {
-    if (!ref.read(isStartProvider) || ref.read(suspendProvider)) {
+    if (ref.read(suspendProvider)) {
       cancelReconnect();
       return;
     }
@@ -45,7 +52,13 @@ class CoreAction extends _$CoreAction {
           actionText: currentAppLocalizations.retry,
           action: () {
             cancelReconnect();
-            ref.read(setupActionProvider.notifier).updateStatus(true);
+            // Retry what the user actually had: restart the tunnel only if it
+            // was running, otherwise just bring the core back.
+            if (ref.read(isStartProvider)) {
+              ref.read(setupActionProvider.notifier).updateStatus(true);
+            } else {
+              restartCore();
+            }
           },
         ),
       );
@@ -57,13 +70,16 @@ class CoreAction extends _$CoreAction {
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(delay, () async {
-      // The user may have stopped or suspended while we were waiting.
-      if (!ref.read(isStartProvider) || ref.read(suspendProvider)) {
+      // The user may have suspended while we were waiting.
+      if (ref.read(suspendProvider)) {
         cancelReconnect();
         return;
       }
       try {
-        await restartCore(true);
+        // Start the tunnel again only if it was up when the core died; a core
+        // that dropped while disconnected is restored without connecting, which
+        // is what restartCore(false) does.
+        await restartCore(ref.read(isStartProvider));
       } catch (e) {
         commonPrint.log(
           'auto-reconnect attempt failed: $e',

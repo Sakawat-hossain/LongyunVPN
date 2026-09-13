@@ -22,7 +22,7 @@ class ProxiesAction extends _$ProxiesAction {
   Future<void> updateGroups() async {
     try {
       commonPrint.log('updateGroups');
-      ref.read(groupsProvider.notifier).value = await retry(
+      final groups = await retry(
         task: () async {
           final sortType = ref.read(
             proxiesStyleSettingProvider.select((state) => state.sortType),
@@ -43,9 +43,18 @@ class ProxiesAction extends _$ProxiesAction {
         },
         retryIf: (res) => res.isEmpty,
       );
+      ref.read(groupsProvider.notifier).value = groups;
     } catch (e) {
-      commonPrint.log('updateGroups error: $e');
-      ref.read(groupsProvider.notifier).value = [];
+      // Keep showing what is already on screen. A refresh that failed is not
+      // evidence that the account has no servers, and this runs every few
+      // seconds off the delay-test results — so one dropped core call used to
+      // replace a full server list with an empty one, flipping the Servers page
+      // to "No Nodes Available" for good. Only a refresh that actually returned
+      // something gets to change what is displayed.
+      commonPrint.log(
+        'updateGroups failed, keeping the previous groups: $e',
+        logLevel: LogLevel.warning,
+      );
     }
   }
 
