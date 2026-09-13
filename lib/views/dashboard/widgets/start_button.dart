@@ -193,10 +193,32 @@ class _StartButtonState extends ConsumerState<StartButton>
                         right: 16 - 8 * eased,
                       ),
                       alignment: Alignment.centerLeft,
-                      // Power, not play. A media glyph reads as "play something"
-                      // and gave first-time users nothing to connect this button
-                      // to the VPN being on or off.
-                      child: const Icon(Icons.power_settings_new),
+                      // Power while resting, a shield once the tunnel is up.
+                      //
+                      // An icon can carry the action or the state, not both.
+                      // Power is an action symbol and it is the right one while
+                      // disconnected, when pressing it is the obvious next move.
+                      // Once connected the button stops being something you are
+                      // about to press and becomes a status display - and a
+                      // power symbol there only repeats what the running timer
+                      // beside it already says, while nothing tells the user
+                      // they are protected. So the switch itself becomes the
+                      // story: press power, get a shield.
+                      //
+                      // Crossed rather than swapped, so neither pops in.
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Opacity(
+                            opacity: 1 - eased,
+                            child: const Icon(Icons.power_settings_new),
+                          ),
+                          Opacity(
+                            opacity: eased,
+                            child: const Icon(Icons.verified_user),
+                          ),
+                        ],
+                      ),
                     ),
                     SizedBox(width: textWidth, child: child!),
                   ],

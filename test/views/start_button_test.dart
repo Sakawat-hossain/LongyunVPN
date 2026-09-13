@@ -69,14 +69,35 @@ void main() {
     expect(size.height, 56);
   });
 
-  testWidgets('uses a power symbol, not a play symbol', (tester) async {
-    await pumpButton(tester, runTime: null);
+  // Both icons are always mounted and cross-faded, so presence proves nothing -
+  // only the opacity says which one a user can actually see.
+  double visibilityOf(WidgetTester tester, IconData icon) {
+    return tester
+        .widget<Opacity>(
+          find
+              .ancestor(of: find.byIcon(icon), matching: find.byType(Opacity))
+              .first,
+        )
+        .opacity;
+  }
 
-    final icons = tester
-        .widgetList<Icon>(find.byType(Icon))
-        .map((icon) => icon.icon);
-    expect(icons, contains(Icons.power_settings_new));
-    expect(icons, isNot(contains(Icons.play_arrow)));
+  testWidgets('shows power, not play, while disconnected', (tester) async {
+    await pumpButton(tester, runTime: null);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byIcon(Icons.play_arrow), findsNothing);
+    expect(visibilityOf(tester, Icons.power_settings_new), 1);
+    expect(visibilityOf(tester, Icons.verified_user), 0);
+  });
+
+  testWidgets('turns into a shield once connected', (tester) async {
+    await pumpButton(tester, runTime: 0);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The power symbol says what pressing does, which is the wrong job once the
+    // tunnel is up and the timer beside it already reports that it is running.
+    expect(visibilityOf(tester, Icons.verified_user), 1);
+    expect(visibilityOf(tester, Icons.power_settings_new), 0);
   });
 
   testWidgets('swaps the label for the timer once connected', (tester) async {
