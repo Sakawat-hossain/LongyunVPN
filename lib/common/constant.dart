@@ -18,6 +18,14 @@ const appName = 'LongyunVPN';
 /// machine-facing keeps using: install paths, the Windows service, the core
 /// binary, release filenames. Those must not acquire two CJK characters.
 const appBrandName = '龙云 LongyunVPN';
+
+/// The brand red, sampled from the app mark (assets/images/icon_1024.png).
+///
+/// Deliberately not part of the colour scheme: the scheme is seeded from the
+/// user's chosen primary and changes with it, while this is the logo's own red
+/// and has to stay put wherever the product is being identified rather than
+/// themed.
+const appBrandColor = Color(0xFFEC1B23);
 const xboardBaseUrl = 'https://admin.jsssbd.com/api/v1';
 const xboardPanelUrl = 'https://admin.jsssbd.com/';
 const appHelperService = 'LongyunVPNHelperService';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:longyunvpn/common/constant.dart';
 import 'package:longyunvpn/common/measure.dart';
 import 'package:longyunvpn/l10n/l10n.dart';
 import 'package:longyunvpn/models/models.dart';
@@ -69,35 +70,60 @@ void main() {
     expect(size.height, 56);
   });
 
-  // Both icons are always mounted and cross-faded, so presence proves nothing -
-  // only the opacity says which one a user can actually see.
-  double visibilityOf(WidgetTester tester, IconData icon) {
-    return tester
-        .widget<Opacity>(
-          find
-              .ancestor(of: find.byIcon(icon), matching: find.byType(Opacity))
-              .first,
-        )
-        .opacity;
-  }
+  Color? iconColour(WidgetTester tester) =>
+      tester.widget<Icon>(find.byIcon(Icons.power_settings_new)).color;
 
-  testWidgets('shows power, not play, while disconnected', (tester) async {
-    await pumpButton(tester, runTime: null);
-    await tester.pump(const Duration(milliseconds: 400));
+  FloatingActionButton fab(WidgetTester tester) =>
+      tester.widget<FloatingActionButton>(find.byType(FloatingActionButton));
 
-    expect(find.byIcon(Icons.play_arrow), findsNothing);
-    expect(visibilityOf(tester, Icons.power_settings_new), 1);
-    expect(visibilityOf(tester, Icons.verified_user), 0);
+  testWidgets('shows power, not play, in both states', (tester) async {
+    for (final runTime in [null, 0]) {
+      await pumpButton(tester, runTime: runTime);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byIcon(Icons.power_settings_new), findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
   });
 
-  testWidgets('turns into a shield once connected', (tester) async {
+  testWidgets('the glyph takes the brand red once connected', (tester) async {
+    await pumpButton(tester, runTime: null);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(iconColour(tester), isNot(appBrandColor));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await pumpButton(tester, runTime: 0);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(iconColour(tester), appBrandColor);
+  });
+
+  testWidgets('the timer stays readable against the pill', (tester) async {
+    // The running pill resolves light in this theme, and so does the scheme's
+    // on-colour, so taking the text colour from the scheme drew the timer
+    // light-on-light. Contrast has to come from the pill that got painted.
     await pumpButton(tester, runTime: 0);
     await tester.pump(const Duration(milliseconds: 400));
 
-    // The power symbol says what pressing does, which is the wrong job once the
-    // tunnel is up and the timer beside it already reports that it is running.
-    expect(visibilityOf(tester, Icons.verified_user), 1);
-    expect(visibilityOf(tester, Icons.power_settings_new), 0);
+    // Read the colour the timer is actually painted in, not the one the button
+    // declares. The button's foregroundColor was right all along; a text style
+    // taken from the theme carries its own colour and quietly overrode it, so
+    // asserting on the button passed while the timer stayed white on pink.
+    final background = fab(tester).backgroundColor!;
+    final label = tester
+        .widgetList<Text>(find.byType(Text))
+        .firstWhere((text) => (text.data ?? '').isNotEmpty);
+    final painted = label.style?.color;
+    expect(painted, isNotNull, reason: 'timer has no explicit colour');
+    final gap =
+        (background.computeLuminance() - painted!.computeLuminance()).abs();
+    expect(gap, greaterThan(0.4), reason: 'timer is not readable on the pill');
+  });
+
+  testWidgets('keeps the squircle corner, not a circle', (tester) async {
+    await pumpButton(tester, runTime: null);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(fab(tester).shape, isA<RoundedSuperellipseBorder>());
   });
 
   testWidgets('swaps the label for the timer once connected', (tester) async {

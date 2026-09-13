@@ -17,6 +17,10 @@ class StartButton extends ConsumerStatefulWidget {
 // while creating both, which asserts in debug ("multiple tickers were created")
 // and in release leaves the second controller's ticker outside the mixin's
 // bookkeeping, so it is never muted when the route is hidden.
+/// Corner radius of the button in both states. 18 against a 56pt box is the
+/// squircle proportion the app mark uses, rather than a circle or a stadium.
+const double _cornerRadius = 18;
+
 class _StartButtonState extends ConsumerState<StartButton>
     with TickerProviderStateMixin {
   AnimationController? _controller;
@@ -117,7 +121,7 @@ class _StartButtonState extends ConsumerState<StartButton>
         ),
         child: AnimatedBuilder(
           animation: _controller!.view,
-          builder: (_, child) {
+          builder: (_, _) {
             // The spring curve overshoots past 0 and 1, which is fine for
             // motion and wrong for anything interpolated: a colour or a width
             // computed from it would leave its own range.
@@ -132,18 +136,26 @@ class _StartButtonState extends ConsumerState<StartButton>
               theme.colorScheme.primaryContainer,
               t,
             )!;
-            final foreground = Color.lerp(
-              theme.colorScheme.onSurfaceVariant,
-              theme.colorScheme.onPrimaryContainer,
-              t,
-            )!;
+            // Contrast is taken from the pill that actually got painted, not
+            // from the scheme's on-colour. The running pill resolves light in
+            // this theme while onPrimaryContainer is light too, so the timer was
+            // being drawn light-on-light and could not be read.
+            final foreground =
+                ThemeData.estimateBrightnessForColor(background) ==
+                    Brightness.dark
+                ? Colors.white
+                : Colors.black87;
+            // The mark's red, once the tunnel is up. Only the glyph takes it —
+            // the pill keeps the theme's colour, so the red reads as a state
+            // and not as a second accent.
+            final iconColor = Color.lerp(foreground, appBrandColor, t)!;
             return AnimatedBuilder(
               animation: _pulseController!,
               builder: (_, fab) {
                 final pulse = _pulseController!.value;
                 return DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(_cornerRadius),
                     boxShadow: t <= 0.01
                         ? const []
                         : [
@@ -166,8 +178,13 @@ class _StartButtonState extends ConsumerState<StartButton>
                 backgroundColor: background,
                 foregroundColor: foreground,
                 elevation: 2 + 2 * t,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
+                // A rounded superellipse, not a circle - the same corner the
+                // app mark uses in the sidebar, so the button belongs to the
+                // rest of the UI instead of being the one round thing in it.
+                // The radius is fixed, so resting is a squircle and running is
+                // the same corner stretched.
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.circular(_cornerRadius),
                   // An outline while resting, fading out as the pill fills in.
                   side: BorderSide(
                     color: theme.colorScheme.outlineVariant.withValues(
@@ -193,69 +210,60 @@ class _StartButtonState extends ConsumerState<StartButton>
                         right: 16 - 8 * eased,
                       ),
                       alignment: Alignment.centerLeft,
-                      // Power while resting, a shield once the tunnel is up.
-                      //
-                      // An icon can carry the action or the state, not both.
-                      // Power is an action symbol and it is the right one while
-                      // disconnected, when pressing it is the obvious next move.
-                      // Once connected the button stops being something you are
-                      // about to press and becomes a status display - and a
-                      // power symbol there only repeats what the running timer
-                      // beside it already says, while nothing tells the user
-                      // they are protected. So the switch itself becomes the
-                      // story: press power, get a shield.
-                      //
-                      // Crossed rather than swapped, so neither pops in.
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Opacity(
-                            opacity: 1 - eased,
-                            child: const Icon(Icons.power_settings_new),
-                          ),
-                          Opacity(
-                            opacity: eased,
-                            child: const Icon(Icons.verified_user),
-                          ),
-                        ],
+                      // One glyph in both states - the power symbol - with the
+                      // state carried by its colour rather than by swapping it
+                      // for a different shape.
+                      child: Icon(
+                        Icons.power_settings_new,
+                        color: iconColor,
                       ),
                     ),
-                    SizedBox(width: textWidth, child: child!),
+                    SizedBox(
+                      width: textWidth,
+                      child: _Label(
+                        style: labelStyle?.copyWith(color: foreground),
+                      ),
+                    ),
                   ],
                 ),
               ),
             );
           },
-          // One consumer covers all three labels. The resting label is the
-          // whole point of the change: the button used to say nothing at all
-          // until after it had been switched on, so the state that needed
-          // explaining was the state with no words on it.
-          child: Consumer(
-            builder: (_, ref, _) {
-              final started = ref.watch(isStartProvider);
-              final isSuspended = ref.watch(suspendProvider);
-              final String text;
-              if (isSuspended) {
-                text = appLocalizations.suspended;
-              } else if (started) {
-                text = utils.getTimeText(ref.watch(runTimeProvider));
-              } else {
-                // Nothing while resting: the button is a circle then, and the
-                // tooltip is what names the action.
-                text = '';
-              }
-              return Text(
-                text,
-                maxLines: 1,
-                overflow: TextOverflow.visible,
-                // No colour here: the button's foregroundColor supplies it, so
-                // the label tracks the resting/running transition with it.
-                style: labelStyle,
-              );
-            },
-          ),
         ),
       ),
+    );
+  }
+}
+
+/// The timer, or the suspended notice, or nothing at all while resting.
+///
+/// The colour arrives on [style] rather than being inherited. The button sets
+/// foregroundColor, but a text style taken from the theme carries a colour of
+/// its own, and that colour wins over the inherited one - which is how the
+/// timer came to be drawn white on a light pill and could not be read.
+class _Label extends ConsumerWidget {
+  final TextStyle? style;
+
+  const _Label({required this.style});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final String text;
+    if (ref.watch(suspendProvider)) {
+      text = appLocalizations.suspended;
+    } else if (ref.watch(isStartProvider)) {
+      text = utils.getTimeText(ref.watch(runTimeProvider));
+    } else {
+      // Nothing while resting: the button is just the mark then, and the
+      // tooltip is what names the action.
+      text = '';
+    }
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.visible,
+      style: style,
     );
   }
 }
