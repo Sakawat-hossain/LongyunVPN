@@ -92,17 +92,16 @@ class _StartButtonState extends ConsumerState<StartButton>
     final theme = Theme.of(context);
     final appLocalizations = context.appLocalizations;
 
-    // The label is measured for both states so the pill can morph between them
-    // rather than jump. The running state's width is measured against a sample
-    // timer rather than the live one, which keeps the width steady while the
-    // seconds tick.
+    // Resting is a plain circle with the icon and nothing else, so there is no
+    // label to measure and the running width collapses to zero on the way back.
+    // The running width is measured against a sample timer rather than the live
+    // one, which keeps the pill steady while the seconds tick.
     final labelStyle = context.textTheme.titleMedium?.toSoftBold;
     double measure(String text, double padding) =>
         globalState.measure
             .computeTextSize(Text(text, style: labelStyle))
             .width +
         padding;
-    final restingWidth = measure(appLocalizations.disconnected, 16);
     final runningWidth = suspend
         ? measure(appLocalizations.suspended, 24)
         : measure(utils.getTimeDifference(DateTime.now()), 16);
@@ -124,8 +123,7 @@ class _StartButtonState extends ConsumerState<StartButton>
             // computed from it would leave its own range.
             final t = _controller!.value.clamp(0.0, 1.0);
             final eased = Curves.easeOut.transform(t);
-            final textWidth =
-                restingWidth + (runningWidth - restingWidth) * eased;
+            final textWidth = runningWidth * eased;
             // Off reads as inactive, on reads as live. Colour was carrying none
             // of this before - both states were the same filled pill, and only
             // a faint halo told them apart.
@@ -188,7 +186,12 @@ class _StartButtonState extends ConsumerState<StartButton>
                   children: [
                     Container(
                       height: 56,
-                      padding: const EdgeInsets.only(left: 16, right: 8),
+                      // Even padding while resting keeps the circle round; the
+                      // right side tightens as the timer slides out.
+                      padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16 - 8 * eased,
+                      ),
                       alignment: Alignment.centerLeft,
                       // Power, not play. A media glyph reads as "play something"
                       // and gave first-time users nothing to connect this button
@@ -215,9 +218,9 @@ class _StartButtonState extends ConsumerState<StartButton>
               } else if (started) {
                 text = utils.getTimeText(ref.watch(runTimeProvider));
               } else {
-                // The state, not the action. The label reports where the tunnel
-                // is; the tooltip below says what pressing will do.
-                text = appLocalizations.disconnected;
+                // Nothing while resting: the button is a circle then, and the
+                // tooltip is what names the action.
+                text = '';
               }
               return Text(
                 text,

@@ -50,10 +50,23 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('says where the tunnel is while disconnected', (tester) async {
+  testWidgets('is the icon alone while disconnected', (tester) async {
     await pumpButton(tester, runTime: null);
+    await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Disconnected'), findsOneWidget);
+    // No words at rest - the button is a circle, and the tooltip names the
+    // action. Any visible label here would make it a pill again.
+    final labels = tester
+        .widgetList<Text>(find.byType(Text))
+        .map((text) => text.data ?? '')
+        .where((text) => text.isNotEmpty);
+    expect(labels, isEmpty);
+
+    // And it is a circle, not a collapsed pill: the FAB's own 56pt box, with
+    // no leftover label width holding it open.
+    final size = tester.getSize(find.byType(FloatingActionButton));
+    expect(size.width, closeTo(size.height, 0.5));
+    expect(size.height, 56);
   });
 
   testWidgets('uses a power symbol, not a play symbol', (tester) async {
@@ -70,9 +83,12 @@ void main() {
     await pumpButton(tester, runTime: 0);
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Disconnected'), findsNothing);
-    // Whatever the elapsed time renders as, it is not the resting label.
-    expect(find.byType(Text), findsWidgets);
+    // The timer appears where the resting state showed nothing at all.
+    final labels = tester
+        .widgetList<Text>(find.byType(Text))
+        .map((text) => text.data ?? '')
+        .where((text) => text.isNotEmpty);
+    expect(labels, isNotEmpty);
   });
 
   testWidgets('resting and running do not look the same', (tester) async {
