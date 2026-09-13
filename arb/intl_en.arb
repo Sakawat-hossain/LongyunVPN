@@ -747,5 +747,7 @@
   "openInApp": "Open in LongyunVPN",
   "resetSubscribeUrl": "Reset subscription URL",
   "resetSubscribeUrlTip": "This generates a new subscription link and new node credentials. Your other devices will stop connecting until you import the new link on each of them. Continue?",
-  "resetSubscribeUrlSuccess": "Subscription URL reset and re-imported"
+  "resetSubscribeUrlSuccess": "Subscription URL reset and re-imported",
+  "connectAction": "Connect",
+  "disconnectAction": "Disconnect"
 }

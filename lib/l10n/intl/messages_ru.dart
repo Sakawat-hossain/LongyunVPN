@@ -344,6 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmPassword": MessageLookupByLibrary.simpleMessage(
       "Подтвердите пароль",
     ),
+    "connectAction": MessageLookupByLibrary.simpleMessage("Подключить"),
     "connected": MessageLookupByLibrary.simpleMessage("Подключено"),
     "connecting": MessageLookupByLibrary.simpleMessage("Подключение..."),
     "connection": MessageLookupByLibrary.simpleMessage("Соединение"),
@@ -472,6 +473,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "LongyunVPN — это VPN-сервис, созданный для безопасного, приватного и надёжного доступа в интернет. Сервис предназначен для законных целей, включая защиту конфиденциальности, безопасный просмотр сайтов и улучшение качества соединения.\n\nПользователи несут ответственность за соблюдение законов и правил своей страны или региона при использовании LongyunVPN. LongyunVPN не поощряет и не поддерживает противоправные действия, злоупотребления или нарушения применимого законодательства.\n\nLongyunVPN не несёт ответственности за неправомерное использование сервиса пользователями и за любые последствия действий, совершённых через VPN-соединение. Используя сервис, пользователь соглашается соблюдать условия использования и применять VPN ответственно.",
     ),
+    "disconnectAction": MessageLookupByLibrary.simpleMessage("Отключить"),
     "disconnected": MessageLookupByLibrary.simpleMessage("Отключено"),
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage(
       "Обнаружена новая версия",

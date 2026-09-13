@@ -331,6 +331,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Existing data will be overwritten after confirmation",
     ),
     "confirmPassword": MessageLookupByLibrary.simpleMessage("Confirm Password"),
+    "connectAction": MessageLookupByLibrary.simpleMessage("Connect"),
     "connected": MessageLookupByLibrary.simpleMessage("Connected"),
     "connecting": MessageLookupByLibrary.simpleMessage("Connecting..."),
     "connection": MessageLookupByLibrary.simpleMessage("Connection"),
@@ -457,6 +458,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "LongyunVPN is a VPN service designed to provide secure, private, and reliable internet access for users. This service is intended for legitimate purposes, including privacy protection, secure browsing, and improving online connectivity.\n\nUsers are responsible for complying with the laws and regulations of their own country or region while using LongyunVPN. LongyunVPN does not encourage or support any illegal activities, misuse, or violation of applicable laws.\n\nLongyunVPN is not responsible for any misuse of the service by users or any consequences resulting from activities performed through the VPN connection. By using this service, users agree to follow the terms of service and use the VPN responsibly.",
     ),
+    "disconnectAction": MessageLookupByLibrary.simpleMessage("Disconnect"),
     "disconnected": MessageLookupByLibrary.simpleMessage("Disconnected"),
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage(
       "Discover the new version",

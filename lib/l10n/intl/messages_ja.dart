@@ -277,6 +277,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "確認後、既存のデータは上書きされます",
     ),
     "confirmPassword": MessageLookupByLibrary.simpleMessage("パスワード（確認）"),
+    "connectAction": MessageLookupByLibrary.simpleMessage("接続"),
     "connected": MessageLookupByLibrary.simpleMessage("接続済み"),
     "connecting": MessageLookupByLibrary.simpleMessage("接続中..."),
     "connection": MessageLookupByLibrary.simpleMessage("接続"),
@@ -379,6 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "LongyunVPN は、安全でプライベート、かつ信頼性の高いインターネット接続を提供するために設計された VPN サービスです。本サービスは、プライバシー保護、安全なブラウジング、通信品質の向上など、適法な目的での利用を想定しています。\n\n利用者は、LongyunVPN の利用にあたり、自身の国または地域の法令を遵守する責任を負います。LongyunVPN は、違法行為、不正利用、法令違反を推奨も支援もしません。\n\nLongyunVPN は、利用者による本サービスの不正利用、および VPN 接続を通じて行われた行為に起因するいかなる結果についても責任を負いません。本サービスを利用することにより、利用者は利用規約に従い、責任をもって VPN を利用することに同意したものとみなされます。",
     ),
+    "disconnectAction": MessageLookupByLibrary.simpleMessage("切断"),
     "disconnected": MessageLookupByLibrary.simpleMessage("切断済み"),
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage("新バージョンを発見"),
     "dnsDesc": MessageLookupByLibrary.simpleMessage("DNS関連設定の更新"),

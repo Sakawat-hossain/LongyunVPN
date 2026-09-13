@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:longyunvpn/common/measure.dart';
+import 'package:longyunvpn/l10n/l10n.dart';
+import 'package:longyunvpn/models/models.dart';
+import 'package:longyunvpn/providers/providers.dart';
+import 'package:longyunvpn/state.dart';
+import 'package:longyunvpn/views/dashboard/widgets/start_button.dart';
+
+/// The connect button is the one control a first-time user has to find, and
+/// while disconnected it used to be a bare circle with a play glyph: a media
+/// metaphor, no label, and the same colour as its connected state.
+///
+/// What is pinned here is the resting state, because that is the one that was
+/// wrong. A button that only explains itself after you have already pressed it
+/// explains nothing.
+void main() {
+  Future<void> pumpButton(WidgetTester tester, {required int? runTime}) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          // The button hides itself entirely when there is no profile.
+          profilesProvider.overrideWith(() => _OneProfile()),
+          // isStart is derived from runTime: null is stopped, a value is running.
+          runTimeProvider.overrideWith(() => _RunTime(runTime)),
+        ],
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                // StartButton measures its label to size the pill.
+                globalState.measure = Measure.of(context, 1);
+                return const StartButton();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+  }
+
+  testWidgets('says what it does while disconnected', (tester) async {
+    await pumpButton(tester, runTime: null);
+
+    expect(find.text('Connect'), findsOneWidget);
+  });
+
+  testWidgets('uses a power symbol, not a play symbol', (tester) async {
+    await pumpButton(tester, runTime: null);
+
+    final icons = tester
+        .widgetList<Icon>(find.byType(Icon))
+        .map((icon) => icon.icon);
+    expect(icons, contains(Icons.power_settings_new));
+    expect(icons, isNot(contains(Icons.play_arrow)));
+  });
+
+  testWidgets('swaps the label for the timer once connected', (tester) async {
+    await pumpButton(tester, runTime: 0);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Connect'), findsNothing);
+    // Whatever the elapsed time renders as, it is not the resting label.
+    expect(find.byType(Text), findsWidgets);
+  });
+
+  testWidgets('resting and running do not look the same', (tester) async {
+    await pumpButton(tester, runTime: null);
+    await tester.pump(const Duration(milliseconds: 400));
+    final resting = tester
+        .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+        .backgroundColor;
+
+    // Tear the tree down in between. Pumping a second ProviderScope over the
+    // first keeps the same State alive, which would carry the first run's
+    // animation value into the second and compare a state against itself.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await pumpButton(tester, runTime: 0);
+    await tester.pump(const Duration(milliseconds: 400));
+    final running = tester
+        .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+        .backgroundColor;
+
+    expect(resting, isNotNull);
+    expect(running, isNotNull);
+    expect(resting, isNot(running));
+  });
+}
+
+class _OneProfile extends Profiles {
+  @override
+  List<Profile> build() => [Profile.normal(label: 'test', url: 'http://x')];
+}
+
+class _RunTime extends RunTime {
+  _RunTime(this.initial);
+
+  final int? initial;
+
+  @override
+  int? build() => initial;
+}

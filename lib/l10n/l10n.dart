@@ -5968,6 +5968,21 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Connect`
+  String get connectAction {
+    return Intl.message('Connect', name: 'connectAction', desc: '', args: []);
+  }
+
+  /// `Disconnect`
+  String get disconnectAction {
+    return Intl.message(
+      'Disconnect',
+      name: 'disconnectAction',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

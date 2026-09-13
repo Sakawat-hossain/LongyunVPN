@@ -249,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmForceCrashCore": MessageLookupByLibrary.simpleMessage("确定要强制崩溃核心？"),
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage("确定后将会覆盖已有数据"),
     "confirmPassword": MessageLookupByLibrary.simpleMessage("确认密码"),
+    "connectAction": MessageLookupByLibrary.simpleMessage("连接"),
     "connected": MessageLookupByLibrary.simpleMessage("已连接"),
     "connecting": MessageLookupByLibrary.simpleMessage("连接中..."),
     "connection": MessageLookupByLibrary.simpleMessage("连接"),
@@ -339,6 +340,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "LongyunVPN 是一项旨在为用户提供安全、私密、可靠互联网访问的 VPN 服务。本服务仅供合法用途使用，包括隐私保护、安全浏览以及改善网络连接质量。\n\n用户在使用 LongyunVPN 时，须自行遵守所在国家或地区的法律法规。LongyunVPN 不鼓励也不支持任何违法活动、滥用行为或违反适用法律的行为。\n\n对于用户滥用本服务的行为，以及通过 VPN 连接所进行活动产生的任何后果，LongyunVPN 概不负责。使用本服务即表示用户同意遵守服务条款并负责任地使用 VPN。",
     ),
+    "disconnectAction": MessageLookupByLibrary.simpleMessage("断开"),
     "disconnected": MessageLookupByLibrary.simpleMessage("已断开"),
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage("发现新版本"),
     "dnsDesc": MessageLookupByLibrary.simpleMessage("更新DNS相关设置"),

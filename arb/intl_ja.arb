@@ -747,5 +747,7 @@
   "openInApp": "LongyunVPN で開く",
   "resetSubscribeUrl": "サブスクリプション URL をリセット",
   "resetSubscribeUrlTip": "新しいサブスクリプションリンクとノード認証情報が生成されます。他の端末では、新しいリンクを取り込むまで接続できなくなります。続行しますか？",
-  "resetSubscribeUrlSuccess": "サブスクリプション URL をリセットし、再取得しました"
+  "resetSubscribeUrlSuccess": "サブスクリプション URL をリセットし、再取得しました",
+  "connectAction": "接続",
+  "disconnectAction": "切断"
 }
