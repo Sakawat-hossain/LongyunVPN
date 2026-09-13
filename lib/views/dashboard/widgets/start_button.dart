@@ -17,9 +17,10 @@ class StartButton extends ConsumerStatefulWidget {
 // while creating both, which asserts in debug ("multiple tickers were created")
 // and in release leaves the second controller's ticker outside the mixin's
 // bookkeeping, so it is never muted when the route is hidden.
-/// Corner radius of the button in both states. 18 against a 56pt box is the
-/// squircle proportion the app mark uses, rather than a circle or a stadium.
-const double _cornerRadius = 18;
+/// Corner radius of the button in both states. A squircle rather than a circle
+/// or a stadium — but a shallow one: 18 against a 56pt box read as almost round
+/// and lost the shape entirely once the pill stretched.
+const double _cornerRadius = 14;
 
 class _StartButtonState extends ConsumerState<StartButton>
     with TickerProviderStateMixin {

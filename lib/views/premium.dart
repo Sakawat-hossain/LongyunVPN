@@ -18,6 +18,11 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
   // planId -> selected period key
   final Map<int, String> _selectedPeriod = {};
 
+  /// Which half of the page is showing. Orders used to sit under the plans, at
+  /// the bottom of a long scroll with nothing above it to say so — findable
+  /// only by someone who already knew to look.
+  _PremiumTab _tab = _PremiumTab.plans;
+
   @override
   void initState() {
     super.initState();
@@ -168,18 +173,63 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     final activePlanId =
         auth.hasActiveSubscription ? auth.userInfo?.planId : null;
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // The account's own state belongs above the split: it is true of both
+        // halves, and an unpaid order is worth seeing whichever tab is open.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            children: [
+              _StatusBanner(auth: auth),
+              if (state.pendingTradeNo != null) ...[
+                const SizedBox(height: 12),
+                _PendingBanner(
+                  busy: state.isPurchasing,
+                  onRefresh: _onRefresh,
+                ),
+              ],
+              const SizedBox(height: 16),
+              SegmentedButton<_PremiumTab>(
+                segments: [
+                  ButtonSegment(
+                    value: _PremiumTab.plans,
+                    icon: const Icon(Icons.workspace_premium_outlined),
+                    label: Text(context.appLocalizations.premium),
+                  ),
+                  ButtonSegment(
+                    value: _PremiumTab.orders,
+                    icon: const Icon(Icons.receipt_long_outlined),
+                    label: Text(context.appLocalizations.orderHistory),
+                  ),
+                ],
+                selected: {_tab},
+                showSelectedIcon: false,
+                onSelectionChanged: (value) =>
+                    setState(() => _tab = value.first),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: switch (_tab) {
+            _PremiumTab.plans => _buildPlans(state, sellablePlans, activePlanId),
+            _PremiumTab.orders => _buildOrders(state),
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlans(
+    PremiumState state,
+    List<XboardPlan> sellablePlans,
+    int? activePlanId,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _StatusBanner(auth: auth),
-        if (state.pendingTradeNo != null) ...[
-          const SizedBox(height: 12),
-          _PendingBanner(
-            busy: state.isPurchasing,
-            onRefresh: _onRefresh,
-          ),
-        ],
-        const SizedBox(height: 12),
         for (final plan in sellablePlans) ...[
           _PlanCard(
             plan: plan,
@@ -198,13 +248,34 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
           ),
           const SizedBox(height: 16),
         ],
-        _OrderHistory(
-          orders: state.orders,
-          loading: state.ordersLoading,
+      ],
+    );
+  }
+
+  Widget _buildOrders(PremiumState state) {
+    if (state.ordersLoading && state.orders.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.orders.isEmpty) {
+      // Now that the list has a tab of its own, an empty state is the honest
+      // answer. It could stay hidden while it was an unlabelled section at the
+      // bottom of the plans; a tab that opens onto nothing cannot.
+      return _EmptyOrders(onRefresh: () => _safe(
+        () => ref.read(premiumProvider.notifier).loadOrders(),
+      ));
+    }
+    return RefreshIndicator(
+      onRefresh: () => ref.read(premiumProvider.notifier).loadOrders(),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: state.orders.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
+        itemBuilder: (_, index) => _OrderTile(
+          order: state.orders[index],
           formatPrice: _formatPrice,
           onCancel: _onCancelOrder,
         ),
-      ],
+      ),
     );
   }
 
@@ -226,50 +297,40 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
   }
 }
 
-/// The account's order history, under the plan cards.
-///
-/// Hidden entirely while it is loading and while it is empty for an account
-/// that has never ordered: a permanently empty "Order history" heading is worse
-/// than no heading, and this page's job is selling a plan.
-class _OrderHistory extends StatelessWidget {
-  final List<XboardOrder> orders;
-  final bool loading;
-  final String Function(int cents) formatPrice;
-  final Future<void> Function(XboardOrder order) onCancel;
+/// Shown when the Orders tab has nothing in it.
+class _EmptyOrders extends StatelessWidget {
+  final VoidCallback onRefresh;
 
-  const _OrderHistory({
-    required this.orders,
-    required this.loading,
-    required this.formatPrice,
-    required this.onCancel,
-  });
+  const _EmptyOrders({required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
-    if (orders.isEmpty) return const SizedBox.shrink();
     final l = context.appLocalizations;
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
-          child: Text(
-            l.orderHistory,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 44,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l.noOrders,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-        ),
-        for (final order in orders) ...[
-          _OrderTile(
-            order: order,
-            formatPrice: formatPrice,
-            onCancel: onCancel,
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onRefresh,
+            icon: const Icon(Icons.refresh),
+            label: Text(l.refresh),
           ),
-          const SizedBox(height: 8),
         ],
-      ],
+      ),
     );
   }
 }
@@ -821,3 +882,6 @@ class _ErrorRetry extends StatelessWidget {
     );
   }
 }
+
+/// The two halves of the Premium page.
+enum _PremiumTab { plans, orders }
