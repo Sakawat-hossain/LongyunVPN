@@ -7,8 +7,13 @@ display_name: LongyunVPN
 executable_name: LongyunVPN.exe
 output_base_file_name: LongyunVPN-Setup.exe
 setup_icon_file: ..\windows\runner\resources\app_icon.ico
+# Every language the app itself ships, and English first: Inno falls back to the
+# first entry when the machine's language matches none of them, so listing zh
+# first made Chinese the installer default for, say, a Bengali or German Windows.
 locales:
+  - lang: en
   - lang: zh
     file: ..\windows\packaging\exe\ChineseSimplified.isl
-  - lang: en
+  - lang: ja
+  - lang: ru
 privileges_required: admin

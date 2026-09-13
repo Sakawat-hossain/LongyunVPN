@@ -15,6 +15,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettingProps {
 
+/// UI language. Defaults to English rather than to the system language.
+///
+/// Null used to mean "follow the system", which put a Chinese, Japanese or
+/// Russian desktop into that language on first launch. The product is sold
+/// and supported in English, so English is where a new install starts and
+/// the language picker is how anyone moves off it - including back to
+/// following the system, which the picker's Default entry still does.
  String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate;// Sidebar labels, on by default. A first-run desktop window showed a strip
 // of unlabelled icons and no hint that the menu button beside them would
 // name any of it, so the navigation had to be discovered by clicking each
@@ -242,10 +249,17 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = true, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.analytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true}): _dashboardWidgets = dashboardWidgets;
+  const _AppSettingProps({this.locale = 'en', @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = true, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.analytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true}): _dashboardWidgets = dashboardWidgets;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
-@override final  String? locale;
+/// UI language. Defaults to English rather than to the system language.
+///
+/// Null used to mean "follow the system", which put a Chinese, Japanese or
+/// Russian desktop into that language on first launch. The product is sold
+/// and supported in English, so English is where a new install starts and
+/// the language picker is how anyone moves off it - including back to
+/// following the system, which the picker's Default entry still does.
+@override@JsonKey() final  String? locale;
  final  List<DashboardWidget> _dashboardWidgets;
 @override@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets {
   if (_dashboardWidgets is EqualUnmodifiableListView) return _dashboardWidgets;

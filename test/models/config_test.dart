@@ -4,6 +4,7 @@ import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/enum/enum.dart';
 import 'package:longyunvpn/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:longyunvpn/l10n/l10n.dart';
 import 'package:test/test.dart';
 
 /// Helper to round-trip a model through JSON encode/decode.
@@ -17,6 +18,7 @@ T roundTrip<T>(
 }
 
 void main() {
+  _localeDefaults();
   group('AppSettingProps JSON round-trip', () {
     test('default values survive round-trip', () {
       const props = AppSettingProps();
@@ -276,6 +278,44 @@ void main() {
       expect(restored.vpnProps.enable, false);
       expect(restored.windowProps.width, 1280);
       expect(restored.windowProps.height, 720);
+    });
+  });
+}
+
+/// The UI language a new install starts in.
+///
+/// This used to be null, meaning "follow the system", so a Chinese, Japanese or
+/// Russian desktop opened the app in that language before the user had chosen
+/// anything. The product is sold and supported in English, so a fresh install
+/// starts there and the language picker is how anyone moves off it.
+void _localeDefaults() {
+  group('AppSettingProps.locale', () {
+    test('a fresh install is in English', () {
+      expect(const AppSettingProps().locale, 'en');
+    });
+
+    test('a config that never stored a language is read as English', () {
+      expect(AppSettingProps.fromJson(const {}).locale, 'en');
+    });
+
+    test('a language the user chose is kept', () {
+      for (final locale in ['zh_CN', 'ja', 'ru', 'en']) {
+        expect(
+          AppSettingProps.fromJson({'locale': locale}).locale,
+          locale,
+          reason: '$locale was not preserved',
+        );
+      }
+    });
+
+    test('English is the first supported locale, so it is the fallback', () {
+      // Flutter resolves an unsupported system language to supportedLocales
+      // .first. Bengali, Hindi and Arabic are not shipped; they must land on
+      // English rather than on whichever translation happens to sort first.
+      expect(
+        AppLocalizations.delegate.supportedLocales.first.languageCode,
+        'en',
+      );
     });
   });
 }

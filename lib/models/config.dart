@@ -71,7 +71,14 @@ List<DashboardWidget> dashboardWidgetsSafeFormJson(
 @freezed
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
-    String? locale,
+    /// UI language. Defaults to English rather than to the system language.
+    ///
+    /// Null used to mean "follow the system", which put a Chinese, Japanese or
+    /// Russian desktop into that language on first launch. The product is sold
+    /// and supported in English, so English is where a new install starts and
+    /// the language picker is how anyone moves off it - including back to
+    /// following the system, which the picker's Default entry still does.
+    @Default('en') String? locale,
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
