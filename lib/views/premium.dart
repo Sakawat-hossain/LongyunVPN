@@ -209,14 +209,32 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
                 onSelectionChanged: (value) =>
                     setState(() => _tab = value.first),
               ),
+              // Breathing room under the switch. The first plan used to begin
+              // immediately below it, so the two read as one stuck-together
+              // block instead of a control and the thing it controls.
+              const SizedBox(height: 4),
             ],
           ),
         ),
         Expanded(
-          child: switch (_tab) {
-            _PremiumTab.plans => _buildPlans(state, sellablePlans, activePlanId),
-            _PremiumTab.orders => _buildOrders(state),
-          },
+          // The list slides under a soft edge instead of stopping at a hard
+          // line beneath the switch. dstIn keeps the page's own background
+          // showing through, so this fades whatever is behind it rather than
+          // painting a band of one colour over it.
+          child: ShaderMask(
+            shaderCallback: (rect) => const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black],
+              stops: [0, 0.035],
+            ).createShader(rect),
+            blendMode: BlendMode.dstIn,
+            child: switch (_tab) {
+              _PremiumTab.plans =>
+                _buildPlans(state, sellablePlans, activePlanId),
+              _PremiumTab.orders => _buildOrders(state),
+            },
+          ),
         ),
       ],
     );
@@ -228,7 +246,7 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     int? activePlanId,
   ) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
         for (final plan in sellablePlans) ...[
           _PlanCard(
@@ -267,7 +285,7 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     return RefreshIndicator(
       onRefresh: () => ref.read(premiumProvider.notifier).loadOrders(),
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         itemCount: state.orders.length,
         separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (_, index) => _OrderTile(
