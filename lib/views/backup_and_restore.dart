@@ -126,6 +126,8 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
         final value = await picker.saveFileWithPath(
           utils.getBackupFileName(),
           path,
+          // The archive is built for this export and has no life after it.
+          deleteSource: true,
         );
         if (value == null) return false;
         return true;

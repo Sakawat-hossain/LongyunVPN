@@ -41,7 +41,14 @@ class Logs extends _$Logs with AutoDisposeNotifierMixin {
     final file = File(tempFilePath);
     await file.safeWriteAsString(logString);
     bool res = false;
-    res = await picker.saveFileWithPath(utils.logFile, tempFilePath) != null;
+    res =
+        await picker.saveFileWithPath(
+          utils.logFile,
+          tempFilePath,
+          // Written moments ago purely to be exported.
+          deleteSource: true,
+        ) !=
+        null;
     return res;
   }
 }

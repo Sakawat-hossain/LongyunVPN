@@ -12,7 +12,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'add.dart';
 import 'edit.dart';
-import 'preview.dart';
 
 class ProfilesView extends StatefulWidget {
   const ProfilesView({super.key});
@@ -225,10 +224,6 @@ class ProfileItem extends StatelessWidget {
         .deleteProfile(profile.id);
   }
 
-  Future<void> _handlePreview(BuildContext context) async {
-    BaseNavigator.push<String>(context, PreviewProfileView(profile: profile));
-  }
-
   Future updateProfile() async {
     if (profile.type == ProfileType.file) return;
     await globalState.loadingRun(() async {
@@ -340,13 +335,6 @@ class ProfileItem extends StatelessWidget {
                               label: appLocalizations.edit,
                               onPressed: () {
                                 _handleShowEditExtendPage(context);
-                              },
-                            ),
-                            PopupMenuItemData(
-                              icon: Icons.visibility_outlined,
-                              label: appLocalizations.preview,
-                              onPressed: () {
-                                _handlePreview(context);
                               },
                             ),
                             if (profile.type == ProfileType.url) ...[

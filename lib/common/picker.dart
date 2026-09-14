@@ -29,10 +29,28 @@ class Picker {
     return path;
   }
 
-  Future<String?> saveFileWithPath(String fileName, String localPath) async {
+  /// Saves [localPath] to a location the user picks, returning that path, or
+  /// null if they cancelled.
+  ///
+  /// [deleteSource] removes the local file afterwards and defaults to **off**.
+  /// It used to be unconditional, which was right for the only caller at the
+  /// time — a temp file written purely to be exported — and quietly wrong for
+  /// every caller added since. Exporting the effective config deleted the live
+  /// config the core reads; exporting the crash log deleted the crash log. Both
+  /// vanished even when the save dialog was cancelled, because the delete ran
+  /// regardless of the outcome. A function named "save" must not destroy its
+  /// own input, so removal is now something a caller opts into.
+  Future<String?> saveFileWithPath(
+    String fileName,
+    String localPath, {
+    bool deleteSource = false,
+  }) async {
     final localFile = File(localPath);
+    // Missing means there is nothing to export. This used to create the file so
+    // the save could proceed, which handed the user an empty one and called it
+    // a success.
     if (!await localFile.exists()) {
-      await localFile.create(recursive: true);
+      return null;
     }
     final bytes = Platform.isAndroid ? await localFile.readAsBytes() : null;
     final path = await FilePicker.saveFile(
@@ -43,7 +61,9 @@ class Picker {
     if (path != null && bytes == null) {
       await localFile.copy(path);
     }
-    await localFile.safeDelete();
+    if (deleteSource) {
+      await localFile.safeDelete();
+    }
     return path;
   }
 
