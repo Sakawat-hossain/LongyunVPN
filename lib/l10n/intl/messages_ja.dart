@@ -703,8 +703,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "orderCompleted": MessageLookupByLibrary.simpleMessage("完了"),
     "orderDiscounted": MessageLookupByLibrary.simpleMessage("割引適用"),
     "orderHistory": MessageLookupByLibrary.simpleMessage("注文履歴"),
+    "orderNotPaidYet": MessageLookupByLibrary.simpleMessage(
+      "この注文はまだ支払われていません。支払いを完了すると有効になります。",
+    ),
     "orderPending": MessageLookupByLibrary.simpleMessage("未払い"),
     "orderProcessing": MessageLookupByLibrary.simpleMessage("処理中"),
+    "orderProcessingHint": MessageLookupByLibrary.simpleMessage(
+      "支払いを確認しました。プランを有効化しています。少々お待ちください。",
+    ),
+    "orderWasCancelled": MessageLookupByLibrary.simpleMessage(
+      "この注文はキャンセルされました。",
+    ),
     "other": MessageLookupByLibrary.simpleMessage("その他"),
     "otherContributors": MessageLookupByLibrary.simpleMessage("その他の貢献者"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("アウトバウンドモード"),
@@ -729,6 +738,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "パスワードが一致しません。",
     ),
     "paste": MessageLookupByLibrary.simpleMessage("貼り付け"),
+    "payNow": MessageLookupByLibrary.simpleMessage("支払う"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("支払い方法"),
     "periodHalfYearly": MessageLookupByLibrary.simpleMessage("半年"),
     "periodMonthly": MessageLookupByLibrary.simpleMessage("月額"),

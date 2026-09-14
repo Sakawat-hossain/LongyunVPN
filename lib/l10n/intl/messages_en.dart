@@ -851,8 +851,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "orderCompleted": MessageLookupByLibrary.simpleMessage("Completed"),
     "orderDiscounted": MessageLookupByLibrary.simpleMessage("Discounted"),
     "orderHistory": MessageLookupByLibrary.simpleMessage("Order history"),
+    "orderNotPaidYet": MessageLookupByLibrary.simpleMessage(
+      "This order has not been paid yet. Complete the payment to activate it.",
+    ),
     "orderPending": MessageLookupByLibrary.simpleMessage("Unpaid"),
     "orderProcessing": MessageLookupByLibrary.simpleMessage("Processing"),
+    "orderProcessingHint": MessageLookupByLibrary.simpleMessage(
+      "Payment received. Activating your plan — this usually takes a moment.",
+    ),
+    "orderWasCancelled": MessageLookupByLibrary.simpleMessage(
+      "This order was cancelled.",
+    ),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
     "otherContributors": MessageLookupByLibrary.simpleMessage(
       "Other contributors",
@@ -881,6 +890,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Passwords do not match.",
     ),
     "paste": MessageLookupByLibrary.simpleMessage("Paste"),
+    "payNow": MessageLookupByLibrary.simpleMessage("Pay now"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("Payment method"),
     "periodHalfYearly": MessageLookupByLibrary.simpleMessage("Half-yearly"),
     "periodMonthly": MessageLookupByLibrary.simpleMessage("Monthly"),

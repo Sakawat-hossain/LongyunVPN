@@ -758,5 +758,9 @@
   "orderCompleted": "已完成",
   "orderDiscounted": "已折抵",
   "cancelOrder": "取消订单",
-  "orderCancelled_success": "订单已取消"
+  "orderCancelled_success": "订单已取消",
+  "payNow": "立即支付",
+  "orderNotPaidYet": "此订单尚未支付，完成支付后即可开通。",
+  "orderProcessingHint": "已收到付款，正在开通套餐，请稍候。",
+  "orderWasCancelled": "此订单已取消。"
 }

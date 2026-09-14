@@ -613,8 +613,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "orderCompleted": MessageLookupByLibrary.simpleMessage("已完成"),
     "orderDiscounted": MessageLookupByLibrary.simpleMessage("已折抵"),
     "orderHistory": MessageLookupByLibrary.simpleMessage("订单记录"),
+    "orderNotPaidYet": MessageLookupByLibrary.simpleMessage(
+      "此订单尚未支付，完成支付后即可开通。",
+    ),
     "orderPending": MessageLookupByLibrary.simpleMessage("待支付"),
     "orderProcessing": MessageLookupByLibrary.simpleMessage("处理中"),
+    "orderProcessingHint": MessageLookupByLibrary.simpleMessage(
+      "已收到付款，正在开通套餐，请稍候。",
+    ),
+    "orderWasCancelled": MessageLookupByLibrary.simpleMessage("此订单已取消。"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
     "otherContributors": MessageLookupByLibrary.simpleMessage("其他贡献者"),
     "outboundMode": MessageLookupByLibrary.simpleMessage("出站模式"),
@@ -633,6 +640,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "passwordTooShort": MessageLookupByLibrary.simpleMessage("密码至少为 8 个字符。"),
     "passwordsDoNotMatch": MessageLookupByLibrary.simpleMessage("两次输入的密码不一致。"),
     "paste": MessageLookupByLibrary.simpleMessage("粘贴"),
+    "payNow": MessageLookupByLibrary.simpleMessage("立即支付"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("支付方式"),
     "periodHalfYearly": MessageLookupByLibrary.simpleMessage("半年付"),
     "periodMonthly": MessageLookupByLibrary.simpleMessage("月付"),

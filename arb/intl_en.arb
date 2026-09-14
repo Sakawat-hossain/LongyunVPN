@@ -758,5 +758,9 @@
   "orderCompleted": "Completed",
   "orderDiscounted": "Discounted",
   "cancelOrder": "Cancel order",
-  "orderCancelled_success": "Order cancelled"
+  "orderCancelled_success": "Order cancelled",
+  "payNow": "Pay now",
+  "orderNotPaidYet": "This order has not been paid yet. Complete the payment to activate it.",
+  "orderProcessingHint": "Payment received. Activating your plan — this usually takes a moment.",
+  "orderWasCancelled": "This order was cancelled."
 }

@@ -758,5 +758,9 @@
   "orderCompleted": "Завершён",
   "orderDiscounted": "Зачтён",
   "cancelOrder": "Отменить заказ",
-  "orderCancelled_success": "Заказ отменён"
+  "orderCancelled_success": "Заказ отменён",
+  "payNow": "Оплатить",
+  "orderNotPaidYet": "Этот заказ ещё не оплачен. Завершите оплату, чтобы активировать его.",
+  "orderProcessingHint": "Платёж получен. Активируем тариф, это займёт немного времени.",
+  "orderWasCancelled": "Этот заказ отменён."
 }

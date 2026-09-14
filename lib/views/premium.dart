@@ -102,6 +102,12 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
         // Nothing changed on the panel — the order may still be pending, or the
         // user backed out. Say so instead of claiming a purchase, and leave the
         // Refresh action for when the gateway settles.
+        //
+        // The history still has to be re-read: an order was created either way,
+        // and it is the only trace of it the user can get back to. Without this
+        // the Orders tab stayed as it was until someone refreshed by hand.
+        await ref.read(premiumProvider.notifier).loadOrders();
+        if (!mounted) return;
         globalState.showNotifier(l.completePaymentInBrowser);
       }
     } else {
@@ -112,15 +118,19 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
 
   Future<void> _onRefresh() async {
     final l = context.appLocalizations;
-    final active = await _safe(
-      () => ref.read(premiumProvider.notifier).refreshStatus(),
+    final result = await _safe(
+      () => ref.read(premiumProvider.notifier).verifyPendingOrder(),
     );
-    if (!mounted) return;
-    if (active == true) {
-      globalState.showNotifier(l.subscriptionActiveImported);
-    } else if (ref.read(premiumProvider).error == null) {
-      globalState.showNotifier(l.noActiveSubscriptionYet);
-    }
+    if (!mounted || result == null) return;
+    // Say what is actually true of the order. Reporting success because the
+    // account happens to hold a plan is how an unpaid order used to look paid.
+    globalState.showNotifier(switch (result) {
+      PendingOrderResult.activated => l.subscriptionActiveImported,
+      PendingOrderResult.processing => l.orderProcessingHint,
+      PendingOrderResult.unpaid => l.orderNotPaidYet,
+      PendingOrderResult.cancelled => l.orderWasCancelled,
+      PendingOrderResult.noSubscription => l.noActiveSubscriptionYet,
+    });
   }
 
   /// Runs an async panel call, surfacing any error as a notifier without
@@ -291,10 +301,47 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
         itemBuilder: (_, index) => _OrderTile(
           order: state.orders[index],
           formatPrice: _formatPrice,
+          onPay: _onPayOrder,
           onCancel: _onCancelOrder,
         ),
       ),
     );
+  }
+
+  /// Reopens checkout for an order that was created but never paid.
+  ///
+  /// Backing out of the payment page used to strand the order: the banner was
+  /// the only route to it, and once that was gone there was no way to pay it
+  /// from inside the app at all.
+  Future<void> _onPayOrder(XboardOrder order) async {
+    final l = context.appLocalizations;
+    final methods = await _safe(
+      () => ref.read(premiumProvider.notifier).loadPaymentMethods(),
+    );
+    if (methods == null || !mounted) return;
+    if (methods.isEmpty) {
+      globalState.showNotifier(l.noPaymentMethods);
+      return;
+    }
+    final result = await showModalBottomSheet<_CheckoutResult>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _CheckoutSheet(methods: methods, showCoupon: false),
+    );
+    if (result == null || !mounted) return;
+
+    final payUrl = await _safe(
+      () => ref.read(premiumProvider.notifier).checkoutExisting(
+        tradeNo: order.tradeNo,
+        methodId: result.method.id,
+      ),
+    );
+    if (!mounted) return;
+    if (payUrl != null && payUrl.isNotEmpty) {
+      await openInApp(context, url: payUrl, title: l.premium);
+      if (!mounted) return;
+    }
+    await _onRefresh();
   }
 
   Future<void> _onCancelOrder(XboardOrder order) async {
@@ -356,11 +403,13 @@ class _EmptyOrders extends StatelessWidget {
 class _OrderTile extends StatelessWidget {
   final XboardOrder order;
   final String Function(int cents) formatPrice;
+  final Future<void> Function(XboardOrder order) onPay;
   final Future<void> Function(XboardOrder order) onCancel;
 
   const _OrderTile({
     required this.order,
     required this.formatPrice,
+    required this.onPay,
     required this.onCancel,
   });
 
@@ -455,12 +504,20 @@ class _OrderTile extends StatelessWidget {
             ),
             if (order.isPayable) ...[
               const SizedBox(height: 6),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => onCancel(order),
-                  child: Text(context.appLocalizations.cancelOrder),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => onCancel(order),
+                    child: Text(context.appLocalizations.cancelOrder),
+                  ),
+                  const SizedBox(width: 8),
+                  // The way back into a payment that was abandoned.
+                  FilledButton.tonal(
+                    onPressed: () => onPay(order),
+                    child: Text(context.appLocalizations.payNow),
+                  ),
+                ],
               ),
             ],
           ],
@@ -790,7 +847,11 @@ class _CheckoutResult {
 class _CheckoutSheet extends StatefulWidget {
   final List<XboardPaymentMethod> methods;
 
-  const _CheckoutSheet({required this.methods});
+  /// Off when paying an order that already exists: its price was fixed when it
+  /// was created, and a coupon field there would take input the panel ignores.
+  final bool showCoupon;
+
+  const _CheckoutSheet({required this.methods, this.showCoupon = true});
 
   @override
   State<_CheckoutSheet> createState() => _CheckoutSheetState();
@@ -844,16 +905,18 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
                 onTap: () => setState(() => _method = method),
               ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _couponController,
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(
-                labelText: context.appLocalizations.couponCodeOptional,
-                prefixIcon: const Icon(Icons.local_offer_outlined),
-                border: const OutlineInputBorder(),
-                isDense: true,
+            if (widget.showCoupon) ...[
+              TextField(
+                controller: _couponController,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(
+                  labelText: context.appLocalizations.couponCodeOptional,
+                  prefixIcon: const Icon(Icons.local_offer_outlined),
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,

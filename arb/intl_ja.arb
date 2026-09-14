@@ -758,5 +758,9 @@
   "orderCompleted": "完了",
   "orderDiscounted": "割引適用",
   "cancelOrder": "注文をキャンセル",
-  "orderCancelled_success": "注文をキャンセルしました"
+  "orderCancelled_success": "注文をキャンセルしました",
+  "payNow": "支払う",
+  "orderNotPaidYet": "この注文はまだ支払われていません。支払いを完了すると有効になります。",
+  "orderProcessingHint": "支払いを確認しました。プランを有効化しています。少々お待ちください。",
+  "orderWasCancelled": "この注文はキャンセルされました。"
 }

@@ -124,6 +124,75 @@ class PremiumNotifier extends Notifier<PremiumState> {
     }
   }
 
+  /// Checks out an order that already exists, for someone resuming a payment
+  /// they abandoned. No plan or period: the order fixed those when it was made.
+  Future<String?> checkoutExisting({
+    required String tradeNo,
+    required int methodId,
+  }) async {
+    state = state.copyWith(isPurchasing: true, error: null);
+    try {
+      final payUrl = await xboardApi.checkoutOrder(
+        tradeNo: tradeNo,
+        method: methodId,
+      );
+      state = state.copyWith(isPurchasing: false, pendingTradeNo: tradeNo);
+      return payUrl;
+    } catch (e) {
+      state = state.copyWith(isPurchasing: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  /// What came back when the pending order was checked against the panel.
+  ///
+  /// "I've paid" used to run [refreshStatus] alone, which answers for the
+  /// account rather than for the order: anyone who already held an active plan
+  /// was told their new purchase had gone through, the pending banner was
+  /// cleared and they were sent to the dashboard — with the order still
+  /// unpaid and no way back to it. The order has to be asked about directly.
+  Future<PendingOrderResult> verifyPendingOrder() async {
+    final tradeNo = state.pendingTradeNo;
+    if (tradeNo == null) {
+      // Nothing outstanding: the account is the only thing worth re-reading.
+      return await refreshStatus()
+          ? PendingOrderResult.activated
+          : PendingOrderResult.noSubscription;
+    }
+    final result = resultForStatus(await xboardApi.getOrderStatus(tradeNo));
+    switch (result) {
+      case PendingOrderResult.activated:
+        // Paid, or absorbed into an upgrade. Now the account is worth reading.
+        await refreshStatus();
+      case PendingOrderResult.cancelled:
+        state = state.copyWith(clearPendingTradeNo: true);
+        await loadOrders();
+      case PendingOrderResult.processing:
+      case PendingOrderResult.unpaid:
+      case PendingOrderResult.noSubscription:
+        break;
+    }
+    return result;
+  }
+
+  /// Maps a panel order status onto what the user should be told.
+  ///
+  /// Pure, and separate from the call that fetches it, because this mapping is
+  /// the part that was wrong: nothing used to read the status at all.
+  ///
+  /// 0 pending · 1 processing · 2 cancelled · 3 completed · 4 discounted, and
+  /// -1 when the panel could not be read.
+  static PendingOrderResult resultForStatus(int status) {
+    return switch (status) {
+      3 || 4 => PendingOrderResult.activated,
+      1 => PendingOrderResult.processing,
+      2 => PendingOrderResult.cancelled,
+      // 0, -1, and anything a future panel invents. An order that cannot be
+      // confirmed paid is treated as unpaid — the safe direction to be wrong in.
+      _ => PendingOrderResult.unpaid,
+    };
+  }
+
   /// Re-checks subscription status after the user reports paying. When the
   /// account is now active, imports the subscribe URL as a LongyunVPN profile
   /// (reusing the existing add/update-from-URL logic) and routes Home. Returns
@@ -150,3 +219,6 @@ class PremiumNotifier extends Notifier<PremiumState> {
 final premiumProvider = NotifierProvider<PremiumNotifier, PremiumState>(
   PremiumNotifier.new,
 );
+
+/// Outcome of checking the outstanding order against the panel.
+enum PendingOrderResult { activated, processing, unpaid, cancelled, noSubscription }

@@ -6063,6 +6063,41 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Pay now`
+  String get payNow {
+    return Intl.message('Pay now', name: 'payNow', desc: '', args: []);
+  }
+
+  /// `This order has not been paid yet. Complete the payment to activate it.`
+  String get orderNotPaidYet {
+    return Intl.message(
+      'This order has not been paid yet. Complete the payment to activate it.',
+      name: 'orderNotPaidYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Payment received. Activating your plan — this usually takes a moment.`
+  String get orderProcessingHint {
+    return Intl.message(
+      'Payment received. Activating your plan — this usually takes a moment.',
+      name: 'orderProcessingHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This order was cancelled.`
+  String get orderWasCancelled {
+    return Intl.message(
+      'This order was cancelled.',
+      name: 'orderWasCancelled',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

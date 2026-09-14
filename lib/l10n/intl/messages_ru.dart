@@ -894,8 +894,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "orderCompleted": MessageLookupByLibrary.simpleMessage("Завершён"),
     "orderDiscounted": MessageLookupByLibrary.simpleMessage("Зачтён"),
     "orderHistory": MessageLookupByLibrary.simpleMessage("История заказов"),
+    "orderNotPaidYet": MessageLookupByLibrary.simpleMessage(
+      "Этот заказ ещё не оплачен. Завершите оплату, чтобы активировать его.",
+    ),
     "orderPending": MessageLookupByLibrary.simpleMessage("Не оплачен"),
     "orderProcessing": MessageLookupByLibrary.simpleMessage("Обработка"),
+    "orderProcessingHint": MessageLookupByLibrary.simpleMessage(
+      "Платёж получен. Активируем тариф, это займёт немного времени.",
+    ),
+    "orderWasCancelled": MessageLookupByLibrary.simpleMessage(
+      "Этот заказ отменён.",
+    ),
     "other": MessageLookupByLibrary.simpleMessage("Другое"),
     "otherContributors": MessageLookupByLibrary.simpleMessage(
       "Другие участники",
@@ -930,6 +939,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пароли не совпадают.",
     ),
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
+    "payNow": MessageLookupByLibrary.simpleMessage("Оплатить"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("Способ оплаты"),
     "periodHalfYearly": MessageLookupByLibrary.simpleMessage("Полгода"),
     "periodMonthly": MessageLookupByLibrary.simpleMessage("Месяц"),
