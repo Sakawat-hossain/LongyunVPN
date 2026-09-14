@@ -4,6 +4,8 @@ import 'package:defer_pointer/defer_pointer.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/enum/enum.dart';
+import 'package:longyunvpn/l10n/l10n.dart';
+import 'package:longyunvpn/models/models.dart';
 import 'package:longyunvpn/providers/providers.dart';
 import 'package:longyunvpn/state.dart';
 import 'package:longyunvpn/widgets/widgets.dart';
@@ -61,110 +63,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   List<Widget> _buildActions(bool isEdit) {
     final appLocalizations = context.appLocalizations;
     return [
-      if (!isEdit)
-        Consumer(
-          builder: (_, ref, _) {
-            final coreStatus = ref.watch(coreStatusProvider);
-            return Tooltip(
-              message: appLocalizations.coreStatus,
-              child: FadeScaleBox(
-                alignment: Alignment.centerRight,
-                child: coreStatus == CoreStatus.connected
-                    ? IconButton.filled(
-                        visualDensity: VisualDensity.compact,
-                        iconSize: 20,
-                        padding: EdgeInsets.zero,
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.green.harmonizeWith(
-                            context.colorScheme.primary,
-                          ),
-                          foregroundColor: switch (Theme.brightnessOf(
-                            context,
-                          )) {
-                            Brightness.light =>
-                              context.colorScheme.onSurfaceVariant,
-                            Brightness.dark =>
-                              context.colorScheme.onPrimaryFixedVariant,
-                          },
-                        ),
-                        onPressed: _handleConnection,
-                        icon: const Icon(Icons.check, fontWeight: FontWeight.w900),
-                      )
-                    : FilledButton.icon(
-                        key: ValueKey(coreStatus),
-                        onPressed: _handleConnection,
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          backgroundColor: switch (coreStatus) {
-                            CoreStatus.connecting => null,
-                            CoreStatus.connected => Colors.greenAccent,
-                            CoreStatus.disconnected =>
-                              context.colorScheme.error,
-                          },
-                          foregroundColor: switch (coreStatus) {
-                            CoreStatus.connecting => null,
-                            CoreStatus.connected => switch (Theme.brightnessOf(
-                              context,
-                            )) {
-                              Brightness.light =>
-                                context.colorScheme.onSurfaceVariant,
-                              Brightness.dark => null,
-                            },
-                            CoreStatus.disconnected =>
-                              context.colorScheme.onError,
-                          },
-                        ),
-                        icon: SizedBox(
-                          height: globalState.measure.bodyMediumHeight,
-                          width: globalState.measure.bodyMediumHeight,
-                          child: switch (coreStatus) {
-                            CoreStatus.connecting => Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: context.colorScheme.onPrimary,
-                                backgroundColor: Colors.transparent,
-                              ),
-                            ),
-                            CoreStatus.connected => const Icon(
-                              Icons.check_sharp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            CoreStatus.disconnected => const Icon(
-                              Icons.restart_alt_sharp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          },
-                        ),
-                        label: Consumer(
-                          builder: (_, ref, _) {
-                            // While auto-reconnect is running, say so and show
-                            // which attempt this is. A bare "Connecting..."
-                            // held for up to five attempts across roughly three
-                            // and a half minutes is indistinguishable from a
-                            // hang, which is exactly how users read it.
-                            final attempt = ref.watch(reconnectAttemptProvider);
-                            return Text(switch (coreStatus) {
-                              CoreStatus.connecting when attempt > 0 =>
-                                appLocalizations.reconnecting(
-                                  attempt,
-                                  CoreAction.maxReconnectAttempts,
-                                ),
-                              CoreStatus.connecting =>
-                                appLocalizations.connecting,
-                              CoreStatus.connected =>
-                                appLocalizations.connected,
-                              CoreStatus.disconnected =>
-                                appLocalizations.disconnected,
-                            });
-                          },
-                        ),
-                      ),
-              ),
-            );
-          },
-        ),
+      if (!isEdit) _buildCoreStatus(appLocalizations),
       if (isEdit)
         ValueListenableBuilder(
           valueListenable: _addedWidgetsNotifier,
@@ -183,18 +82,148 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         ),
       FadeRotationScaleBox(
         child: isEdit
+            // Editing is a mode you are already in, so its controls stay out in
+            // the open where they can be reached.
             ? IconButton(
                 key: const ValueKey(true),
                 icon: const Icon(Icons.save, key: ValueKey('save-icon')),
                 onPressed: _handleUpdateIsEdit,
               )
-            : IconButton(
+            // Entering it is rare, so it lives behind the overflow rather than
+            // keeping a permanent pencil in the header of the page people look
+            // at most.
+            : CommonPopupBox(
                 key: const ValueKey(false),
-                icon: const Icon(Icons.edit, key: ValueKey('edit-icon')),
-                onPressed: _handleUpdateIsEdit,
+                popup: CommonPopupMenu(
+                  items: [
+                    PopupMenuItemData(
+                      icon: Icons.edit_outlined,
+                      label: appLocalizations.edit,
+                      onPressed: _handleUpdateIsEdit,
+                    ),
+                  ],
+                ),
+                targetBuilder: (open) {
+                  return IconButton(
+                    onPressed: () {
+                      open();
+                    },
+                    icon: const Icon(Icons.more_vert),
+                  );
+                },
               ),
       ),
     ];
+  }
+
+  /// Core status in the header.
+  ///
+  /// Healthy is a dot and nothing else. It used to be a filled green tick in a
+  /// circle, which was the loudest control on the dashboard while carrying the
+  /// least news — everything is fine — and read as an action waiting to be
+  /// taken rather than as a state.
+  ///
+  /// Connecting and disconnected keep the full labelled button. That is the
+  /// half worth being loud: it is the only place the app says a reconnect is in
+  /// progress, which attempt it is on, or that the core is down. Quietening
+  /// that too would have hidden the problem along with the noise.
+  Widget _buildCoreStatus(AppLocalizations appLocalizations) {
+    return Consumer(
+      builder: (_, ref, _) {
+        final coreStatus = ref.watch(coreStatusProvider);
+        return Tooltip(
+          message: appLocalizations.coreStatus,
+          child: FadeScaleBox(
+            alignment: Alignment.centerRight,
+            child: coreStatus == CoreStatus.connected
+                ? InkWell(
+                    onTap: _handleConnection,
+                    customBorder: const CircleBorder(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green.harmonizeWith(
+                            context.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : FilledButton.icon(
+                    key: ValueKey(coreStatus),
+                    onPressed: _handleConnection,
+                    style: FilledButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      backgroundColor: switch (coreStatus) {
+                        CoreStatus.connecting => null,
+                        CoreStatus.connected => Colors.greenAccent,
+                        CoreStatus.disconnected => context.colorScheme.error,
+                      },
+                      foregroundColor: switch (coreStatus) {
+                        CoreStatus.connecting => null,
+                        CoreStatus.connected => switch (Theme.brightnessOf(
+                          context,
+                        )) {
+                          Brightness.light =>
+                            context.colorScheme.onSurfaceVariant,
+                          Brightness.dark => null,
+                        },
+                        CoreStatus.disconnected => context.colorScheme.onError,
+                      },
+                    ),
+                    icon: SizedBox(
+                      height: globalState.measure.bodyMediumHeight,
+                      width: globalState.measure.bodyMediumHeight,
+                      child: switch (coreStatus) {
+                        CoreStatus.connecting => Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: context.colorScheme.onPrimary,
+                            backgroundColor: Colors.transparent,
+                          ),
+                        ),
+                        CoreStatus.connected => const Icon(
+                          Icons.check_sharp,
+                          fontWeight: FontWeight.w900,
+                        ),
+                        CoreStatus.disconnected => const Icon(
+                          Icons.restart_alt_sharp,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      },
+                    ),
+                    label: Consumer(
+                      builder: (_, ref, _) {
+                        // While auto-reconnect is running, say so and show which
+                        // attempt this is. A bare "Connecting..." held for up to
+                        // five attempts across roughly three and a half minutes
+                        // is indistinguishable from a hang, which is exactly how
+                        // users read it.
+                        final attempt = ref.watch(reconnectAttemptProvider);
+                        return Text(switch (coreStatus) {
+                          CoreStatus.connecting when attempt > 0 =>
+                            appLocalizations.reconnecting(
+                              attempt,
+                              CoreAction.maxReconnectAttempts,
+                            ),
+                          CoreStatus.connecting => appLocalizations.connecting,
+                          CoreStatus.connected => appLocalizations.connected,
+                          CoreStatus.disconnected =>
+                            appLocalizations.disconnected,
+                        });
+                      },
+                    ),
+                  ),
+          ),
+        );
+      },
+    );
   }
 
   void _showAddWidgetsModal() {
@@ -273,35 +302,44 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         titleWidget: const DashboardTitle(),
         actions: _buildActions(isEdit),
         floatingActionButton: const StartButton(),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16).copyWith(bottom: 88),
-            child: isEdit
-                ? SystemBackBlock(
-                    child: CommonPopScope(
-                      child: SuperGrid(
-                        key: key,
-                        crossAxisCount: columns,
-                        crossAxisSpacing: spacing,
-                        mainAxisSpacing: spacing,
-                        children: children,
-                        onUpdate: () {
-                          _handleSave();
+        // No scrollbar down the dashboard. It is a grid of cards that the user
+        // arranges, and a track pinned to the right edge sat over that layout
+        // permanently, in the one place where the page is meant to look settled.
+        // Scrolling still works by wheel, trackpad and drag; the bar is the only
+        // thing gone. HiddenBarScrollBehavior already existed for this - the
+        // proxies list uses it for the same reason.
+        body: ScrollConfiguration(
+          behavior: HiddenBarScrollBehavior(),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16).copyWith(bottom: 88),
+              child: isEdit
+                  ? SystemBackBlock(
+                      child: CommonPopScope(
+                        child: SuperGrid(
+                          key: key,
+                          crossAxisCount: columns,
+                          crossAxisSpacing: spacing,
+                          mainAxisSpacing: spacing,
+                          children: children,
+                          onUpdate: () {
+                            _handleSave();
+                          },
+                        ),
+                        onPop: (context) {
+                          _handleUpdateIsEdit();
+                          return false;
                         },
                       ),
-                      onPop: (context) {
-                        _handleUpdateIsEdit();
-                        return false;
-                      },
+                    )
+                  : Grid(
+                      crossAxisCount: columns,
+                      crossAxisSpacing: spacing,
+                      mainAxisSpacing: spacing,
+                      children: children,
                     ),
-                  )
-                : Grid(
-                    crossAxisCount: columns,
-                    crossAxisSpacing: spacing,
-                    mainAxisSpacing: spacing,
-                    children: children,
-                  ),
+            ),
           ),
         ),
       ),

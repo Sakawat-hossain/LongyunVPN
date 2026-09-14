@@ -60,12 +60,14 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     if (result == null || !mounted) return;
 
     final payUrl = await _safe(
-      () => ref.read(premiumProvider.notifier).purchase(
-        planId: plan.id,
-        period: period,
-        methodId: result.method.id,
-        couponCode: result.coupon,
-      ),
+      () => ref
+          .read(premiumProvider.notifier)
+          .purchase(
+            planId: plan.id,
+            period: period,
+            methodId: result.method.id,
+            couponCode: result.coupon,
+          ),
     );
     if (!mounted) return;
     // _safe returns null on error; distinguish from a legitimately-null URL by
@@ -94,7 +96,8 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
       await ref.read(authProvider.notifier).refresh();
       if (!mounted) return;
       final auth = ref.read(authProvider);
-      final changed = auth.subscribeInfo?.expiredAt != beforeExpiry ||
+      final changed =
+          auth.subscribeInfo?.expiredAt != beforeExpiry ||
           auth.userInfo?.planId != beforePlan;
       if (changed) {
         await _onRefresh();
@@ -180,8 +183,9 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
 
     // The user's current plan id — its card gets the extra "Reset traffic"
     // period chip (resetting traffic only makes sense for the plan you own).
-    final activePlanId =
-        auth.hasActiveSubscription ? auth.userInfo?.planId : null;
+    final activePlanId = auth.hasActiveSubscription
+        ? auth.userInfo?.planId
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -195,10 +199,7 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
               _StatusBanner(auth: auth),
               if (state.pendingTradeNo != null) ...[
                 const SizedBox(height: 12),
-                _PendingBanner(
-                  busy: state.isPurchasing,
-                  onRefresh: _onRefresh,
-                ),
+                _PendingBanner(busy: state.isPurchasing, onRefresh: _onRefresh),
               ],
               const SizedBox(height: 16),
               SegmentedButton<_PremiumTab>(
@@ -240,8 +241,11 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
             ).createShader(rect),
             blendMode: BlendMode.dstIn,
             child: switch (_tab) {
-              _PremiumTab.plans =>
-                _buildPlans(state, sellablePlans, activePlanId),
+              _PremiumTab.plans => _buildPlans(
+                state,
+                sellablePlans,
+                activePlanId,
+              ),
               _PremiumTab.orders => _buildOrders(state),
             },
           ),
@@ -261,8 +265,8 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
         for (final plan in sellablePlans) ...[
           _PlanCard(
             plan: plan,
-            selectedPeriod: _selectedPeriod[plan.id] ??
-                plan.periodPrices.keys.first,
+            selectedPeriod:
+                _selectedPeriod[plan.id] ?? plan.periodPrices.keys.first,
             formatPrice: _formatPrice,
             busy: state.isPurchasing,
             isCurrent: plan.id == activePlanId,
@@ -288,9 +292,10 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
       // Now that the list has a tab of its own, an empty state is the honest
       // answer. It could stay hidden while it was an unlabelled section at the
       // bottom of the plans; a tab that opens onto nothing cannot.
-      return _EmptyOrders(onRefresh: () => _safe(
-        () => ref.read(premiumProvider.notifier).loadOrders(),
-      ));
+      return _EmptyOrders(
+        onRefresh: () =>
+            _safe(() => ref.read(premiumProvider.notifier).loadOrders()),
+      );
     }
     return RefreshIndicator(
       onRefresh: () => ref.read(premiumProvider.notifier).loadOrders(),
@@ -331,10 +336,9 @@ class _PremiumViewState extends ConsumerState<PremiumView> {
     if (result == null || !mounted) return;
 
     final payUrl = await _safe(
-      () => ref.read(premiumProvider.notifier).checkoutExisting(
-        tradeNo: order.tradeNo,
-        methodId: result.method.id,
-      ),
+      () => ref
+          .read(premiumProvider.notifier)
+          .checkoutExisting(tradeNo: order.tradeNo, methodId: result.method.id),
     );
     if (!mounted) return;
     if (payUrl != null && payUrl.isNotEmpty) {
@@ -527,7 +531,6 @@ class _OrderTile extends StatelessWidget {
   }
 }
 
-
 class _StatusBanner extends StatelessWidget {
   final AuthState auth;
 
@@ -574,7 +577,9 @@ class _StatusBanner extends StatelessWidget {
                 children: [
                   Text(
                     active ? l.subscriptionActive : l.noSubscription,
-                    style: theme.textTheme.titleMedium?.copyWith(color: onColor),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: onColor,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -680,19 +685,24 @@ class _PlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isReset = selectedPeriod == xboardResetPeriod;
-    final price =
-        isReset ? resetPriceCents : plan.periodPrices[selectedPeriod];
-    // The plan the user owns is lifted out of the list with the brand colour:
-    // a thicker primary border and a faint primary wash, so it is obvious at a
-    // glance which plan is active. primary comes from the app's seed colour, so
-    // this tracks the logo/theme instead of hardcoding a hex value.
+    final price = isReset ? resetPriceCents : plan.periodPrices[selectedPeriod];
+    // The plan the user owns is marked three ways: the "Current plan" chip, a
+    // faint diagonal wash, and this border. It used to be 2pt of full-strength
+    // primary, which on the light container read as a hard bright outline
+    // drawn around the card rather than as part of it — the loudest thing on a
+    // page whose job is to be read. Softened to a tint, since the chip and the
+    // wash were already saying it. primary comes from the app's seed colour, so
+    // this still tracks the theme instead of hardcoding a hex value.
     return Card(
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: isCurrent
-            ? BorderSide(color: theme.colorScheme.primary, width: 2)
+            ? BorderSide(
+                color: theme.colorScheme.primary.withValues(alpha: 0.45),
+                width: 1.5,
+              )
             : BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Container(
@@ -717,10 +727,7 @@ class _PlanCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    plan.name,
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  child: Text(plan.name, style: theme.textTheme.titleLarge),
                 ),
                 if (isCurrent)
                   Padding(
@@ -809,8 +816,11 @@ class _PlanCard extends StatelessWidget {
                     onSelected: busy
                         ? null
                         : (_) => onPeriodChange(xboardResetPeriod),
-                    avatar: Icon(Icons.restart_alt,
-                        size: 16, color: theme.colorScheme.tertiary),
+                    avatar: Icon(
+                      Icons.restart_alt,
+                      size: 16,
+                      color: theme.colorScheme.tertiary,
+                    ),
                     label: Text(
                       '${context.appLocalizations.resetTraffic} · '
                       '${formatPrice(resetPriceCents!)}',
@@ -883,11 +893,15 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.appLocalizations.checkout,
-                style: theme.textTheme.titleMedium),
+            Text(
+              context.appLocalizations.checkout,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
-            Text(context.appLocalizations.paymentMethod,
-                style: theme.textTheme.labelLarge),
+            Text(
+              context.appLocalizations.paymentMethod,
+              style: theme.textTheme.labelLarge,
+            ),
             const SizedBox(height: 4),
             for (final method in widget.methods)
               ListTile(
@@ -957,7 +971,9 @@ class _ErrorRetry extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           FilledButton.tonal(
-              onPressed: onRetry, child: Text(context.appLocalizations.retry)),
+            onPressed: onRetry,
+            child: Text(context.appLocalizations.retry),
+          ),
         ],
       ),
     );
