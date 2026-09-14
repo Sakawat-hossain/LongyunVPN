@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:longyunvpn/common/common.dart';
 import 'package:longyunvpn/enum/enum.dart';
 import 'package:longyunvpn/l10n/l10n.dart';
@@ -23,6 +22,11 @@ class DashboardView extends ConsumerStatefulWidget {
   @override
   ConsumerState<DashboardView> createState() => _DashboardViewState();
 }
+
+/// Core-is-healthy green. The unhealthy states are not this colour and do not
+/// use this mark: connecting and disconnected keep the labelled button, and
+/// disconnected is already red there.
+const _coreHealthyColor = Color(0xFF43A047);
 
 class _DashboardViewState extends ConsumerState<DashboardView> {
   final key = GlobalKey<SuperGridState>();
@@ -104,11 +108,19 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   ],
                 ),
                 targetBuilder: (open) {
-                  return IconButton(
-                    onPressed: () {
+                  // Same treatment as the status mark: no ink, no reserved
+                  // tap target. The menu opening is the feedback, so a hover
+                  // circle only added a second highlight next to a mark that
+                  // deliberately has none.
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
                       open();
                     },
-                    icon: const Icon(Icons.more_vert),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Icon(Icons.more_vert, size: 20),
+                    ),
                   );
                 },
               ),
@@ -136,20 +148,31 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           child: FadeScaleBox(
             alignment: Alignment.centerRight,
             child: coreStatus == CoreStatus.connected
-                ? InkWell(
+                // A broadcast mark rather than a bare dot: it reads as "on
+                // air" instead of as a decoration, and being an IconButton like
+                // the overflow beside it means the two are spaced as siblings.
+                // The hand-built dot was a 10pt circle inside 12pt of padding,
+                // which left a gap far wider than the header's own rhythm.
+                // Static and state-coloured: green while the core is healthy.
+                // A GestureDetector rather than an IconButton, for two reasons -
+                // an IconButton reserves a 48pt tap target that pushed a wide
+                // channel between this and the overflow, and its ripple and
+                // hover made a status read as a button waiting to be pressed.
+                ? GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: _handleConnection,
-                    customBorder: const CircleBorder(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.green.harmonizeWith(
-                            context.colorScheme.primary,
-                          ),
-                        ),
+                    // No horizontal padding at all. CommonScaffold's genActions
+                    // already separates actions by 4pt, so anything added here
+                    // is doubled on both sides of that gap - which is what kept
+                    // these two apart while their own padding kept shrinking.
+                    // Vertical padding stays, to keep the click target
+                    // comfortable without widening the glyph.
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Icon(
+                        Icons.broadcast_on_personal,
+                        size: 20,
+                        color: _coreHealthyColor,
                       ),
                     ),
                   )

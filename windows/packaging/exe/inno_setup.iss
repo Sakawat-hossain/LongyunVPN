@@ -13,6 +13,19 @@ OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
 Compression=lzma
 SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
+; The icon Windows shows beside the app in Apps & features and in the uninstall
+; list. Without it Inno writes no DisplayIcon value and Windows falls back to a
+; blank generic tile - which is why every other program in that list had its own
+; mark and this one did not. Points at the installed executable, whose icon is
+; already the app's.
+;
+; Single backslash, deliberately, where the paths below use two. This template is
+; rendered by Liquid, which leaves backslashes alone, so "\\" reaches the .iss as
+; a doubled separator. That is harmless for a path Windows opens - it collapses
+; them - but this value is written to the registry and parsed by Explorer to pull
+; an icon out, so it gets the plain path. Do not "fix" it to match its
+; neighbours.
+UninstallDisplayIcon={app}\{{EXECUTABLE_NAME}}
 WizardStyle=modern
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 ArchitecturesAllowed={{ARCH}}
