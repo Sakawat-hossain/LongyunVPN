@@ -762,5 +762,6 @@
   "payNow": "立即支付",
   "orderNotPaidYet": "此订单尚未支付，完成支付后即可开通。",
   "orderProcessingHint": "已收到付款，正在开通套餐，请稍候。",
-  "orderWasCancelled": "此订单已取消。"
+  "orderWasCancelled": "此订单已取消。",
+  "visitWebsite": "访问官网"
 }

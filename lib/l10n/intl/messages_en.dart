@@ -1397,6 +1397,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Vibrant"),
     "view": MessageLookupByLibrary.simpleMessage("View"),
+    "visitWebsite": MessageLookupByLibrary.simpleMessage("Visit our website"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
       "VPN configuration change detected",
     ),

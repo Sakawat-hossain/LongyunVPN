@@ -1003,6 +1003,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "verificationCodeRequired": MessageLookupByLibrary.simpleMessage("请输入验证码。"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("活力"),
     "view": MessageLookupByLibrary.simpleMessage("查看"),
+    "visitWebsite": MessageLookupByLibrary.simpleMessage("访问官网"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
       "检测到VPN相关配置改动",
     ),

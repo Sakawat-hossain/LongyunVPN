@@ -6098,6 +6098,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Visit our website`
+  String get visitWebsite {
+    return Intl.message(
+      'Visit our website',
+      name: 'visitWebsite',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -28,6 +28,9 @@ const appBrandName = '龙云 LongyunVPN';
 const appBrandColor = Color(0xFFEC1B23);
 const xboardBaseUrl = 'https://admin.jsssbd.com/api/v1';
 const xboardPanelUrl = 'https://admin.jsssbd.com/';
+
+/// The public marketing site, linked from Tools.
+const appWebsiteUrl = 'https://longyunvpn.com';
 const appHelperService = 'LongyunVPNHelperService';
 // The pre-rebrand Windows service name. Kept only so upgrades can stop and delete
 // the old service (see Windows.registerService) — do not register anything under

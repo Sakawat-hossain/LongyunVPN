@@ -127,6 +127,12 @@ class AboutLinks extends StatelessWidget {
           const Divider(height: 0),
         ],
         ListItem(
+          title: Text(appLocalizations.visitWebsite),
+          trailing: const Icon(Icons.launch),
+          onTap: () => globalState.openUrl(appWebsiteUrl),
+        ),
+        const Divider(height: 0),
+        ListItem(
           title: const Text('Telegram'),
           trailing: const Icon(Icons.launch),
           onTap: () => globalState.openUrl('https://t.me/longyunvpn'),
