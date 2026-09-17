@@ -111,9 +111,20 @@ class AboutLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    // The in-app update check is desktop-only — mobile updates via the app
-    // store (Google Play), which disallows self-update prompts.
-    final showUpdate = !Platform.isAndroid && !Platform.isIOS;
+    // Everywhere except iOS, which has no sideload path and so nothing it could
+    // do with an update it found.
+    //
+    // This used to hide on Android too, on the reasoning that mobile updates
+    // come from Play. The app is not on Play - it ships APKs from GitHub
+    // Releases, the manifest carries REQUEST_INSTALL_PACKAGES, the updater
+    // already picks the APK matching the device's ABI, and the automatic check
+    // has been running on Android all along. Only this button was missing, so
+    // an Android user could never ask the question themselves.
+    //
+    // It matters more than a convenience: a manual check passes isUser, which
+    // is what bypasses "Skip this version". Without it, an Android user who
+    // skipped a release could never be offered it again.
+    final showUpdate = !Platform.isIOS;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,

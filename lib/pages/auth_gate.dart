@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home.dart';
 import 'login.dart';
+import 'reset_password.dart';
 import 'signup.dart';
 
 class AuthGate extends ConsumerStatefulWidget {
@@ -15,7 +16,9 @@ class AuthGate extends ConsumerStatefulWidget {
 }
 
 class _AuthGateState extends ConsumerState<AuthGate> {
-  bool _showSignUp = false;
+  /// Which of the three signed-out forms is showing. Swapped with local
+  /// state rather than Navigator routes for the reason below.
+  _AuthForm _form = _AuthForm.login;
 
   @override
   void initState() {
@@ -76,16 +79,24 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         // route for SignUp would race with that swap on the same route
         // stack and could leave the engine mid-transition (observed as a
         // black screen on Windows).
-        if (_showSignUp) {
-          return SignUpPage(
-            onBack: () => setState(() => _showSignUp = false),
-          );
-        }
-        return LoginPage(
-          onSignUp: () => setState(() => _showSignUp = true),
-        );
+        return switch (_form) {
+          _AuthForm.signUp => SignUpPage(
+            onBack: () => setState(() => _form = _AuthForm.login),
+          ),
+          _AuthForm.resetPassword => ResetPasswordPage(
+            onBack: () => setState(() => _form = _AuthForm.login),
+          ),
+          _AuthForm.login => LoginPage(
+            onSignUp: () => setState(() => _form = _AuthForm.signUp),
+            onForgotPassword: () =>
+                setState(() => _form = _AuthForm.resetPassword),
+          ),
+        };
       case AuthStatus.loggedIn:
         return const HomePage();
     }
   }
 }
+
+/// The forms available before sign-in.
+enum _AuthForm { login, signUp, resetPassword }

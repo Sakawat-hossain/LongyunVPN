@@ -467,6 +467,34 @@ class XboardApi {
     }
   }
 
+  /// Sets a new password using a code mailed to [email].
+  ///
+  /// The code comes from the same `sendEmailVerifyCode` the sign-up form uses —
+  /// the panel's endpoint takes only an address and does not distinguish what
+  /// the code is for, so nothing extra is needed to reuse it here.
+  ///
+  /// The panel enforces a minimum of eight characters on [password]; the form
+  /// checks that first so the user is not made to wait for a code and then told
+  /// by the server.
+  Future<void> resetPassword({
+    required String email,
+    required String emailCode,
+    required String password,
+  }) async {
+    try {
+      await _dio.post(
+        '/passport/auth/forget',
+        data: {
+          'email': email,
+          'email_code': emailCode,
+          'password': password,
+        },
+      );
+    } catch (e) {
+      throw _toApiException(e);
+    }
+  }
+
   Future<void> sendEmailVerifyCode(String email) async {
     try {
       await _dio.post(

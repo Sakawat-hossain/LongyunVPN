@@ -136,11 +136,29 @@ class AuthNotifier extends Notifier<AuthState> {
     return false;
   }
 
-  Future<bool> login(String email, String password) async {
+  /// Signs in. [remember] decides whether the session survives a restart.
+  ///
+  /// The token is applied in memory by xboardApi.login itself, so this run
+  /// works either way; persisting it is what makes the next launch skip the
+  /// sign-in screen. Defaults to true, which is what the app has always done —
+  /// nobody who ignores the new checkbox sees a change.
+  Future<bool> login(
+    String email,
+    String password, {
+    bool remember = true,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final token = await xboardApi.login(email, password);
-      await preferences.setXboardToken(token);
+      if (remember) {
+        await preferences.setXboardToken(token);
+      } else {
+        // Clear rather than merely skip. Someone who was remembered before and
+        // is now signing in with the box unchecked would otherwise keep a
+        // stale token on disk, and the next launch would restore the session
+        // they just asked not to keep.
+        await preferences.clearXboardToken();
+      }
       // Sequential here (not parallelized) so a failing panel call surfaces its
       // own XboardApiException message to the login UI rather than a wrapped
       // ParallelWaitError.

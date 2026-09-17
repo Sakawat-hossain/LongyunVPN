@@ -257,6 +257,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage(
       "Интервал автообновления (минуты)",
     ),
+    "backToSignIn": MessageLookupByLibrary.simpleMessage("Вернуться ко входу"),
     "backup": MessageLookupByLibrary.simpleMessage("Резервное копирование"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование и восстановление",
@@ -585,6 +586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Вы уверены, что хотите принудительно перезапустить ядро?",
     ),
+    "forgotPassword": MessageLookupByLibrary.simpleMessage("Забыли пароль?"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовый микс"),
     "general": MessageLookupByLibrary.simpleMessage("Общие"),
     "geodataLoader": MessageLookupByLibrary.simpleMessage(
@@ -805,6 +807,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("Тип сети"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Нейтральные"),
     "never": MessageLookupByLibrary.simpleMessage("Никогда"),
+    "newPassword": MessageLookupByLibrary.simpleMessage("Новый пароль"),
     "noAccountSignUp": MessageLookupByLibrary.simpleMessage(
       "Нет аккаунта? Зарегистрироваться",
     ),
@@ -1072,6 +1075,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "refreshing": MessageLookupByLibrary.simpleMessage("Обновление…"),
     "reload": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "rememberMe": MessageLookupByLibrary.simpleMessage("Запомнить меня"),
     "remote": MessageLookupByLibrary.simpleMessage("Удаленный"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование локальных данных на WebDAV",
@@ -1096,6 +1100,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetData": MessageLookupByLibrary.simpleMessage("Сбросить трафик"),
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "На текущей странице есть изменения. Вы уверены, что хотите сбросить?",
+    ),
+    "resetPassword": MessageLookupByLibrary.simpleMessage("Сброс пароля"),
+    "resetPasswordSubtitle": MessageLookupByLibrary.simpleMessage(
+      "Мы отправим код подтверждения на вашу почту.",
+    ),
+    "resetPasswordSuccess": MessageLookupByLibrary.simpleMessage(
+      "Пароль изменён. Теперь можно войти.",
     ),
     "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage(
       "Сбросить ссылку подписки",

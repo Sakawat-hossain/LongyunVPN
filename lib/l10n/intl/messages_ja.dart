@@ -210,6 +210,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoSetSystemDns": MessageLookupByLibrary.simpleMessage("オートセットシステムDNS"),
     "autoUpdate": MessageLookupByLibrary.simpleMessage("自動更新"),
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage("自動更新間隔（分）"),
+    "backToSignIn": MessageLookupByLibrary.simpleMessage("ログインに戻る"),
     "backup": MessageLookupByLibrary.simpleMessage("バックアップ"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage("バックアップと復元"),
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
@@ -464,6 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "コアを強制再起動してもよろしいですか？",
     ),
+    "forgotPassword": MessageLookupByLibrary.simpleMessage("パスワードをお忘れですか？"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("フルーツサラダ"),
     "general": MessageLookupByLibrary.simpleMessage("一般"),
     "geodataLoader": MessageLookupByLibrary.simpleMessage("Geo低メモリモード"),
@@ -628,6 +630,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("ネットワーク種別"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("ニュートラル"),
     "never": MessageLookupByLibrary.simpleMessage("なし"),
+    "newPassword": MessageLookupByLibrary.simpleMessage("新しいパスワード"),
     "noAccountSignUp": MessageLookupByLibrary.simpleMessage(
       "アカウントをお持ちでないですか？登録",
     ),
@@ -851,6 +854,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "refreshing": MessageLookupByLibrary.simpleMessage("更新中…"),
     "reload": MessageLookupByLibrary.simpleMessage("再読み込み"),
+    "rememberMe": MessageLookupByLibrary.simpleMessage("ログイン状態を保持"),
     "remote": MessageLookupByLibrary.simpleMessage("リモート"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "WebDAVにデータをバックアップ",
@@ -871,6 +875,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetData": MessageLookupByLibrary.simpleMessage("通信量をリセット"),
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "現在のページに変更があります。リセットしてもよろしいですか？",
+    ),
+    "resetPassword": MessageLookupByLibrary.simpleMessage("パスワードを再設定"),
+    "resetPasswordSubtitle": MessageLookupByLibrary.simpleMessage(
+      "確認コードをメールでお送りします。",
+    ),
+    "resetPasswordSuccess": MessageLookupByLibrary.simpleMessage(
+      "パスワードを変更しました。ログインできます。",
     ),
     "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage(
       "サブスクリプション URL をリセット",

@@ -763,5 +763,12 @@
   "orderNotPaidYet": "This order has not been paid yet. Complete the payment to activate it.",
   "orderProcessingHint": "Payment received. Activating your plan — this usually takes a moment.",
   "orderWasCancelled": "This order was cancelled.",
-  "visitWebsite": "Visit our website"
+  "visitWebsite": "Visit our website",
+  "forgotPassword": "Forgot password?",
+  "resetPassword": "Reset password",
+  "resetPasswordSubtitle": "We will email you a verification code.",
+  "newPassword": "New password",
+  "resetPasswordSuccess": "Password changed. You can sign in now.",
+  "backToSignIn": "Back to sign in",
+  "rememberMe": "Remember me"
 }

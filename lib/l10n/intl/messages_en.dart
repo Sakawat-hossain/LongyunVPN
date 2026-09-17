@@ -254,6 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage(
       "Auto update interval (minutes)",
     ),
+    "backToSignIn": MessageLookupByLibrary.simpleMessage("Back to sign in"),
     "backup": MessageLookupByLibrary.simpleMessage("Backup"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage(
       "Backup and Restore",
@@ -560,6 +561,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to force restart the core?",
     ),
+    "forgotPassword": MessageLookupByLibrary.simpleMessage("Forgot password?"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
     "general": MessageLookupByLibrary.simpleMessage("General"),
     "geodataLoader": MessageLookupByLibrary.simpleMessage(
@@ -766,6 +768,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("Network type"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Neutral"),
     "never": MessageLookupByLibrary.simpleMessage("Never"),
+    "newPassword": MessageLookupByLibrary.simpleMessage("New password"),
     "noAccountSignUp": MessageLookupByLibrary.simpleMessage(
       "Don\'t have an account? Sign Up",
     ),
@@ -1019,6 +1022,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "refreshing": MessageLookupByLibrary.simpleMessage("Refreshing…"),
     "reload": MessageLookupByLibrary.simpleMessage("Reload"),
+    "rememberMe": MessageLookupByLibrary.simpleMessage("Remember me"),
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
       "Backup local data to WebDAV",
@@ -1043,6 +1047,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetData": MessageLookupByLibrary.simpleMessage("Reset data"),
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "The current page has changes. Are you sure you want to reset?",
+    ),
+    "resetPassword": MessageLookupByLibrary.simpleMessage("Reset password"),
+    "resetPasswordSubtitle": MessageLookupByLibrary.simpleMessage(
+      "We will email you a verification code.",
+    ),
+    "resetPasswordSuccess": MessageLookupByLibrary.simpleMessage(
+      "Password changed. You can sign in now.",
     ),
     "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage(
       "Reset subscription URL",

@@ -763,5 +763,12 @@
   "orderNotPaidYet": "此订单尚未支付，完成支付后即可开通。",
   "orderProcessingHint": "已收到付款，正在开通套餐，请稍候。",
   "orderWasCancelled": "此订单已取消。",
-  "visitWebsite": "访问官网"
+  "visitWebsite": "访问官网",
+  "forgotPassword": "忘记密码？",
+  "resetPassword": "重置密码",
+  "resetPasswordSubtitle": "我们会向您的邮箱发送验证码。",
+  "newPassword": "新密码",
+  "resetPasswordSuccess": "密码已修改，现在可以登录了。",
+  "backToSignIn": "返回登录",
+  "rememberMe": "记住我"
 }

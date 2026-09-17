@@ -763,5 +763,12 @@
   "orderNotPaidYet": "Этот заказ ещё не оплачен. Завершите оплату, чтобы активировать его.",
   "orderProcessingHint": "Платёж получен. Активируем тариф, это займёт немного времени.",
   "orderWasCancelled": "Этот заказ отменён.",
-  "visitWebsite": "Наш сайт"
+  "visitWebsite": "Наш сайт",
+  "forgotPassword": "Забыли пароль?",
+  "resetPassword": "Сброс пароля",
+  "resetPasswordSubtitle": "Мы отправим код подтверждения на вашу почту.",
+  "newPassword": "Новый пароль",
+  "resetPasswordSuccess": "Пароль изменён. Теперь можно войти.",
+  "backToSignIn": "Вернуться ко входу",
+  "rememberMe": "Запомнить меня"
 }

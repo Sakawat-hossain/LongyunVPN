@@ -196,6 +196,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoSetSystemDns": MessageLookupByLibrary.simpleMessage("自动设置系统DNS"),
     "autoUpdate": MessageLookupByLibrary.simpleMessage("自动更新"),
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage("自动更新间隔（分钟）"),
+    "backToSignIn": MessageLookupByLibrary.simpleMessage("返回登录"),
     "backup": MessageLookupByLibrary.simpleMessage("备份"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage("备份与恢复"),
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
@@ -410,6 +411,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage("开启后会有一定性能损耗"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("字体"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage("您确定要强制重启核心吗？"),
+    "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码？"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("果缤纷"),
     "general": MessageLookupByLibrary.simpleMessage("常规"),
     "geodataLoader": MessageLookupByLibrary.simpleMessage("Geo低内存模式"),
@@ -554,6 +556,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkType": MessageLookupByLibrary.simpleMessage("网络类型"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("中性"),
     "never": MessageLookupByLibrary.simpleMessage("从未"),
+    "newPassword": MessageLookupByLibrary.simpleMessage("新密码"),
     "noAccountSignUp": MessageLookupByLibrary.simpleMessage("还没有账号？注册"),
     "noActivePlanChoose": MessageLookupByLibrary.simpleMessage(
       "暂无有效套餐 — 请在下方选择一个以开始使用。",
@@ -733,6 +736,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "refreshSubscriptionHint": MessageLookupByLibrary.simpleMessage("请刷新您的订阅。"),
     "refreshing": MessageLookupByLibrary.simpleMessage("正在刷新…"),
     "reload": MessageLookupByLibrary.simpleMessage("重新加载"),
+    "rememberMe": MessageLookupByLibrary.simpleMessage("记住我"),
     "remote": MessageLookupByLibrary.simpleMessage("远程"),
     "remoteBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到WebDAV"),
     "remoteDestination": MessageLookupByLibrary.simpleMessage("远程目标"),
@@ -749,6 +753,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resetData": MessageLookupByLibrary.simpleMessage("重置流量"),
     "resetPageChangesTip": MessageLookupByLibrary.simpleMessage(
       "当前页面存在更改，确定重置吗？",
+    ),
+    "resetPassword": MessageLookupByLibrary.simpleMessage("重置密码"),
+    "resetPasswordSubtitle": MessageLookupByLibrary.simpleMessage(
+      "我们会向您的邮箱发送验证码。",
+    ),
+    "resetPasswordSuccess": MessageLookupByLibrary.simpleMessage(
+      "密码已修改，现在可以登录了。",
     ),
     "resetSubscribeUrl": MessageLookupByLibrary.simpleMessage("重置订阅链接"),
     "resetSubscribeUrlSuccess": MessageLookupByLibrary.simpleMessage(

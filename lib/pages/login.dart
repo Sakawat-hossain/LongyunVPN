@@ -5,8 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   final VoidCallback onSignUp;
+  final VoidCallback onForgotPassword;
 
-  const LoginPage({super.key, required this.onSignUp});
+  const LoginPage({
+    super.key,
+    required this.onSignUp,
+    required this.onForgotPassword,
+  });
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -18,11 +23,55 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _obscurePassword = true;
   String? _emailError;
 
+  /// Whether to keep the session after the app closes. On by default, which is
+  /// what the app has always done - unchecking is opting out, not in.
+  bool _rememberMe = true;
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Widget _buildRememberMe(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          value: _rememberMe,
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onChanged: (value) => setState(() => _rememberMe = value ?? true),
+        ),
+        // The label is part of the control: a checkbox you can only hit on the
+        // box itself is a small target and reads as decoration beside its own
+        // text.
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _rememberMe = !_rememberMe),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+            child: Text(
+              context.appLocalizations.rememberMe,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForgotPassword(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      onPressed: widget.onForgotPassword,
+      child: Text(context.appLocalizations.forgotPassword),
+    );
   }
 
   Future<void> _handleLogin() async {
@@ -38,7 +87,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() => _emailError = context.appLocalizations.emailInvalid);
       return;
     }
-    await ref.read(authProvider.notifier).login(email, password);
+    await ref
+        .read(authProvider.notifier)
+        .login(email, password, remember: _rememberMe);
   }
 
   @override
@@ -112,14 +163,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                   ),
+                  // The option on the left, the escape hatch on the right.
+                  //
+                  // A Wrap, not a Row, and not a width threshold either. The
+                  // first attempt put the label in a Flexible beside a Spacer -
+                  // both flex, so they split the free space and the label was
+                  // given less room than the word "Remember", which it broke in
+                  // half. The second guessed a pixel width to stack at and
+                  // overflowed by 78 at the widths it guessed wrong about.
+                  //
+                  // Wrap cannot overflow: the two sit side by side when they
+                  // fit and the second drops to its own line when they do not,
+                  // whatever the font, text size or translation. "Forgot
+                  // password?" is a good deal longer in Russian.
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 4,
+                    children: [
+                      _buildRememberMe(context),
+                      _buildForgotPassword(context),
+                    ],
+                  ),
                   if (authState.error != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       authState.error!,
                       style: TextStyle(color: colorScheme.error),
                     ),
                   ],
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 4),
                   FilledButton(
                     onPressed: authState.isLoading ? null : _handleLogin,
                     style: FilledButton.styleFrom(
@@ -133,7 +206,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           )
                         : Text(context.appLocalizations.logIn),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   TextButton(
                     onPressed: widget.onSignUp,
                     child: Text(context.appLocalizations.noAccountSignUp),

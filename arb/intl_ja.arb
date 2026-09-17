@@ -763,5 +763,12 @@
   "orderNotPaidYet": "この注文はまだ支払われていません。支払いを完了すると有効になります。",
   "orderProcessingHint": "支払いを確認しました。プランを有効化しています。少々お待ちください。",
   "orderWasCancelled": "この注文はキャンセルされました。",
-  "visitWebsite": "公式サイトを見る"
+  "visitWebsite": "公式サイトを見る",
+  "forgotPassword": "パスワードをお忘れですか？",
+  "resetPassword": "パスワードを再設定",
+  "resetPasswordSubtitle": "確認コードをメールでお送りします。",
+  "newPassword": "新しいパスワード",
+  "resetPasswordSuccess": "パスワードを変更しました。ログインできます。",
+  "backToSignIn": "ログインに戻る",
+  "rememberMe": "ログイン状態を保持"
 }

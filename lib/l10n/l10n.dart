@@ -6108,6 +6108,71 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Forgot password?`
+  String get forgotPassword {
+    return Intl.message(
+      'Forgot password?',
+      name: 'forgotPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset password`
+  String get resetPassword {
+    return Intl.message(
+      'Reset password',
+      name: 'resetPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We will email you a verification code.`
+  String get resetPasswordSubtitle {
+    return Intl.message(
+      'We will email you a verification code.',
+      name: 'resetPasswordSubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New password`
+  String get newPassword {
+    return Intl.message(
+      'New password',
+      name: 'newPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password changed. You can sign in now.`
+  String get resetPasswordSuccess {
+    return Intl.message(
+      'Password changed. You can sign in now.',
+      name: 'resetPasswordSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back to sign in`
+  String get backToSignIn {
+    return Intl.message(
+      'Back to sign in',
+      name: 'backToSignIn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remember me`
+  String get rememberMe {
+    return Intl.message('Remember me', name: 'rememberMe', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
