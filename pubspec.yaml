@@ -107,7 +107,7 @@ dependencies:
   # version are unchanged so crashlytics/analytics (^4.13.0) still resolve.
   firebase_core: ^4.13.0
   firebase_crashlytics: ^5.2.7
-  firebase_analytics: ^12.4.6
+  firebase_analytics: ^12.5.0
 dependency_overrides:
   # Overridden rather than swapped: firebase_crashlytics and firebase_analytics
   # both declare a hosted "firebase_core: ^4.13.0", and pub refuses to satisfy a
