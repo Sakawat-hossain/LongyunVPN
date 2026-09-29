@@ -32,6 +32,14 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 
+# flutter_inappwebview_windows is built with /await and includes
+# <experimental/coroutine>. From MSVC 14.51 (Visual Studio 18) that header is a
+# hard error (STL1011) unless this is defined, which broke the windows-arm64
+# release build the day its runner image moved to Visual Studio 18. Directory
+# scope, so it reaches every plugin added below; it only silences the
+# deprecation and changes nothing on older toolsets.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by
