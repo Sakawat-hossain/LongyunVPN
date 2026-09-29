@@ -29,6 +29,11 @@ class System {
 
   bool get isLinux => Platform.isLinux;
 
+  /// Whether macOS is running this app from a translocated copy - see
+  /// [isTranslocatedPath].
+  bool get isTranslocated =>
+      isMacOS && isTranslocatedPath(Platform.resolvedExecutable);
+
   Future<int> get version async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
     return switch (Platform.operatingSystem) {
@@ -444,3 +449,17 @@ class MacOS {
 }
 
 final macOS = system.isMacOS ? MacOS() : null;
+
+/// App Translocation: a downloaded app opened without first being moved - from
+/// Downloads, or straight off the disk image - is run by Gatekeeper from a
+/// randomised, read-only copy under `.../AppTranslocation/<uuid>/d/`.
+///
+/// Two things break there. Authorising TUN changes the owner and mode of the
+/// bundled core, which a read-only mount refuses. And a login item registered
+/// at that path points at nothing after the next restart.
+///
+/// The fix is the user's to make - move the app - so this only detects it. The
+/// quarantine flag that causes it is deliberately left alone: removing it from
+/// inside the app would be bypassing Gatekeeper's check of the download.
+bool isTranslocatedPath(String executablePath) =>
+    executablePath.contains('/AppTranslocation/');

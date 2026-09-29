@@ -6183,6 +6183,41 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Move LongyunVPN to Applications`
+  String get appTranslocatedTitle {
+    return Intl.message(
+      'Move LongyunVPN to Applications',
+      name: 'appTranslocatedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LongyunVPN was opened straight from the download or the disk image, so macOS is running it from a temporary, read-only copy. From there, TUN mode cannot be turned on, and Launch at startup stops working after a restart.\n\nQuit, drag LongyunVPN into the Applications folder, and open it from there.`
+  String get appTranslocatedMessage {
+    return Intl.message(
+      'LongyunVPN was opened straight from the download or the disk image, so macOS is running it from a temporary, read-only copy. From there, TUN mode cannot be turned on, and Launch at startup stops working after a restart.\n\nQuit, drag LongyunVPN into the Applications folder, and open it from there.',
+      name: 'appTranslocatedMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quit and move`
+  String get quitAndMove {
+    return Intl.message(
+      'Quit and move',
+      name: 'quitAndMove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not now`
+  String get notNow {
+    return Intl.message('Not now', name: 'notNow', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

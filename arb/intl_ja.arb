@@ -771,5 +771,9 @@
   "resetPasswordSuccess": "パスワードを変更しました。ログインできます。",
   "backToSignIn": "ログインに戻る",
   "rememberMe": "ログイン状態を保持",
-  "subscriptionDownloadFailed": "サブスクリプションをダウンロードできませんでした。ネットワーク接続を確認して、もう一度お試しください。"
+  "subscriptionDownloadFailed": "サブスクリプションをダウンロードできませんでした。ネットワーク接続を確認して、もう一度お試しください。",
+  "appTranslocatedTitle": "LongyunVPN を「アプリケーション」フォルダへ移動してください",
+  "appTranslocatedMessage": "LongyunVPN がダウンロード先またはディスクイメージから直接開かれたため、macOS は一時的な読み取り専用のコピーから実行しています。この状態では TUN モードを有効にできず、「ログイン時に起動」も再起動後に機能しなくなります。\n\n終了して LongyunVPN を「アプリケーション」フォルダへドラッグし、そこから開いてください。",
+  "quitAndMove": "終了して移動",
+  "notNow": "後で"
 }

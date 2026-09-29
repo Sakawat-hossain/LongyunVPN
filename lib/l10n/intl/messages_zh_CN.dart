@@ -177,6 +177,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "app": MessageLookupByLibrary.simpleMessage("应用"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("应用访问控制"),
+    "appTranslocatedMessage": MessageLookupByLibrary.simpleMessage(
+      "LongyunVPN 是直接从下载位置或磁盘映像打开的，因此 macOS 正在从一个临时的只读副本运行它。在这种情况下无法开启 TUN 模式，“开机启动”在重启后也会失效。\n\n请退出，将 LongyunVPN 拖入“应用程序”文件夹，然后从那里打开。",
+    ),
+    "appTranslocatedTitle": MessageLookupByLibrary.simpleMessage(
+      "请将 LongyunVPN 移到“应用程序”文件夹",
+    ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage("强制为配置附加系统DNS"),
     "application": MessageLookupByLibrary.simpleMessage("应用程序"),
@@ -591,6 +597,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nodeStatus": MessageLookupByLibrary.simpleMessage("节点状态"),
     "none": MessageLookupByLibrary.simpleMessage("无"),
+    "notNow": MessageLookupByLibrary.simpleMessage("暂不"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage("当前代理组无法选中"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage("没有配置文件,请先添加配置文件"),
     "nullTip": m29,
@@ -725,6 +732,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickConnectNoNode": MessageLookupByLibrary.simpleMessage("没有节点响应"),
     "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),
+    "quitAndMove": MessageLookupByLibrary.simpleMessage("退出并移动"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("重新检测出口 IP"),
     "reconnectFailed": MessageLookupByLibrary.simpleMessage("自动重连失败，点击重试。"),

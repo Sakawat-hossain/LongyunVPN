@@ -771,5 +771,9 @@
   "resetPasswordSuccess": "Password changed. You can sign in now.",
   "backToSignIn": "Back to sign in",
   "rememberMe": "Remember me",
-  "subscriptionDownloadFailed": "Couldn't download your subscription. Check your internet connection and try again."
+  "subscriptionDownloadFailed": "Couldn't download your subscription. Check your internet connection and try again.",
+  "appTranslocatedTitle": "Move LongyunVPN to Applications",
+  "appTranslocatedMessage": "LongyunVPN was opened straight from the download or the disk image, so macOS is running it from a temporary, read-only copy. From there, TUN mode cannot be turned on, and Launch at startup stops working after a restart.\n\nQuit, drag LongyunVPN into the Applications folder, and open it from there.",
+  "quitAndMove": "Quit and move",
+  "notNow": "Not now"
 }

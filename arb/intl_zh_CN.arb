@@ -771,5 +771,9 @@
   "resetPasswordSuccess": "密码已修改，现在可以登录了。",
   "backToSignIn": "返回登录",
   "rememberMe": "记住我",
-  "subscriptionDownloadFailed": "无法下载订阅，请检查网络连接后重试。"
+  "subscriptionDownloadFailed": "无法下载订阅，请检查网络连接后重试。",
+  "appTranslocatedTitle": "请将 LongyunVPN 移到“应用程序”文件夹",
+  "appTranslocatedMessage": "LongyunVPN 是直接从下载位置或磁盘映像打开的，因此 macOS 正在从一个临时的只读副本运行它。在这种情况下无法开启 TUN 模式，“开机启动”在重启后也会失效。\n\n请退出，将 LongyunVPN 拖入“应用程序”文件夹，然后从那里打开。",
+  "quitAndMove": "退出并移动",
+  "notNow": "暂不"
 }

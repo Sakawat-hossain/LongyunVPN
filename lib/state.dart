@@ -320,20 +320,42 @@ class GlobalState {
     container.read(systemActionProvider.notifier).updateTray();
     container.read(profilesActionProvider.notifier).autoUpdateProfiles();
     container.read(commonActionProvider.notifier).autoCheckUpdate();
-    autoLaunch?.updateStatus(container.read(appSettingProvider).autoLaunch);
-    if (!container.read(appSettingProvider).silentLaunch) {
+    // From a translocated copy this would register a login item at a path
+    // that is gone after the next restart, replacing a working one.
+    if (!system.isTranslocated) {
+      autoLaunch?.updateStatus(container.read(appSettingProvider).autoLaunch);
+    }
+    if (!container.read(appSettingProvider).silentLaunch ||
+        system.isTranslocated) {
       window?.show();
     } else {
       window?.hide();
     }
     await _handleFailedPreference();
     await _handlerDisclaimer();
+    await _warnIfTranslocated();
     await _showCrashlyticsTip();
     await container.read(coreActionProvider.notifier).connectCore();
     await container.read(coreActionProvider.notifier).initCore();
     await container.read(setupActionProvider.notifier).initStatus();
     container.read(initProvider.notifier).value = true;
     permissions.check();
+  }
+
+  // Asked on every launch until the app is moved: nothing else explains why
+  // TUN fails to authorise, or why launch at startup forgets itself.
+  Future<void> _warnIfTranslocated() async {
+    if (!system.isTranslocated) return;
+    final quit = await showMessage(
+      title: currentAppLocalizations.appTranslocatedTitle,
+      message: TextSpan(text: currentAppLocalizations.appTranslocatedMessage),
+      confirmText: currentAppLocalizations.quitAndMove,
+      cancelText: currentAppLocalizations.notNow,
+    );
+    if (quit != true) return;
+    // Opens a Finder window on Applications to drag into.
+    await Process.run('open', ['/Applications']);
+    await container.read(systemActionProvider.notifier).handleExit();
   }
 
   Future<void> _handleFailedPreference() async {

@@ -187,6 +187,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),
+    "appTranslocatedMessage": MessageLookupByLibrary.simpleMessage(
+      "LongyunVPN がダウンロード先またはディスクイメージから直接開かれたため、macOS は一時的な読み取り専用のコピーから実行しています。この状態では TUN モードを有効にできず、「ログイン時に起動」も再起動後に機能しなくなります。\n\n終了して LongyunVPN を「アプリケーション」フォルダへドラッグし、そこから開いてください。",
+    ),
+    "appTranslocatedTitle": MessageLookupByLibrary.simpleMessage(
+      "LongyunVPN を「アプリケーション」フォルダへ移動してください",
+    ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage(
       "設定にシステムDNSを強制的に追加します",
@@ -673,6 +679,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nodeStatus": MessageLookupByLibrary.simpleMessage("ノード状態"),
     "none": MessageLookupByLibrary.simpleMessage("なし"),
+    "notNow": MessageLookupByLibrary.simpleMessage("後で"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",
     ),
@@ -839,6 +846,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "quickConnectNoNode": MessageLookupByLibrary.simpleMessage("応答するノードがありません"),
     "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
+    "quitAndMove": MessageLookupByLibrary.simpleMessage("終了して移動"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("出口 IP を再確認"),
     "reconnectFailed": MessageLookupByLibrary.simpleMessage(

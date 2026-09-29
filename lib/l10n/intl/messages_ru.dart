@@ -218,6 +218,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Контроль доступа приложений",
     ),
+    "appTranslocatedMessage": MessageLookupByLibrary.simpleMessage(
+      "LongyunVPN открыт прямо из загрузок или образа диска, поэтому macOS запускает его из временной копии только для чтения. В таком режиме нельзя включить режим TUN, а автозапуск перестанет работать после перезагрузки.\n\nЗакройте приложение, перетащите LongyunVPN в папку «Программы» и откройте его оттуда.",
+    ),
+    "appTranslocatedTitle": MessageLookupByLibrary.simpleMessage(
+      "Переместите LongyunVPN в папку «Программы»",
+    ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Добавить системный DNS",
     ),
@@ -862,6 +868,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nodeStatus": MessageLookupByLibrary.simpleMessage("Состояние узлов"),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
+    "notNow": MessageLookupByLibrary.simpleMessage("Не сейчас"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущая группа прокси не может быть выбрана.",
     ),
@@ -1058,6 +1065,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
+    "quitAndMove": MessageLookupByLibrary.simpleMessage(
+      "Закрыть и переместить",
+    ),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радужные"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage(
       "Проверить выходной IP снова",

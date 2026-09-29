@@ -215,6 +215,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "App access control",
     ),
+    "appTranslocatedMessage": MessageLookupByLibrary.simpleMessage(
+      "LongyunVPN was opened straight from the download or the disk image, so macOS is running it from a temporary, read-only copy. From there, TUN mode cannot be turned on, and Launch at startup stops working after a restart.\n\nQuit, drag LongyunVPN into the Applications folder, and open it from there.",
+    ),
+    "appTranslocatedTitle": MessageLookupByLibrary.simpleMessage(
+      "Move LongyunVPN to Applications",
+    ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Append System DNS",
     ),
@@ -819,6 +825,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nodeStatus": MessageLookupByLibrary.simpleMessage("Node Status"),
     "none": MessageLookupByLibrary.simpleMessage("none"),
+    "notNow": MessageLookupByLibrary.simpleMessage("Not now"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",
     ),
@@ -1007,6 +1014,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickConnectedTo": m32,
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
+    "quitAndMove": MessageLookupByLibrary.simpleMessage("Quit and move"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
     "recheckExitIp": MessageLookupByLibrary.simpleMessage("Re-check exit IP"),
     "reconnectFailed": MessageLookupByLibrary.simpleMessage(
