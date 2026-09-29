@@ -195,7 +195,14 @@ abstract class VpnProps with _$VpnProps {
 @freezed
 abstract class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
-    @Default(true) bool systemProxy,
+    /// Whether connecting also points Windows/macOS/Linux at the VPN.
+    ///
+    /// Off on a fresh install: changing the whole computer's proxy is the
+    /// user's decision to make, not something an install does for them. A
+    /// saved config keeps whatever it already had, so existing users see no
+    /// change. With this and TUN both off, connecting routes nothing - the
+    /// user turns one of them on from the dashboard.
+    @Default(false) bool systemProxy,
     @Default(defaultBypassDomain) List<String> bypassDomain,
     @Default(RouteMode.config) RouteMode routeMode,
     @Default(true) bool autoSetSystemDns,

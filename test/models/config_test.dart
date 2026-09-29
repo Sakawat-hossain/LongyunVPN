@@ -19,6 +19,7 @@ T roundTrip<T>(
 
 void main() {
   _localeDefaults();
+  _systemProxyDefaults();
   group('AppSettingProps JSON round-trip', () {
     test('default values survive round-trip', () {
       const props = AppSettingProps();
@@ -145,7 +146,7 @@ void main() {
   group('NetworkProps JSON round-trip', () {
     test('default values', () {
       const props = NetworkProps();
-      expect(props.systemProxy, true);
+      expect(props.systemProxy, false);
       expect(props.bypassDomain, defaultBypassDomain);
       expect(props.routeMode, RouteMode.config);
       expect(props.autoSetSystemDns, true);
@@ -245,7 +246,7 @@ void main() {
       final restored = roundTrip(() => config.toJson(), Config.fromJson);
       expect(restored.currentProfileId, null);
       expect(restored.overrideDns, false);
-      expect(restored.networkProps.systemProxy, true);
+      expect(restored.networkProps.systemProxy, false);
       expect(restored.vpnProps.enable, true);
       expect(restored.hotKeyActions, isEmpty);
     });
@@ -316,6 +317,37 @@ void _localeDefaults() {
         AppLocalizations.delegate.supportedLocales.first.languageCode,
         'en',
       );
+    });
+  });
+}
+
+/// The system proxy toggle on a fresh install.
+///
+/// Pointing the whole computer at the VPN is the user's call, so a new install
+/// starts with it off and they switch it on from the dashboard. What must not
+/// happen is that an existing user who had it on finds it off after updating -
+/// so a saved value always wins over the default.
+void _systemProxyDefaults() {
+  group('NetworkProps.systemProxy', () {
+    test('is off on a fresh install', () {
+      expect(const NetworkProps().systemProxy, isFalse);
+      expect(NetworkProps.fromJson(const {}).systemProxy, isFalse);
+    });
+
+    test('an existing user who had it on keeps it on', () {
+      expect(NetworkProps.fromJson({'systemProxy': true}).systemProxy, isTrue);
+    });
+
+    test('an existing user who had it off keeps it off', () {
+      expect(
+        NetworkProps.fromJson({'systemProxy': false}).systemProxy,
+        isFalse,
+      );
+    });
+
+    test('the saved value survives a save and reload', () {
+      final saved = const NetworkProps().copyWith(systemProxy: true).toJson();
+      expect(NetworkProps.fromJson(saved).systemProxy, isTrue);
     });
   });
 }

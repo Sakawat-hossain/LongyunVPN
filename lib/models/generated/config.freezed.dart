@@ -1245,6 +1245,13 @@ $AccessControlPropsCopyWith<$Res> get accessControlProps {
 /// @nodoc
 mixin _$NetworkProps {
 
+/// Whether connecting also points Windows/macOS/Linux at the VPN.
+///
+/// Off on a fresh install: changing the whole computer's proxy is the
+/// user's decision to make, not something an install does for them. A
+/// saved config keeps whatever it already had, so existing users see no
+/// change. With this and TUN both off, connecting routes nothing - the
+/// user turns one of them on from the dashboard.
  bool get systemProxy; List<String> get bypassDomain; RouteMode get routeMode; bool get autoSetSystemDns; bool get appendSystemDns;
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
@@ -1443,9 +1450,16 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 @JsonSerializable()
 
 class _NetworkProps implements NetworkProps {
-  const _NetworkProps({this.systemProxy = true, final  List<String> bypassDomain = defaultBypassDomain, this.routeMode = RouteMode.config, this.autoSetSystemDns = true, this.appendSystemDns = false}): _bypassDomain = bypassDomain;
+  const _NetworkProps({this.systemProxy = false, final  List<String> bypassDomain = defaultBypassDomain, this.routeMode = RouteMode.config, this.autoSetSystemDns = true, this.appendSystemDns = false}): _bypassDomain = bypassDomain;
   factory _NetworkProps.fromJson(Map<String, dynamic> json) => _$NetworkPropsFromJson(json);
 
+/// Whether connecting also points Windows/macOS/Linux at the VPN.
+///
+/// Off on a fresh install: changing the whole computer's proxy is the
+/// user's decision to make, not something an install does for them. A
+/// saved config keeps whatever it already had, so existing users see no
+/// change. With this and TUN both off, connecting routes nothing - the
+/// user turns one of them on from the dashboard.
 @override@JsonKey() final  bool systemProxy;
  final  List<String> _bypassDomain;
 @override@JsonKey() List<String> get bypassDomain {
