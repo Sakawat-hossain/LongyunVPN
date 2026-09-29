@@ -34,6 +34,18 @@ enum LinuxProxyBackend {
   kde,
 }
 
+/// The three manual proxies macOS keeps per network service.
+enum MacosProxyKind {
+  web('-getwebproxy', '-setwebproxystate'),
+  secureWeb('-getsecurewebproxy', '-setsecurewebproxystate'),
+  socks('-getsocksfirewallproxy', '-setsocksfirewallproxystate');
+
+  final String getFlag;
+  final String setStateFlag;
+
+  const MacosProxyKind(this.getFlag, this.setStateFlag);
+}
+
 class Proxy extends ProxyPlatform {
   static String url = '127.0.0.1';
 
@@ -59,15 +71,30 @@ class Proxy extends ProxyPlatform {
     };
   }
 
+  // Stop only ever undoes a proxy of ours: 127.0.0.1 on our port. It runs on
+  // every launch, not just on disconnect, and it used to switch the proxy off
+  // unconditionally - so opening the app to check an account turned off a
+  // running Clash Verge, a company proxy, and on macOS the PAC setting of every
+  // network service, which start never even touched. Windows applies the same
+  // rule natively (see windows/system_proxy.h).
   @override
   Future<bool?> stopProxy([int? port]) async {
     return switch (Platform.operatingSystem) {
-      'macos' => await _stopProxyWithMacos(),
-      'linux' => await _stopProxyWithLinux(),
+      'macos' => await stopMacosProxy(port),
+      'linux' => await _stopProxyWithLinux(port),
       'windows' => await ProxyPlatform.instance.stopProxy(port),
       String() => false,
     };
   }
+
+  // The port this process last pointed the system at. Recognises our proxy
+  // when the port setting was changed while it was on.
+  int? _appliedPort;
+
+  Set<int> _ownedPorts(int? port) => {
+        if (port != null) port,
+        if (_appliedPort != null) _appliedPort!,
+      };
 
   Future<bool> _startProxyWithLinux(int port, List<String> bypassDomain) async {
     final homeDir = Platform.environment['HOME'];
@@ -83,22 +110,121 @@ class Proxy extends ProxyPlatform {
     if (commands.isEmpty) {
       return false;
     }
-    return _runCommands(commands);
+    final applied = await _runCommands(commands);
+    if (applied) _appliedPort = port;
+    return applied;
   }
 
-  Future<bool> _stopProxyWithLinux() async {
+  Future<bool> _stopProxyWithLinux(int? port) async {
     final homeDir = Platform.environment['HOME'];
     if (homeDir == null || homeDir.isEmpty) {
       return false;
     }
-    final commands = await _resolveLinuxStopCommands(
+    return stopLinuxProxy(
+      port,
       desktop: Platform.environment['XDG_CURRENT_DESKTOP'],
       homeDir: homeDir,
     );
-    if (commands.isEmpty) {
+  }
+
+  @visibleForTesting
+  Future<bool> stopLinuxProxy(
+    int? port, {
+    required String? desktop,
+    required String homeDir,
+  }) async {
+    final ports = _ownedPorts(port);
+    if (ports.isEmpty) {
+      return true;
+    }
+    final backend = await _resolveLinuxBackend(desktop);
+    if (backend == null) {
       return false;
     }
-    return _runCommands(commands);
+    final bool ours;
+    final List<ProxyCommand> commands;
+    switch (backend) {
+      case LinuxProxyBackend.gnome:
+      case LinuxProxyBackend.mate:
+        final schema = backend == LinuxProxyBackend.gnome
+            ? 'org.gnome.system.proxy'
+            : 'org.mate.system.proxy';
+        ours = await _isGSettingsProxyOurs(schema, ports);
+        commands = _buildGSettingsStopCommands(schemaPrefix: schema);
+      case LinuxProxyBackend.kde:
+        final writer = await _resolveKdeConfigWriter();
+        ours = await _isKdeProxyOurs(
+          homeDir: homeDir,
+          reader: writer.replaceFirst('kwriteconfig', 'kreadconfig'),
+          ports: ports,
+        );
+        commands = _buildKdeStopCommands(homeDir: homeDir, executable: writer);
+    }
+    if (!ours) {
+      _appliedPort = null;
+      return true;
+    }
+    final cleared = await _runCommands(commands);
+    if (cleared) _appliedPort = null;
+    return cleared;
+  }
+
+  Future<bool> _isGSettingsProxyOurs(String schema, Set<int> ports) async {
+    final mode = await _read('gsettings', ['get', schema, 'mode']);
+    if (_unquoteGVariant(mode) != 'manual') {
+      return false;
+    }
+    final host = await _read('gsettings', ['get', '$schema.http', 'host']);
+    final port = await _read('gsettings', ['get', '$schema.http', 'port']);
+    return _unquoteGVariant(host) == url &&
+        ports.contains(int.tryParse(_unquoteGVariant(port) ?? ''));
+  }
+
+  Future<bool> _isKdeProxyOurs({
+    required String homeDir,
+    required String reader,
+    required Set<int> ports,
+  }) async {
+    List<String> key(String name) => [
+          '--file',
+          join(homeDir, '.config', 'kioslaverc'),
+          '--group',
+          'Proxy Settings',
+          '--key',
+          name,
+        ];
+    final type = await _read(reader, key('ProxyType'));
+    if (type?.trim() != '1') {
+      return false;
+    }
+    final http = await _read(reader, key('httpProxy'));
+    return isOurKdeProxyForTest(http, ports);
+  }
+
+  /// Runs a read-only query; null if it could not be answered. An unanswered
+  /// query means "not ours": leaving a proxy of ours on is recoverable with one
+  /// click, and switching someone else's off is the bug this guards against.
+  Future<String?> _read(String executable, List<String> args) async {
+    try {
+      final result = await _processRunner(executable, args);
+      if (result.exitCode != 0) return null;
+      return result.stdout.toString();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String? _unquoteGVariant(String? value) {
+    if (value == null) return null;
+    var text = value.trim();
+    // gsettings prints integers bare, strings quoted, and some types prefixed.
+    if (text.startsWith('uint32 ')) text = text.substring(7);
+    if (text.length >= 2 &&
+        (text.startsWith("'") && text.endsWith("'") ||
+            text.startsWith('"') && text.endsWith('"'))) {
+      text = text.substring(1, text.length - 1);
+    }
+    return text;
   }
 
   Future<bool> _startProxyWithMacos(int port, List<String> bypassDomain) async {
@@ -110,13 +236,32 @@ class Proxy extends ProxyPlatform {
         bypassDomain,
       ),
     );
-    return _runCommands(commands);
+    final applied = await _runCommands(commands);
+    if (applied) _appliedPort = port;
+    return applied;
   }
 
-  Future<bool> _stopProxyWithMacos() async {
+  @visibleForTesting
+  Future<bool> stopMacosProxy(int? port) async {
+    final ports = _ownedPorts(port);
+    if (ports.isEmpty) {
+      return true;
+    }
     final devices = await _getNetworkDeviceListWithMacos();
-    final commands = devices.expand(_buildMacosStopCommands);
-    return _runCommands(commands);
+    final commands = <ProxyCommand>[];
+    for (final dev in devices) {
+      final owned = <MacosProxyKind>[];
+      for (final kind in MacosProxyKind.values) {
+        final out = await _read('/usr/sbin/networksetup', [kind.getFlag, dev]);
+        if (out != null && isOurMacosProxyForTest(out, ports)) {
+          owned.add(kind);
+        }
+      }
+      commands.addAll(_buildMacosStopCommands(dev, owned));
+    }
+    final cleared = await _runCommands(commands);
+    if (cleared) _appliedPort = null;
+    return cleared;
   }
 
   Future<List<String>> _getNetworkDeviceListWithMacos() async {
@@ -161,22 +306,6 @@ class Proxy extends ProxyPlatform {
     return _buildLinuxStartCommands(
       port: port,
       bypassDomain: bypassDomain,
-      desktop: desktop,
-      homeDir: homeDir,
-      backend: backend,
-      kdeConfigWriter: await _resolveKdeConfigWriter(),
-    );
-  }
-
-  Future<List<ProxyCommand>> _resolveLinuxStopCommands({
-    required String? desktop,
-    required String homeDir,
-  }) async {
-    final backend = await _resolveLinuxBackend(desktop);
-    if (backend == null) {
-      return [];
-    }
-    return _buildLinuxStopCommands(
       desktop: desktop,
       homeDir: homeDir,
       backend: backend,
@@ -277,38 +406,6 @@ class Proxy extends ProxyPlatform {
       LinuxProxyBackend.kde => _buildKdeStartCommands(
           port: port,
           bypassDomain: bypassDomain,
-          homeDir: homeDir,
-          executable: _resolveKdeConfigWriterForBuild(
-            availableExecutables,
-            fallback: kdeConfigWriter,
-          ),
-        ),
-    };
-  }
-
-  static List<ProxyCommand> _buildLinuxStopCommands({
-    required String? desktop,
-    required String homeDir,
-    LinuxProxyBackend? backend,
-    String kdeConfigWriter = 'kwriteconfig5',
-    Set<String>? availableExecutables,
-  }) {
-    final resolvedBackend = backend ??
-        _resolveLinuxBackendForBuild(
-          desktop: desktop,
-          availableExecutables: availableExecutables,
-        );
-    if (resolvedBackend == null) {
-      return [];
-    }
-    return switch (resolvedBackend) {
-      LinuxProxyBackend.gnome => _buildGSettingsStopCommands(
-          schemaPrefix: 'org.gnome.system.proxy',
-        ),
-      LinuxProxyBackend.mate => _buildGSettingsStopCommands(
-          schemaPrefix: 'org.mate.system.proxy',
-        ),
-      LinuxProxyBackend.kde => _buildKdeStopCommands(
           homeDir: homeDir,
           executable: _resolveKdeConfigWriterForBuild(
             availableExecutables,
@@ -533,26 +630,51 @@ class Proxy extends ProxyPlatform {
     ];
   }
 
-  static List<ProxyCommand> _buildMacosStopCommands(String dev) {
+  // Switches off, on one service, only the proxies found pointing at us - and
+  // never the automatic (PAC) setting, which start does not touch either.
+  static List<ProxyCommand> _buildMacosStopCommands(
+    String dev,
+    List<MacosProxyKind> owned,
+  ) {
+    if (owned.isEmpty) {
+      return const [];
+    }
     return [
-      ProxyCommand(
-        '/usr/sbin/networksetup',
-        ['-setautoproxystate', dev, 'off'],
-      ),
-      ProxyCommand(
-        '/usr/sbin/networksetup',
-        ['-setwebproxystate', dev, 'off'],
-      ),
-      ProxyCommand(
-        '/usr/sbin/networksetup',
-        ['-setsecurewebproxystate', dev, 'off'],
-      ),
-      ProxyCommand(
-        '/usr/sbin/networksetup',
-        ['-setsocksfirewallproxystate', dev, 'off'],
-      ),
+      for (final kind in owned)
+        ProxyCommand('/usr/sbin/networksetup', [kind.setStateFlag, dev, 'off']),
       _buildMacosProxyBypassCommand(dev, const []),
     ];
+  }
+
+  /// Whether `networksetup -get*proxy` output describes 127.0.0.1 on one of
+  /// [ports], switched on.
+  @visibleForTesting
+  static bool isOurMacosProxyForTest(String stdout, Set<int> ports) {
+    final fields = <String, String>{};
+    for (final line in stdout.split('\n')) {
+      final colon = line.indexOf(':');
+      if (colon <= 0) continue;
+      fields[line.substring(0, colon).trim()] =
+          line.substring(colon + 1).trim();
+    }
+    return fields['Enabled'] == 'Yes' &&
+        fields['Server'] == url &&
+        ports.contains(int.tryParse(fields['Port'] ?? ''));
+  }
+
+  /// Whether a KDE `httpProxy` value is 127.0.0.1 on one of [ports]. Start
+  /// writes `http://127.0.0.1:7890`; KDE's own settings page writes the port
+  /// after a space instead.
+  @visibleForTesting
+  static bool isOurKdeProxyForTest(String? value, Set<int> ports) {
+    if (value == null) return false;
+    var text = value.trim();
+    final scheme = text.indexOf('://');
+    if (scheme >= 0) text = text.substring(scheme + 3);
+    final separator = text.lastIndexOf(RegExp('[: ]'));
+    if (separator <= 0) return false;
+    return text.substring(0, separator) == url &&
+        ports.contains(int.tryParse(text.substring(separator + 1)));
   }
 
   static ProxyCommand _buildMacosProxyBypassCommand(
