@@ -21,7 +21,7 @@ dependencies:
       url: https://github.com/Sakawat-hossain/window_manager
       ref: 5a489acfe5799c38909e3e96abd11b78354f1809
       path: packages/window_manager
-  dynamic_color: ^1.8.1
+  dynamic_color: ^2.1.0
   proxy:
     path: plugins/proxy
   window_ext:
