@@ -8,6 +8,10 @@
 #include "flutter_window.h"
 #include "utils.h"
 
+// Shared with the proxy plugin, so the uninstaller recognises and restores the
+// system proxy by exactly the rules the running app uses.
+#include "../../plugins/proxy/windows/system_proxy.h"
+
 namespace {
 
 // Point WebView2 at a per-user, writable folder.
@@ -38,6 +42,19 @@ void SetWebView2UserDataFolder() {
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  // `--clear-system-proxy`: restore the system proxy if it is ours, then exit
+  // without starting the app.
+  //
+  // The uninstaller runs this. It has to force-kill the app first, so the
+  // normal exit path that clears the proxy never runs - and once the files are
+  // gone nothing ever would, leaving every program on the machine pointed at a
+  // port with nothing behind it. Handled here, before the engine, the window or
+  // the single-instance lock, so it is quick and invisible.
+  if (command_line != nullptr &&
+      wcsstr(command_line, L"--clear-system-proxy") != nullptr) {
+    return system_proxy::Restore(0) ? 0 : 1;
+  }
+
   SetWebView2UserDataFolder();
 
   // Attach to console when present (e.g., 'flutter run') or create a

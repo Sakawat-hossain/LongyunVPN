@@ -3,20 +3,17 @@
 // This must be included before many other Windows headers.
 #include <windows.h>
 
-#include <WinInet.h>
-#include <Ras.h>
-#include <RasError.h>
 #include <string>
-#include <vector>
-
-#pragma comment(lib, "wininet")
-#pragma comment(lib, "Rasapi32")
 
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
 #include <memory>
+
+// Setting, recognising and restoring the system proxy lives in one place, shared
+// with the app's launcher so the uninstaller applies exactly the same rules.
+#include "system_proxy.h"
 
 namespace
 {
@@ -57,100 +54,6 @@ std::wstring BuildBypassList(const flutter::EncodableList& bypassDomain)
   return bypassList;
 }
 
-bool SetOptionsForConnection(
-    INTERNET_PER_CONN_OPTION_LIST& list,
-    LPTSTR connection)
-{
-  list.pszConnection = connection;
-  return InternetSetOption(
-      nullptr,
-      INTERNET_OPTION_PER_CONNECTION_OPTION,
-      &list,
-      sizeof(list)) != FALSE;
-}
-
-bool ApplyOptionsToConnections(INTERNET_PER_CONN_OPTION_LIST& list)
-{
-  bool success = SetOptionsForConnection(list, nullptr);
-
-  DWORD size = 0;
-  DWORD count = 0;
-  auto ret = RasEnumEntries(nullptr, nullptr, nullptr, &size, &count);
-  if (ret == ERROR_BUFFER_TOO_SMALL && count > 0)
-  {
-    std::vector<RASENTRYNAME> entries(count);
-    for (auto& entry : entries)
-    {
-      entry.dwSize = sizeof(RASENTRYNAME);
-    }
-    ret = RasEnumEntries(nullptr, nullptr, entries.data(), &size, &count);
-    if (ret == ERROR_SUCCESS)
-    {
-      for (DWORD i = 0; i < count; i++)
-      {
-        success = SetOptionsForConnection(list, entries[i].szEntryName) && success;
-      }
-    }
-    else
-    {
-      success = false;
-    }
-  }
-  else if (ret != ERROR_SUCCESS)
-  {
-    success = false;
-  }
-
-  return success;
-}
-
-bool NotifySettingsChanged()
-{
-  const bool changed = InternetSetOption(
-      nullptr, INTERNET_OPTION_SETTINGS_CHANGED, nullptr, 0) != FALSE;
-  const bool refreshed = InternetSetOption(
-      nullptr, INTERNET_OPTION_REFRESH, nullptr, 0) != FALSE;
-  return changed && refreshed;
-}
-
-bool startProxy(const int port, const flutter::EncodableList& bypassDomain)
-{
-  auto url = Utf8ToWide("127.0.0.1:" + std::to_string(port));
-  auto bypassList = BuildBypassList(bypassDomain);
-  std::vector<INTERNET_PER_CONN_OPTION> options(3);
-
-  INTERNET_PER_CONN_OPTION_LIST list = {};
-  list.dwSize = sizeof(list);
-  list.dwOptionCount = static_cast<DWORD>(options.size());
-  list.pOptions = options.data();
-
-  options[0].dwOption = INTERNET_PER_CONN_FLAGS;
-  options[0].Value.dwValue = PROXY_TYPE_DIRECT | PROXY_TYPE_PROXY;
-
-  options[1].dwOption = INTERNET_PER_CONN_PROXY_SERVER;
-  options[1].Value.pszValue = url.data();
-
-  options[2].dwOption = INTERNET_PER_CONN_PROXY_BYPASS;
-  options[2].Value.pszValue = bypassList.data();
-
-  return ApplyOptionsToConnections(list) && NotifySettingsChanged();
-}
-
-bool stopProxy()
-{
-  std::vector<INTERNET_PER_CONN_OPTION> options(1);
-
-  INTERNET_PER_CONN_OPTION_LIST list = {};
-  list.dwSize = sizeof(list);
-  list.dwOptionCount = 1;
-  list.pOptions = options.data();
-
-  options[0].dwOption = INTERNET_PER_CONN_FLAGS;
-  options[0].Value.dwValue = PROXY_TYPE_DIRECT;
-
-  return ApplyOptionsToConnections(list) && NotifySettingsChanged();
-}
-
 }  // namespace
 
 namespace proxy
@@ -186,7 +89,22 @@ namespace proxy
   {
     if (method_call.method_name().compare("StopProxy") == 0)
     {
-      result->Success(stopProxy());
+      // The port is optional: it recognises a proxy of ours left by a version
+      // that kept no record. Without it only a recorded proxy is undone.
+      int port = 0;
+      if (const auto *arguments =
+              std::get_if<flutter::EncodableMap>(method_call.arguments()))
+      {
+        auto portIt = arguments->find(flutter::EncodableValue("port"));
+        if (portIt != arguments->end())
+        {
+          if (const auto *value = std::get_if<int>(&portIt->second))
+          {
+            port = *value;
+          }
+        }
+      }
+      result->Success(system_proxy::Restore(port));
     }
     else if (method_call.method_name().compare("StartProxy") == 0)
     {
@@ -210,7 +128,8 @@ namespace proxy
         result->Error("bad_args", "StartProxy argument types are invalid");
         return;
       }
-      result->Success(startProxy(*port, *bypassDomain));
+      result->Success(
+          system_proxy::Set(*port, BuildBypassList(*bypassDomain)));
     }
     else
     {

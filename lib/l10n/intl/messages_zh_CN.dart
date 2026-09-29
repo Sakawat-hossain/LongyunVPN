@@ -941,6 +941,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionActiveImported": MessageLookupByLibrary.simpleMessage(
       "订阅已激活，配置已导入。",
     ),
+    "subscriptionDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "无法下载订阅，请检查网络连接后重试。",
+    ),
     "suspended": MessageLookupByLibrary.simpleMessage("挂起中..."),
     "sync": MessageLookupByLibrary.simpleMessage("同步"),
     "system": MessageLookupByLibrary.simpleMessage("系统"),

@@ -6173,6 +6173,16 @@ class AppLocalizations {
   String get rememberMe {
     return Intl.message('Remember me', name: 'rememberMe', desc: '', args: []);
   }
+
+  /// `Couldn't download your subscription. Check your internet connection and try again.`
+  String get subscriptionDownloadFailed {
+    return Intl.message(
+      'Couldn\'t download your subscription. Check your internet connection and try again.',
+      name: 'subscriptionDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

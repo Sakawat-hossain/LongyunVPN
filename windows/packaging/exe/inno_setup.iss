@@ -219,9 +219,26 @@ begin
 end;
 
 function InitializeUninstall(): Boolean;
+var
+  ResultCode: Integer;
 begin
   UnregisterHelperServices;
   KillProcesses;
+  // Killing the app skips its own exit path, which is what normally takes the
+  // system proxy down. Left as it is, uninstalling would leave every program on
+  // the machine pointed at 127.0.0.1 with nothing listening - "I removed the VPN
+  // and now nothing connects". The app restores only a proxy it set itself, and
+  // puts back whatever the user had before.
+  //
+  // Plain Exec: ExecAsOriginalUser is not supported at uninstall time. Under an
+  // ordinary UAC prompt the elevated uninstaller is still the same user, so
+  // HKCU - where the proxy setting lives - is theirs. Elevating with a
+  // *different* administrator account would act on that account's settings
+  // instead; the user's own next launch of any version of the app would not
+  // help either, since it has been removed. Narrow, and noted rather than
+  // hidden.
+  Exec(ExpandConstant('{app}\{{EXECUTABLE_NAME}}'),
+    '--clear-system-proxy', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Result := True;
 end;
 

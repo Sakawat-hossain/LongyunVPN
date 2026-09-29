@@ -24,7 +24,11 @@ abstract class ProxyPlatform extends PlatformInterface {
     throw UnimplementedError('startProxy() has not been implemented.');
   }
 
-  Future<bool?> stopProxy() {
+  /// Removes the system proxy - on Windows, only if it is ours.
+  ///
+  /// [port] recognises a proxy of ours left by a version of the app that kept
+  /// no record of what it set. Leave it null when the port is not known.
+  Future<bool?> stopProxy([int? port]) {
     throw UnimplementedError('stopProxy() has not been implemented.');
   }
 }

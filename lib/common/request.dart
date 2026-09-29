@@ -102,6 +102,15 @@ class Request {
       final where = host == null || host.isEmpty ? '' : ' ($host)';
       return detail.isEmpty ? 'no connection$where' : '$detail$where';
     }
+    if (error is HttpException) {
+      // The one a customer actually sees when the other end hangs up
+      // mid-response. dart:io's wording ("Connection closed before full header
+      // was received") is accurate but means nothing to anyone outside it.
+      if (error.message.contains('closed before full header')) {
+        return 'the server closed the connection before answering';
+      }
+      return error.message;
+    }
     if (error is FormatException) {
       return 'malformed response';
     }
@@ -112,17 +121,45 @@ class Request {
     return text.length > 160 ? '${text.substring(0, 160)}…' : text;
   }
 
-  /// True when the failure is the local proxy refusing the connection, rather
-  /// than the remote host being unreachable. Only that case is worth retrying
-  /// direct — a genuinely offline device should still report being offline.
-  static bool isLocalProxyRefused(DioException e) => _isLocalProxyRefused(e);
-
-  static bool _isLocalProxyRefused(DioException e) {
-    if (e.type != DioExceptionType.connectionError) return false;
-    final error = e.error;
-    if (error is! SocketException) return false;
-    final host = error.address?.host ?? '';
-    return host == localhost || host == '127.0.0.1' || host == '::1';
+  /// Whether a failed subscription download should be tried again without the
+  /// proxy.
+  ///
+  /// Only ever when the request went through our own core. Then any failure on
+  /// the way - refused, reset, hung up before answering, timed out - is worth
+  /// a direct attempt, because from here there is no telling "the server is
+  /// unreachable" from "our core cannot carry this": the core sits in between.
+  /// If the direct attempt fails too, that failure is what gets reported, so a
+  /// device that is genuinely offline still says so.
+  ///
+  /// This used to accept only a refused socket on localhost - the core not yet
+  /// listening. A core that *is* listening but has no working node accepts the
+  /// connection and then closes it before sending a header, which surfaces as
+  /// an HttpException, not a SocketException. That case was never retried, and
+  /// it is the one that stops a customer adding a new subscription while the
+  /// old one's nodes are dead - the one Clash Verge never hits, since it fetches
+  /// subscriptions directly by default.
+  ///
+  /// An answer from the server (badResponse) is never retried: it said no, and
+  /// asking again by another route would not change that.
+  @visibleForTesting
+  static bool shouldRetryDirect(
+    DioException e, {
+    required bool wasProxied,
+  }) {
+    if (!wasProxied) return false;
+    return switch (e.type) {
+      DioExceptionType.connectionError ||
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.unknown => true,
+      // The response arrived and could not be parsed in time: the network did
+      // its job, so another route would not help.
+      DioExceptionType.transformTimeout ||
+      DioExceptionType.badResponse ||
+      DioExceptionType.badCertificate ||
+      DioExceptionType.cancel => false,
+    };
   }
 
   /// Exposed so a test can assert these clients are actually bounded; an
@@ -135,6 +172,9 @@ class Request {
 
   Future<Response<Uint8List>> getFileResponseForUrl(String url) async {
     final options = Options(responseType: ResponseType.bytes);
+    final uri = Uri.tryParse(url);
+    final wasProxied = uri != null &&
+        LongyunHttpOverrides.handleFindProxy(uri) != 'DIRECT';
     try {
       return await _clashDio.get<Uint8List>(url, options: options);
     } catch (error) {
@@ -147,9 +187,10 @@ class Request {
       // the import; the happy path is untouched, and a device that is simply
       // offline still reports being offline because the retry fails too.
       var e = error;
-      if (e is DioException && _isLocalProxyRefused(e)) {
+      if (e is DioException && shouldRetryDirect(e, wasProxied: wasProxied)) {
         commonPrint.log(
-          'subscription fetch refused by local proxy, retrying direct',
+          'subscription fetch failed through the local proxy '
+          '(${e.type.name}), retrying direct',
           logLevel: LogLevel.warning,
         );
         try {
@@ -165,6 +206,13 @@ class Request {
               '${describeNetworkError(e.error)}';
         } else if (e.type == DioExceptionType.badResponse) {
           throw currentAppLocalizations.networkException;
+        } else if (e.type == DioExceptionType.connectionError) {
+          // Used to fall through to `throw e`, which put the raw DioException
+          // text - "The connection errored: ... This indicates an error which
+          // most likely cannot be solved by the library" - in front of a
+          // customer. Say what failed, keep the detail for a screenshot.
+          throw '${currentAppLocalizations.subscriptionDownloadFailed}\n'
+              '${describeNetworkError(e.error)}';
         } else if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.receiveTimeout ||
             e.type == DioExceptionType.sendTimeout) {

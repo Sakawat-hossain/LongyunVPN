@@ -770,5 +770,6 @@
   "newPassword": "新しいパスワード",
   "resetPasswordSuccess": "パスワードを変更しました。ログインできます。",
   "backToSignIn": "ログインに戻る",
-  "rememberMe": "ログイン状態を保持"
+  "rememberMe": "ログイン状態を保持",
+  "subscriptionDownloadFailed": "サブスクリプションをダウンロードできませんでした。ネットワーク接続を確認して、もう一度お試しください。"
 }

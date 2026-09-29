@@ -1097,6 +1097,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionActiveImported": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションが有効になり、プロファイルをインポートしました。",
     ),
+    "subscriptionDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションをダウンロードできませんでした。ネットワーク接続を確認して、もう一度お試しください。",
+    ),
     "suspended": MessageLookupByLibrary.simpleMessage("一時停止中..."),
     "sync": MessageLookupByLibrary.simpleMessage("同期"),
     "system": MessageLookupByLibrary.simpleMessage("システム"),

@@ -1309,6 +1309,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionActiveImported": MessageLookupByLibrary.simpleMessage(
       "Subscription active. Profile imported.",
     ),
+    "subscriptionDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t download your subscription. Check your internet connection and try again.",
+    ),
     "suspended": MessageLookupByLibrary.simpleMessage("Suspended..."),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),

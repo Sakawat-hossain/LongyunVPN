@@ -1380,6 +1380,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionActiveImported": MessageLookupByLibrary.simpleMessage(
       "Подписка активна. Профиль импортирован.",
     ),
+    "subscriptionDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить подписку. Проверьте подключение к интернету и повторите попытку.",
+    ),
     "suspended": MessageLookupByLibrary.simpleMessage("Приостановлено..."),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),
     "system": MessageLookupByLibrary.simpleMessage("Система"),

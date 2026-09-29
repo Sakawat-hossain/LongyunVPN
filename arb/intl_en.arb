@@ -770,5 +770,6 @@
   "newPassword": "New password",
   "resetPasswordSuccess": "Password changed. You can sign in now.",
   "backToSignIn": "Back to sign in",
-  "rememberMe": "Remember me"
+  "rememberMe": "Remember me",
+  "subscriptionDownloadFailed": "Couldn't download your subscription. Check your internet connection and try again."
 }

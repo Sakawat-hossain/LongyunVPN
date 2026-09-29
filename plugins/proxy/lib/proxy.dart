@@ -60,11 +60,11 @@ class Proxy extends ProxyPlatform {
   }
 
   @override
-  Future<bool?> stopProxy() async {
+  Future<bool?> stopProxy([int? port]) async {
     return switch (Platform.operatingSystem) {
       'macos' => await _stopProxyWithMacos(),
       'linux' => await _stopProxyWithLinux(),
-      'windows' => await ProxyPlatform.instance.stopProxy(),
+      'windows' => await ProxyPlatform.instance.stopProxy(port),
       String() => false,
     };
   }

@@ -26,7 +26,10 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
     if (isStart && systemProxy) {
       result = await proxy?.startProxy(port, proxyState.bassDomain);
     } else {
-      result = await proxy?.stopProxy();
+      // The port lets Windows recognise a proxy of ours even without the
+      // record it now keeps - one left by an older version, say - while still
+      // leaving anybody else's proxy alone.
+      result = await proxy?.stopProxy(port);
     }
     if (result == false) {
       commonPrint.log('update system proxy failed', logLevel: LogLevel.warning);
