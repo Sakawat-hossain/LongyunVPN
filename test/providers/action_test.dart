@@ -35,6 +35,51 @@ void main() {
       expect(profile?.label, edited.label);
       expect(profile?.url, edited.url);
     });
+
+    test('dedupe moves the selection off a duplicate it deletes', () {
+      // The selected profile being the later copy of a URL is exactly the
+      // case that used to leave the selection pointing at nothing.
+      final first = Profile.normal(label: 'kept', url: 'https://sub/a');
+      final dup = Profile.normal(label: 'dup', url: 'https://sub/a');
+      final other = Profile.normal(label: 'other', url: 'https://sub/b');
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => dup.id),
+          profilesProvider.overrideWith(
+            () => _TestProfiles([first, dup, other]),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(profilesActionProvider.notifier).dedupeProfiles();
+
+      expect(container.read(profilesProvider).map((p) => p.id), [
+        first.id,
+        other.id,
+      ]);
+      expect(container.read(currentProfileIdProvider), first.id);
+    });
+
+    test('dedupe leaves an unaffected selection alone', () {
+      final first = Profile.normal(label: 'kept', url: 'https://sub/a');
+      final dup = Profile.normal(label: 'dup', url: 'https://sub/a');
+      final other = Profile.normal(label: 'other', url: 'https://sub/b');
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => other.id),
+          profilesProvider.overrideWith(
+            () => _TestProfiles([first, dup, other]),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(profilesActionProvider.notifier).dedupeProfiles();
+
+      expect(container.read(currentProfileIdProvider), other.id);
+      expect(container.read(profilesProvider), hasLength(2));
+    });
   });
 }
 
@@ -56,5 +101,10 @@ class _TestProfiles extends Profiles {
       next[index] = profile;
     }
     state = next;
+  }
+
+  @override
+  void del(int id) {
+    state = state.where((item) => item.id != id).toList();
   }
 }

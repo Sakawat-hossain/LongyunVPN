@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'constant.dart';
 
@@ -354,7 +355,24 @@ class XboardApi {
   final Dio _dio;
   String? _token;
 
-  XboardApi() : _dio = Dio(BaseOptions(baseUrl: xboardBaseUrl)) {
+  // Dio's timeouts default to null - wait forever. Every account call went out
+  // unbounded, and the one that mattered was session restore at launch: the
+  // app shows nothing but a spinner until it answers, so a panel that accepted
+  // the connection and never replied (or a route that silently drops packets)
+  // held the whole app on that spinner with no error and no way past it.
+  static const _connectTimeout = Duration(seconds: 15);
+  static const _receiveTimeout = Duration(seconds: 30);
+  static const _sendTimeout = Duration(seconds: 30);
+
+  XboardApi()
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: xboardBaseUrl,
+          connectTimeout: _connectTimeout,
+          receiveTimeout: _receiveTimeout,
+          sendTimeout: _sendTimeout,
+        ),
+      ) {
     // The app installs a global HttpOverrides that tunnels every HttpClient
     // through the clash mixed-port once the VPN is started. Our panel API
     // (login, subscription, plans, orders) must NOT depend on a working proxy
@@ -383,6 +401,10 @@ class XboardApi {
     _token = token;
   }
 
+  /// Exposed so a test can assert every panel call is bounded.
+  @visibleForTesting
+  BaseOptions get options => _dio.options;
+
   /// Wraps a raw error, preserving whether it was a panel rejection (has a
   /// status code) or a transport failure (no response at all).
   XboardApiException _toApiException(Object error) {
@@ -404,6 +426,7 @@ class XboardApi {
       }
       if (error.type == DioExceptionType.connectionTimeout ||
           error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
           error.type == DioExceptionType.connectionError) {
         return 'Network error. Please check your connection.';
       }
@@ -484,11 +507,7 @@ class XboardApi {
     try {
       await _dio.post(
         '/passport/auth/forget',
-        data: {
-          'email': email,
-          'email_code': emailCode,
-          'password': password,
-        },
+        data: {'email': email, 'email_code': emailCode, 'password': password},
       );
     } catch (e) {
       throw _toApiException(e);
@@ -497,10 +516,7 @@ class XboardApi {
 
   Future<void> sendEmailVerifyCode(String email) async {
     try {
-      await _dio.post(
-        '/passport/comm/sendEmailVerify',
-        data: {'email': email},
-      );
+      await _dio.post('/passport/comm/sendEmailVerify', data: {'email': email});
     } catch (e) {
       throw _toApiException(e);
     }

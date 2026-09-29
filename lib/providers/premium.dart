@@ -45,8 +45,9 @@ class PremiumState {
       plans: plans ?? this.plans,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      pendingTradeNo:
-          clearPendingTradeNo ? null : (pendingTradeNo ?? this.pendingTradeNo),
+      pendingTradeNo: clearPendingTradeNo
+          ? null
+          : (pendingTradeNo ?? this.pendingTradeNo),
       isPurchasing: isPurchasing ?? this.isPurchasing,
       orders: orders ?? this.orders,
       ordersLoading: ordersLoading ?? this.ordersLoading,
@@ -77,8 +78,10 @@ class PremiumNotifier extends Notifier<PremiumState> {
       final orders = await xboardApi.getOrders();
       state = state.copyWith(orders: orders, ordersLoading: false);
     } catch (e) {
-      commonPrint.log('order history failed to load: $e',
-          logLevel: LogLevel.warning);
+      commonPrint.log(
+        'order history failed to load: $e',
+        logLevel: LogLevel.warning,
+      );
       state = state.copyWith(ordersLoading: false);
     }
   }
@@ -203,9 +206,10 @@ class PremiumNotifier extends Notifier<PremiumState> {
     if (!auth.hasActiveSubscription) return false;
     final subscribeUrl = auth.subscribeInfo?.subscribeUrl;
     if (subscribeUrl != null && subscribeUrl.isNotEmpty) {
+      // Adopted, so the plan just paid for is the one in use.
       await ref
           .read(profilesActionProvider.notifier)
-          .addProfileFormURL(subscribeUrl);
+          .adoptAccountProfile(subscribeUrl);
     }
     // addProfileFormURL jumps to the Profiles tab; the spec wants the user on
     // Home to connect, so land there instead.
@@ -221,4 +225,10 @@ final premiumProvider = NotifierProvider<PremiumNotifier, PremiumState>(
 );
 
 /// Outcome of checking the outstanding order against the panel.
-enum PendingOrderResult { activated, processing, unpaid, cancelled, noSubscription }
+enum PendingOrderResult {
+  activated,
+  processing,
+  unpaid,
+  cancelled,
+  noSubscription,
+}

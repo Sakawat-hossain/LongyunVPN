@@ -47,9 +47,11 @@ class _AuthGateState extends ConsumerState<AuthGate> {
                 .read(profilesProvider)
                 .any((p) => p.url == subscribeUrl);
             if (!exists) {
+              // Adopt, not just import: a profile left selected from another
+              // account would otherwise stay the one in use.
               ref
                   .read(profilesActionProvider.notifier)
-                  .addProfileFormURL(subscribeUrl)
+                  .adoptAccountProfile(subscribeUrl)
                   .then((_) {
                     ref
                         .read(currentPageLabelProvider.notifier)
@@ -60,18 +62,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         } else {
           // No active plan (new or expired): route straight to Premium so the
           // user can buy a package. Don't force this on users with a plan.
-          ref
-              .read(currentPageLabelProvider.notifier)
-              .toPage(PageLabel.premium);
+          ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.premium);
         }
       }
     });
 
     switch (authState.status) {
       case AuthStatus.unknown:
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       case AuthStatus.loggedOut:
         // Login/SignUp are swapped here via local state rather than
         // Navigator push/pop, since this widget already swaps in HomePage

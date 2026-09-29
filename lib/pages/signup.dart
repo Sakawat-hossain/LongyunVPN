@@ -131,7 +131,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     });
     try {
       await xboardApi.sendEmailVerifyCode(_emailController.text.trim());
-      _startCooldown();
+      // Backing out while the code is being sent disposes this state, and
+      // setState on a disposed State throws.
+      if (mounted) _startCooldown();
     } catch (e) {
       commonPrint.log(
         'send verification code failed: $e',
@@ -216,8 +218,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                           if (_configError != null) ...[
                             const SizedBox(height: 12),
                             Text(
-                              context.appLocalizations
-                                  .signupConfigError(_configError!),
+                              context.appLocalizations.signupConfigError(
+                                _configError!,
+                              ),
                               style: TextStyle(color: colorScheme.error),
                             ),
                           ],
@@ -242,8 +245,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                     keyboardType: TextInputType.number,
                                     validator: _validateEmailCode,
                                     decoration: InputDecoration(
-                                      labelText:
-                                          context.appLocalizations.verificationCode,
+                                      labelText: context
+                                          .appLocalizations
+                                          .verificationCode,
                                       border: const OutlineInputBorder(),
                                     ),
                                   ),
@@ -253,8 +257,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                   height: 56,
                                   child: OutlinedButton(
                                     onPressed:
-                                        (_isSendingCode ||
-                                            _cooldownSeconds > 0)
+                                        (_isSendingCode || _cooldownSeconds > 0)
                                         ? null
                                         : _handleSendCode,
                                     child: _isSendingCode
@@ -268,7 +271,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                         : Text(
                                             _cooldownSeconds > 0
                                                 ? '${_cooldownSeconds}s'
-                                                : context.appLocalizations.sendCode,
+                                                : context
+                                                      .appLocalizations
+                                                      .sendCode,
                                           ),
                                   ),
                                 ),
@@ -301,8 +306,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                 ),
                                 onPressed: () {
                                   setState(
-                                    () =>
-                                        _obscurePassword = !_obscurePassword,
+                                    () => _obscurePassword = !_obscurePassword,
                                   );
                                 },
                               ),
@@ -314,7 +318,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                             obscureText: _obscureConfirmPassword,
                             validator: _validateConfirmPassword,
                             decoration: InputDecoration(
-                              labelText: context.appLocalizations.confirmPassword,
+                              labelText:
+                                  context.appLocalizations.confirmPassword,
                               border: const OutlineInputBorder(),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -367,9 +372,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                 ? null
                                 : _handleSignUp,
                             style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: authState.isLoading
                                 ? const SizedBox(

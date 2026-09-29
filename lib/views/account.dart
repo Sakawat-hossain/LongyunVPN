@@ -67,17 +67,35 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
     );
     if (confirmed != true || !mounted) return;
     setState(() => _resetting = true);
+    final oldUrl = ref.read(authProvider).subscribeInfo?.subscribeUrl;
     try {
       final url = await ref.read(authProvider.notifier).resetSubscribeUrl();
       if (!mounted) return;
-      // Re-import so this device keeps working with the new credentials.
-      await ref.read(profilesActionProvider.notifier).addProfileFormURL(url);
+      // Re-import, switch to it, and drop the old one, whose credentials the
+      // reset has just revoked - so this device keeps working.
+      await ref
+          .read(profilesActionProvider.notifier)
+          .adoptAccountProfile(url, replacedUrl: oldUrl);
       if (mounted) globalState.showNotifier(l.resetSubscribeUrlSuccess);
     } catch (e) {
       if (mounted) globalState.showNotifier(e.toString());
     } finally {
       if (mounted) setState(() => _resetting = false);
     }
+  }
+
+  /// Signing out takes the account's subscription with it. Left behind, it
+  /// stayed selected and kept working, so on a shared computer the next person
+  /// to sign in - even one with no plan at all - was connecting on this
+  /// account's plan. Signing back in re-imports it.
+  Future<void> _handleLogout() async {
+    final url = ref.read(authProvider).subscribeInfo?.subscribeUrl;
+    if (url != null && url.isNotEmpty) {
+      await ref.read(profilesActionProvider.notifier).removeProfilesForUrl(url);
+    }
+    // Pending order and order history belong to this account too.
+    ref.invalidate(premiumProvider);
+    await ref.read(authProvider.notifier).logout();
   }
 
   static String _fmtBytes(num bytes) {
@@ -103,11 +121,15 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
     final expiryMs = expiredAt != null ? expiredAt * 1000 : null;
     final nowMs = DateTime.now().millisecondsSinceEpoch;
     final expired = expiryMs != null && expiryMs < nowMs;
-    final daysLeft =
-        expiryMs != null ? ((expiryMs - nowMs) / 86400000).ceil() : null;
+    final daysLeft = expiryMs != null
+        ? ((expiryMs - nowMs) / 86400000).ceil()
+        : null;
 
     final (Color statusColor, String statusText) = !active || expired
-        ? (theme.colorScheme.error, expired ? l.statusExpired : l.statusInactive)
+        ? (
+            theme.colorScheme.error,
+            expired ? l.statusExpired : l.statusInactive,
+          )
         : (Colors.green, l.statusActive);
 
     final planName = sub?.plan?['name']?.toString() ?? '—';
@@ -138,14 +160,18 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user.email,
-                      style: theme.textTheme.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  Text(
+                    user.email,
+                    style: theme.textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 4),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(20),
@@ -194,16 +220,20 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text(l.usedOfTotal(_fmtBytes(used), _fmtBytes(total)),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          )),
+                      Text(
+                        l.usedOfTotal(_fmtBytes(used), _fmtBytes(total)),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                       const Spacer(),
-                      Text(l.amountLeft(_fmtBytes(remaining)),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w600,
-                          )),
+                      Text(
+                        l.amountLeft(_fmtBytes(remaining)),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -215,18 +245,24 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
 
         // Details
         _InfoTile(
-            icon: Icons.workspace_premium, label: l.planLabel, value: planName),
+          icon: Icons.workspace_premium,
+          label: l.planLabel,
+          value: planName,
+        ),
         _InfoTile(
           icon: Icons.event,
           label: l.expires,
           value: expiryMs != null
               ? '${DateFormat.yMMMd().format(DateTime.fromMillisecondsSinceEpoch(expiryMs))}'
-                  '${daysLeft != null && !expired ? '  ·  ${l.nDaysLeft(daysLeft)}' : ''}'
+                    '${daysLeft != null && !expired ? '  ·  ${l.nDaysLeft(daysLeft)}' : ''}'
               : (active ? l.noExpiry : '—'),
         ),
         if (deviceLimit != null)
           _InfoTile(
-              icon: Icons.devices, label: l.devices, value: '$deviceLimit'),
+            icon: Icons.devices,
+            label: l.devices,
+            value: '$deviceLimit',
+          ),
         _InfoTile(
           icon: Icons.account_balance_wallet,
           label: l.balance,
@@ -255,7 +291,7 @@ class _AccountSummaryState extends ConsumerState<AccountSummary> {
         ),
         const SizedBox(height: 10),
         OutlinedButton.icon(
-          onPressed: () => ref.read(authProvider.notifier).logout(),
+          onPressed: _handleLogout,
           icon: const Icon(Icons.logout, size: 20),
           label: Text(l.logOut),
         ),

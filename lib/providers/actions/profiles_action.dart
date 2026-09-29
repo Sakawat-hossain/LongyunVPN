@@ -59,7 +59,8 @@ class ProfilesAction extends _$ProfilesAction {
     // id meant the freshly imported subscription was never made current: the
     // core loaded no config, the Servers page stayed empty, and importing again
     // could not recover it.
-    final currentExists = currentId != null &&
+    final currentExists =
+        currentId != null &&
         ref.read(profilesProvider).any((p) => p.id == currentId);
     if (currentExists) return;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
@@ -130,12 +131,61 @@ class ProfilesAction extends _$ProfilesAction {
 
   void dedupeProfiles() {
     final profiles = ref.read(profilesProvider);
-    final seenUrls = <String>{};
+    final kept = <String, int>{};
     for (final profile in profiles) {
       if (profile.url.isEmpty) continue;
-      if (!seenUrls.add(profile.url)) {
-        ref.read(profilesProvider.notifier).del(profile.id);
+      final keptId = kept[profile.url];
+      if (keptId == null) {
+        kept[profile.url] = profile.id;
+        continue;
       }
+      // The duplicate being dropped can be the selected one. Deleting it
+      // without moving the selection left the id pointing at nothing: no
+      // profile, no config, an empty server list - and since the URL was
+      // still present, signing in never re-imported it to recover.
+      if (ref.read(currentProfileIdProvider) == profile.id) {
+        ref.read(currentProfileIdProvider.notifier).value = keptId;
+      }
+      ref.read(profilesProvider.notifier).del(profile.id);
+    }
+  }
+
+  /// Imports (or refreshes) the account's subscription at [url] and makes it
+  /// the selected profile, deleting any profile for [replacedUrl].
+  ///
+  /// Importing alone is not enough: [putProfile] keeps whatever is already
+  /// selected. After "Reset subscription URL" that was the old profile, whose
+  /// credentials the reset had just revoked, so the device lost its connection
+  /// at the moment the reset promised to keep it working. The same held for
+  /// a second person signing in on a device: the first account stayed
+  /// selected, and its plan is what they used.
+  Future<void> adoptAccountProfile(String url, {String? replacedUrl}) async {
+    await addProfileFormURL(url);
+    int? adoptedId;
+    for (final profile in ref.read(profilesProvider)) {
+      if (profile.url == url) {
+        adoptedId = profile.id;
+        break;
+      }
+    }
+    // Import failed; addProfileFormURL has already told the user why. Leave
+    // everything else as it was rather than delete the only working profile.
+    if (adoptedId == null) return;
+    ref.read(currentProfileIdProvider.notifier).value = adoptedId;
+    if (replacedUrl != null && replacedUrl.isNotEmpty && replacedUrl != url) {
+      await removeProfilesForUrl(replacedUrl);
+    }
+  }
+
+  /// Deletes every profile imported from [url].
+  Future<void> removeProfilesForUrl(String url) async {
+    final matching = ref
+        .read(profilesProvider)
+        .where((p) => p.url == url)
+        .map((p) => p.id)
+        .toList();
+    for (final id in matching) {
+      await deleteProfile(id);
     }
   }
 
